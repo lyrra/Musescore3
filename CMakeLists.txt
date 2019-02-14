@@ -134,6 +134,12 @@ option(BUILD_AUTOUPDATE "Build with autoupdate support" OFF)
 # Scripting
 option(BUILD_GUILE "Build with GNU Guile SCHEME support" ON) # GNU Guile SCHEME support
 
+set (BUILD_SHARED $ENV{BUILD_SHARED}) # Build libmusescore shared library
+
+if(BUILD_SHARED)
+  set(LIBMUSESCORE_SHARED 1)
+endif(BUILD_SHARED)
+
 if (APPLE)
       set (CMAKE_CXX_COMPILER   clang++)
       set (CMAKE_CXX_COMPILER_ID "Clang")
