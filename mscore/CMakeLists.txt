@@ -484,6 +484,13 @@ else (MSVC)
 	target_link_libraries(mscore vorbisfile)
 endif (MSVC)
 
+if (LIBMUSESCORE_SHARED)
+  set(MUSESCORE_LIBLINK "-L${PROJECT_BINARY_DIR}/libmscore -lmusescore -Wl,-rpath -Wl,${PROJECT_BINARY_DIR}/libmscore")
+else (LIBMUSESCORE_SHARED)
+  set(MUSESCORE_LIBLINK libmscore)
+endif (LIBMUSESCORE_SHARED)
+
+
 target_link_libraries(mscore
       awl
       bww
@@ -493,7 +500,7 @@ target_link_libraries(mscore
       midi
       fluid
       effects
-      libmscore
+      ${MUSESCORE_LIBLINK}
       qzip
       beatroot
       kqoauth
