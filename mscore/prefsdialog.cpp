@@ -46,6 +46,8 @@
 
 namespace Ms {
 
+extern int g_driver_running; // FIX: remove this (should driver be part of seq?)
+
 //---------------------------------------------------------
 //   startPreferenceDialog
 //---------------------------------------------------------
@@ -690,6 +692,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues, bool setup)
       //
       // initialize portaudio
       //
+/* PORTAUDIO/PORTMIDI disabled, we're using the api directly, not through the driver interface
 #ifdef USE_PORTAUDIO
       if (portAudioIsUsed) {
             Portaudio* audio = static_cast<Portaudio*>(seq->driver());
@@ -741,6 +744,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues, bool setup)
                   }
             }
 #endif
+*/
 
 #ifndef HAS_MIDI
       enableMidiInput->setEnabled(false);
@@ -764,6 +768,7 @@ void PreferenceDialog::updateValues(bool useDefaultValues, bool setup)
 //   portaudioApiActivated
 //---------------------------------------------------------
 
+/* disable PORTAUDIO
 #ifdef USE_PORTAUDIO
 void PreferenceDialog::portaudioApiActivated(int idx)
       {
@@ -773,8 +778,9 @@ void PreferenceDialog::portaudioApiActivated(int idx)
       portaudioDevice->addItems(devices);
       }
 #else
+*/
 void PreferenceDialog::portaudioApiActivated(int)  {}
-#endif
+//#endif
 
 //---------------------------------------------------------
 //   ShortcutItem
@@ -1414,11 +1420,11 @@ void PreferenceDialog::apply()
             if (jackParametersChanged) {
                   // Change parameters of JACK driver without unload
                   if (seq) {
-                        if (seq->driver() == nullptr) {
+                        if (! g_driver_running) {
                               qDebug("sequencer driver is null");
                               restartAudioEngine();
                               }
-                        seq->driver()->init(true);
+                        mux_msg_to_audio(MsgTypeAudioInit, 1);
                         if (!seq->init(true))
                               qDebug("sequencer init failed");
                         }
@@ -1447,13 +1453,16 @@ void PreferenceDialog::apply()
 
                   restartAudioEngine();
                   }
+/* disable PORTAUDIO
       #ifdef USE_PORTAUDIO
             if (portAudioIsUsed && !noSeq) {
                   Portaudio* audio = static_cast<Portaudio*>(seq->driver());
                   preferences.setPreference(PREF_IO_PORTAUDIO_DEVICE, audio->deviceIndex(portaudioApi->currentIndex(), portaudioDevice->currentIndex()));
                   }
       #endif
+*/
 
+/* disable PORTMIDI
       #ifdef USE_PORTMIDI
             preferences.setPreference(PREF_IO_PORTMIDI_INPUTDEVICE, portMidiInput->currentText());
             preferences.setPreference(PREF_IO_PORTMIDI_OUTPUTDEVICE, portMidiOutput->currentText());
@@ -1466,6 +1475,7 @@ void PreferenceDialog::apply()
                   msgBox.exec();
                   }
       #endif
+*/
             }
 
       if (shortcutsChanged) {
