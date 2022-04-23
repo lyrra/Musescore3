@@ -310,9 +310,9 @@ add_library(mscoreapp STATIC
       )
 
 if (MSVC OR MINGW)
-      target_link_libraries(mscoreapp vorbisfiledll)
+      target_link_libraries(mscoreapp vorbisfiledll ${ZMQ_LIBRARY})
 else (MSVC OR MINGW)
-      target_link_libraries(mscoreapp vorbisfile)
+      target_link_libraries(mscoreapp vorbisfile ${ZMQ_LIBRARY})
 endif (MSVC OR MINGW)
 
 if (LIBMUSESCORE_SHARED)

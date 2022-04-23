@@ -509,6 +509,11 @@ else (APPLE OR MINGW)
 endif (APPLE OR MINGW)
 
 ##
+## Find ZeroMQ
+##
+include(FindZeroMQ)
+
+##
 ## Find JACK >= JACK_MIN_VERSION
 ##
 
