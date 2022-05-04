@@ -120,8 +120,6 @@
 #include "libmscore/utils.h"
 #include "libmscore/icon.h"
 
-#include "audio/drivers/driver.h"
-
 #include "effects/zita1/zita.h"
 #include "effects/compressor/compressor.h"
 #include "effects/noeffect/noeffect.h"
@@ -184,6 +182,7 @@ namespace Ms {
 
 bool script_scheme_shell = false;
 char *script_scheme_file  = NULL;
+void mux_threads_start();
 
 MuseScore* mscore;
 MasterSynthesizer* synti;
@@ -218,8 +217,6 @@ bool needUpdateSource = false;
 static bool exportTransposedScore = false;
 static QString transposeExportOptions;
 static QString highlightConfigPath;
-bool script_scheme_shell = false;
-char *script_scheme_file  = NULL;
 
 QString mscoreGlobalShare;
 
@@ -3114,14 +3111,9 @@ void MuseScore::restartAudioEngine()
             seq->exit();
 
       if (seq) {
-            Driver* driver = driverFactory(seq, "");
-            if (driver) {
-                  // Updating synthesizer's sample rate
-                  if (seq->synti()) {
-                        seq->synti()->setSampleRate(driver->sampleRate());
-                        seq->synti()->init();
-                        }
-                  //seq->setDriver(driver);
+            if (seq->synti()) {
+                  seq->synti()->setSampleRate(MScore::sampleRate);
+                  seq->synti()->init();
                   }
             if (!seq->init())
                   qDebug("sequencer init failed");
@@ -8148,24 +8140,13 @@ void MuseScore::init(QStringList& argv)
             showSplashMessage(sc, tr("Initializing sequencer and audio driver…"));
             seq            = new Seq();
             MScore::seq    = seq;
-            Driver* driver = driverFactory(seq, audioDriver);
             synti          = synthesizerFactory();
-            if (driver) {
-                  MScore::sampleRate = driver->sampleRate();
-                  synti->setSampleRate(MScore::sampleRate);
-
-                  showSplashMessage(sc, tr("Loading SoundFonts…"));
-                  synti->init();
-
-                  //seq->setDriver(driver);
-                  }
-            else {
-                  // Do not delete the sequencer If we can't load driver.
-                  // Allow user to select the working driver later.
-                  MScore::sampleRate = 44100;  // Would be changed when user changes driver
-                  synti->setSampleRate(MScore::sampleRate);
-                  synti->init();
-                  }
+            mux_threads_start();
+            // FIX: query muxaudio about current sampleRate
+            MScore::sampleRate = 48000.0f;
+            synti->setSampleRate(MScore::sampleRate);
+            showSplashMessage(sc, tr("Loading SoundFonts…"));
+            synti->init();
             seq->setMasterSynthesizer(synti);
             }
       else {
