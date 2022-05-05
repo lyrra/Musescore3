@@ -53,6 +53,7 @@ set (SOURCE_FILES
       stemslash.h stringdata.h style.h sym.h symbol.h synthesizerstate.h system.h systemdivider.h systemtext.h tempo.h
       tempotext.h text.h mmrestrange.h measurenumberbase.h measurenumber.h textbase.h textedit.h textframe.h textline.h textlinebase.h tie.h tiemap.h timesig.h
       tremolo.h tremolobar.h trill.h tuplet.h tupletmap.h types.h undo.h utils.h vibrato.h volta.h xml.h
+      muxseq.h
 
       segmentlist.cpp fingering.cpp accidental.cpp arpeggio.cpp
       fermata.cpp articulation.cpp barline.cpp beam.cpp bend.cpp box.cpp
@@ -107,6 +108,7 @@ if (LIBMUSESCORE_SHARED)
       ${INCS}
       ${LIB_SCRIPT_FILES}
       ${SOURCE_FILES}
+      muxseq.cpp
       )
 else (LIBMUSESCORE_SHARED)
    add_library (
