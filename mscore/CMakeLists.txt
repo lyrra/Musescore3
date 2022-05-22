@@ -45,6 +45,9 @@ include_directories(
       ${PROJECT_SOURCE_DIR}/thirdparty
       ${PROJECT_SOURCE_DIR}/global
       ${PROJECT_SOURCE_DIR}/importexport
+      ${PROJECT_SOURCE_DIR}/muxlib
+      ${PROJECT_SOURCE_DIR}/muxseq
+      ${PROJECT_SOURCE_DIR}/muxtools
       ${QTSINGLEAPPLICATION_INCLUDE_DIRS}
       )
 
@@ -203,7 +206,6 @@ add_library(mscoreapp STATIC
       radiobuttongroupbox.h recordbutton.h resourceManager.h ruler.h scoreaccessibility.h
       scoreBrowser.h scoreInfo.h scorePreview.h scoretab.h scoreview.h searchComboBox.h
       selectdialog.h selectionwindow.h selectnotedialog.h selinstrument.h
-      muxcommon.h muxseq.h muxseqtools.h muxseqsig.h
       shortcut.h shortcutcapturedialog.h simplebutton.h splitstaff.h stafftextproperties.h
       startcenter.h startupWizard.h stringutils.h svggenerator.h symboldialog.h synthcontrol.h
       templateBrowser.h textcursor.h textpalette.h texttools.h timedialog.h timeline.h timesigproperties.h
@@ -227,7 +229,6 @@ add_library(mscoreapp STATIC
       timeline.cpp
       parteditbase.cpp playpanel.cpp selectionwindow.cpp
       preferences.cpp measureproperties.cpp
-      muxseq.cpp muxseqtools.cpp muxseqsig.cpp
       textpalette.cpp
       timedialog.cpp symboldialog.cpp shortcutcapturedialog.cpp
       radiobuttongroupbox.cpp simplebutton.cpp
@@ -310,9 +311,9 @@ add_library(mscoreapp STATIC
       )
 
 if (MSVC OR MINGW)
-      target_link_libraries(mscoreapp vorbisfiledll ${ZMQ_LIBRARY})
+      target_link_libraries(mscoreapp vorbisfiledll)
 else (MSVC OR MINGW)
-      target_link_libraries(mscoreapp vorbisfile ${ZMQ_LIBRARY})
+      target_link_libraries(mscoreapp vorbisfile)
 endif (MSVC OR MINGW)
 
 if (LIBMUSESCORE_SHARED)
@@ -324,12 +325,14 @@ endif (LIBMUSESCORE_SHARED)
 target_link_libraries(mscoreapp
       awl
       ${QTSINGLEAPPLICATION_LIBRARIES}
-      audio
       effects
       ${MUSESCORE_LIBLINK}
+      muxlib
+      muxtools
       qzip
       importexport
       ${COCOABRIDGE}
+      ${ZMQ_LIBRARY}
       )
 
 if (BUILD_CRASH_REPORTER)
