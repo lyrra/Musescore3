@@ -163,9 +163,10 @@
 #endif
 #include "telemetrymanager.h"
 
-#include "muxseqsig.h"
-#include "muxseq.h"
+#include "muxcommon.h"
+#include "muxseq_client.h"
 #include "muxseqtools.h"
+#include "muxseqsig.h"
 
 namespace Ms {
 
