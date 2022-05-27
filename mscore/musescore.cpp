@@ -164,6 +164,7 @@
 #include "telemetrymanager.h"
 
 #include "muxcommon.h"
+#include "muxlib.h"
 #include "muxseq_client.h"
 #include "muxseqtools.h"
 #include "muxseqsig.h"
@@ -7877,7 +7878,7 @@ void MuseScore::init(QStringList& argv)
             MScore::sampleRate = 48000.0f;
             muxseq_initialize(MScore::sampleRate);
             showSplashMessage(sc, tr("Loading SoundFonts…"));
-            //FIX: muxaudio start mux_threads_start();
+            mux_musescore_client_start();
             }
       else {
             muxseq_dealloc();

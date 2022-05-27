@@ -327,6 +327,7 @@ target_link_libraries(mscoreapp
       ${QTSINGLEAPPLICATION_LIBRARIES}
       effects
       ${MUSESCORE_LIBLINK}
+      mux
       muxlib
       muxtools
       qzip
