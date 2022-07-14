@@ -85,7 +85,7 @@ include (FindQt5)
 #include (UsePkgConfig1) # Defines MACRO(PKGCONFIG1 _package _minVersion _include_DIR _link_DIR _link_FLAGS _cflags)
 #include (FindPulseAudio)
 #include (GetCompilerVersion)
-#include (CreatePrecompiledHeader)
+include (CreatePrecompiledHeader)
 
 # For debugging the make system uncomment next line:
 # set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -758,6 +758,8 @@ if (NOT MSVC)
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       )
 endif (NOT MSVC)
+
+precompiled_header(QT_INCLUDES all ${BUILD_PCH})
 
 # MSVC does not require these targets, as all.h is not copied and the
 #   PCH generation is done per-project
