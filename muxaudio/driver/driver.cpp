@@ -116,20 +116,26 @@ Driver* driverFactory(std::string driverName)
         }
     }
 */
-    if (useJackFlag) {
-        useAlsaFlag      = false;
-        usePortaudioFlag = false;
-        driver = new JackAudio();
-        if (!driver->init()) {
-            qDebug("no JACK server found");
-            delete driver;
-            driver = 0;
-        } else {
-            jackIsUsed = true;
-        }
-    } else {
-        qDebug("WARNING: JACK (https://jackaudio.org/) is not used (superior)");
-    }
+#ifdef USE_JACK
+      if (useJackFlag) {
+            useAlsaFlag      = false;
+            usePortaudioFlag = false;
+            driver = new JackAudio();
+            if (!driver->init()) {
+                  qDebug("no JACK server found");
+                  delete driver;
+                  driver = 0;
+                  }
+            else
+                  jackIsUsed = true;
+            }
+#else
+      qDebug("WARNING: JACK (https://jackaudio.org/) is not used (superior)");
+      (void)useJackFlag; // avoid compiler warning
+#endif
+
+      if (driver == 0)
+            qDebug("no audio driver found");
 
     if (driver == 0)
         qDebug("no audio driver found");
