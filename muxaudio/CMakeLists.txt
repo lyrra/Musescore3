@@ -7,9 +7,7 @@ include_directories(
       ${PROJECT_SOURCE_DIR}/muxtools # needed for midifile.h
       ${PROJECT_SOURCE_DIR}/muxseq # FIX: wrong (needs mux.h)
       ${PROJECT_SOURCE_DIR}/muxaudio/driver
-      ${PROJECT_BINARY_DIR}
-      ${PROJECT_SOURCE_DIR}/thirdparty  # portmidi
-      ${QTSINGLEAPPLICATION_INCLUDE_DIRS}
+      ${QT_INCLUDES}
       )
 
 add_executable(muxaudio
