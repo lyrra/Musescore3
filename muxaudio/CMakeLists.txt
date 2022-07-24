@@ -1,5 +1,121 @@
 # GPL-2.0-or-later
 
+CMAKE_MINIMUM_REQUIRED(VERSION 3.3.0)
+
+SET(JACK_LONGNAME "JACK (Jack Audio Connection Kit)")
+SET(JACK_MIN_VERSION "0.98.0")
+
+option(BUILD_JACK    "Build with support for ${JACK_LONGNAME} audio backend. JACK >= ${JACK_MIN_VERSION} will be needed." ON)
+option(BUILD_PULSEAUDIO "Build with support for PulseAudio audio backend." OFF)
+option(BUILD_ALSA "Build with support for ALSA audio backend." OFF)
+option(BUILD_PORTAUDIO "Build with support for PortAudio audio backend." ON)
+option(BUILD_PORTMIDI "Build with support for PortAudio's MIDI features." ${BUILD_PORTAUDIO}) # PortAudio required
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(PkgConfig)
+find_package(Threads REQUIRED)
+find_package(Qt5 COMPONENTS Core REQUIRED)
+
+
+# Disable components not supported on Windows
+if (MSVC OR MINGW)
+    set(WIN_NOT_AVAIL "Not available on Windows")
+    option(BUILD_PULSEAUDIO ${WIN_NOT_AVAIL} OFF)
+    option(BUILD_ALSA ${WIN_NOT_AVAIL} OFF)
+endif (MSVC OR MINGW)
+
+# Disable components not supported on Mac
+if (APPLE)
+      set(MAC_NOT_AVAIL "Not available on Mac")
+      option(BUILD_PULSEAUDIO ${MAC_NOT_AVAIL} OFF)
+      option(BUILD_ALSA ${MAC_NOT_AVAIL} OFF)
+endif (APPLE)
+
+# Disable components not supported on Linux/BSD
+if (NOT APPLE AND NOT MINGW AND NOT MSVC)
+      set(NIX_NOT_AVAIL "Not available on Linux/BSD")
+      #option(BUILD_PORTMIDI "PortMidi disabled on Linux. (It uses ALSA but it's better to use ALSA directly)" OFF)
+endif (NOT APPLE AND NOT MINGW AND NOT MSVC)
+
+##
+## Find JACK >= JACK_MIN_VERSION
+##
+IF(BUILD_JACK)
+    set ( USE_JACK 1 )
+    pkg_check_modules(JACK "jack")
+ENDIF(BUILD_JACK)
+
+##
+## PortAudio
+##
+
+if (BUILD_PORTAUDIO)
+    set ( USE_PORTAUDIO 1 )
+    include(FindPortAudio)
+else (BUILD_PORTAUDIO)
+     message(STATUS "PortAudio support disabled")
+endif (BUILD_PORTAUDIO)
+
+##
+## PortMidi
+##
+
+if (BUILD_PORTMIDI)
+    if (NOT BUILD_PORTAUDIO)
+        message(SEND_ERROR "Error: PortMidi support requested (BUILD_PORTMIDI=${BUILD_PORTMIDI}), but PortAudio support is disabled (BUILD_PORTAUDIO=${BUILD_PORTAUDIO}). PortMidi requires PortAudio.")
+    endif (NOT BUILD_PORTAUDIO)
+    pkg_check_modules(PORTMIDI "portmidi")
+    set (USE_PORTMIDI 1)
+else (BUILD_PORTMIDI)
+    message(STATUS "PortMidi support disabled")
+endif (BUILD_PORTMIDI)
+
+##
+## ALSA >= 1.0.0
+##
+
+#if (BUILD_ALSA)
+#      PKGCONFIG1 (alsa 1.0.0 ALSA_INCDIR ALSA_LIBDIR ALSA_LIB ALSA_CPP )
+#      if (NOT ALSA_INCDIR)
+#            message(SEND_ERROR "Error: ALSA support requested (BUILD_ALSA=${BUILD_ALSA}), but ALSA >= 1.0.0 was not found.")
+#      else (NOT ALSA_INCDIR)
+#            message("ALSA >= 1.0.0 found. ALSA support enabled. INCDIR ${ALSA_INCDIR}, LIBDIR ${ALSA_LIBDIR}, LIB ${ALSA_LIB}, CPP ${ALSA_CPP}")
+#            set (USE_ALSA 1)
+#      endif (NOT ALSA_INCDIR)
+#else (BUILD_ALSA)
+#     message(STATUS "ALSA support disabled")
+#endif (BUILD_ALSA)
+
+##
+## MIDI
+##
+
+if (APPLE OR MINGW OR MSVC)
+      set (HAS_MIDI 1)
+else (APPLE OR MINGW OR MSVC)
+      if (USE_ALSA)
+            set (HAS_MIDI 1)
+      endif (USE_ALSA)
+endif (APPLE OR MINGW OR MSVC)
+
+##
+## PulseAudio
+##
+
+if (BUILD_PULSEAUDIO)
+      include (FindPulseAudio)
+      if (PULSEAUDIO_FOUND)
+            set(USE_PULSEAUDIO 1)
+            message("PulseAudio found. PulseAudio support enabled.")
+      else (PULSEAUDIO_FOUND)
+            message(SEND_ERROR "Error: PulseAudio support requested (BUILD_PULSEAUDIO=${BUILD_PULSEAUDIO}), but PulseAudio was not found.")
+      endif (PULSEAUDIO_FOUND)
+else (BUILD_PULSEAUDIO)
+      message(STATUS "PulseAudio support disabled")
+endif (BUILD_PULSEAUDIO)
+
+
+
 include_directories(
       ${PROJECT_SOURCE_DIR}/global
       ${PROJECT_SOURCE_DIR}/mux
