@@ -36,7 +36,9 @@
 #include "seq.h"
 #include "muxqueue.h"
 
-#define SLEEP_USEC 100
+#define SLEEP_USEC 1000
+#define MUX_READER_USLEEP 1000
+#define MUX_WRITER_USLEEP 1000
 
 namespace Ms {
 
