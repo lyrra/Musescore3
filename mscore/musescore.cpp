@@ -182,6 +182,9 @@ extern Ms::Synthesizer* createZerberus();
 
 namespace Ms {
 
+bool script_scheme_shell = false;
+char *script_scheme_file  = NULL;
+
 MuseScore* mscore;
 MasterSynthesizer* synti;
 
@@ -7881,7 +7884,6 @@ MuseScoreApplication::CommandLineParseResult MuseScoreApplication::parseCommandL
       if (parser.isSet("no-gui")) {
             MScore::noGui = true;
             }
-
       if (parser.isSet("script-scheme-shell")) {
             script_scheme_shell = true;
             }
@@ -8284,7 +8286,6 @@ void MuseScore::init(QStringList& argv)
 
       if (MScore::noGui) {
             main_nongui(0, nullptr, argv, script_scheme_shell, script_scheme_file);
-            return;
             }
       else {
             showSplashMessage(sc, tr("Initializing main window…"));
@@ -8400,13 +8401,10 @@ void MuseScore::init(QStringList& argv)
             /* Starts a Guile/Scheme script shell thread on console */
             ScriptGuile::start();
             /* Runs MuseScore App inside a Guile/Scheme environment, giving it access to Guile/Scheme procedures */
-            int rc = (int) ScriptGuile::start_func(main_gui);
-            return; // FIX: how do we return RC?
+            ScriptGuile::start_func(main_gui);
             }
       else {
-            long x = (long) main_gui(nullptr);
-            int rc = (int) x;
-            return; // FIX: how do we return RC?
+            main_gui(nullptr);
             }
       }
 
