@@ -337,6 +337,7 @@ target_link_libraries(mscoreapp
       importexport
       ${COCOABRIDGE}
       ${ZMQ_LIBRARIES}
+      ${FREETYPE_LIBRARIES}
       )
 
 if (BUILD_CRASH_REPORTER)
@@ -344,10 +345,6 @@ if (BUILD_CRASH_REPORTER)
 endif (BUILD_CRASH_REPORTER)
 
 add_dependencies(mscoreapp workspaces)
-
-if (USE_SYSTEM_FREETYPE)
-      target_link_libraries(mscoreapp ${FREETYPE_LIBRARIES})
-endif (USE_SYSTEM_FREETYPE)
 
 if (AEOLUS)
       target_link_libraries(mscoreapp aeolus)
@@ -427,13 +424,8 @@ else (MINGW)
          z
          ${CMAKE_DL_LIBS}
          pthread
+         freetype
          )
-
-       if (USE_SYSTEM_FREETYPE)
-            target_link_libraries(mscoreapp freetype)
-       else (USE_SYSTEM_FREETYPE)
-            target_link_libraries(mscoreapp mscore_freetype)
-       endif (USE_SYSTEM_FREETYPE)
 
       set_target_properties (
          mscoreapp
