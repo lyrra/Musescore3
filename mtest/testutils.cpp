@@ -30,6 +30,7 @@
 #include "thirdparty/qzip/qzipreader_p.h"
 
 static void initMyResources() {
+      /*
       Q_INIT_RESOURCE(mtest);
       Q_INIT_RESOURCE(musescorefonts_Campania);
       Q_INIT_RESOURCE(musescorefonts_Leland);
@@ -43,6 +44,7 @@ static void initMyResources() {
       Q_INIT_RESOURCE(musescorefonts_Petaluma);
       Q_INIT_RESOURCE(musescorefonts_FinaleMaestro);
       Q_INIT_RESOURCE(musescorefonts_FinaleBroadway);
+      */
       }
 
 namespace Ms {
@@ -336,7 +338,7 @@ void MTest::initMTest()
       {
       qputenv("QML_DISABLE_DISK_CACHE", "true");
       qSetMessagePattern("%{function}: %{message}");
-      initMyResources();
+      initMuseScoreResources();
 //      DPI  = 120;
 //      PDPI = 120;
       MScore::noGui = true;
@@ -344,7 +346,7 @@ void MTest::initMTest()
       //synti  = new MasterSynthesizer();
       mscore = new MScore;
       new MuseScoreCore;
-      preferences.init(true);
+      //preferences.init(true);
 
       mscore->init();
 

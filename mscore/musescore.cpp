@@ -7527,7 +7527,7 @@ MuseScoreApplication::CommandLineParseResult MuseScoreApplication::parseCommandL
             QString temp = parser.value("M");
             if (temp.isEmpty())
                   parser.showHelp(EXIT_FAILURE);
-            midiImportOperations.setOperationsFile(temp);
+            midiImportOperations->setOperationsFile(temp);
             }
       noWebView = parser.isSet("w");
       exportScoreParts = parser.isSet("export-score-parts");
