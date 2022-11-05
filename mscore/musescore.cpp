@@ -1025,7 +1025,7 @@ void MuseScore::populatePlaybackControls()
 //   seqStarted
 //---------------------------------------------------------
 
-void MuseScore::seqStarted()
+void MuseScore::seqStarted(unsigned int playFrame)
       {
       if (cv)
             cv->setCursorOn(true);
@@ -1039,10 +1039,14 @@ void MuseScore::seqStarted()
 //    executed in gui environment
 //---------------------------------------------------------
 
-void MuseScore::seqStopped()
-      {
-      cv->setCursorOn(false);
-      }
+void MuseScore::seqStopped(unsigned int playFrame)
+{
+    // update play position
+    int tck = cs->repeatList().utick2tick(cs->utime2utick(qreal(playFrame) / qreal(MScore::sampleRate)));
+    cs->setPlayPos(Fraction::fromTicks(tck));
+    cs->update();
+    cv->setCursorOn(false);
+}
 
 
 //---------------------------------------------------------
@@ -4997,9 +5001,11 @@ void MuseScore::setPos(const Fraction& t)
 
 void MuseScore::handleUTick(unsigned int utick) {
     LD("MuseScore::handleUTick utick: %ld", utick);
-    int t = cs->repeatList().utick2tick(utick);
-    currentScoreView()->moveCursor(Fraction::fromTicks(t));
-    setPos(Fraction::fromTicks(t));
+    if (cs) {
+        int t = cs->repeatList().utick2tick(utick);
+        currentScoreView()->moveCursor(Fraction::fromTicks(t));
+        setPos(Fraction::fromTicks(t));
+    }
 }
 
 //---------------------------------------------------------
