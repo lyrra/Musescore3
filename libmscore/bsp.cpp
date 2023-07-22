@@ -7,7 +7,7 @@
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License version 2
 //  as published by the Free Software Foundation and appearing in
-//  the file LICENCE.GPL
+//  the file LICENCE.GPL2
 //
 //  This code is from Qt implementation of QGraphicsItem
 //    Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
