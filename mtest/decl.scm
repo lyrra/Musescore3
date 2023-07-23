@@ -56,7 +56,6 @@ extern Ms::MTest* g_mtest;
 ;
 (newline %h)
 (register-c-type %directionh)
-(register-c-type %direction)
 (register-c-type %note-value-type)
 (register-c-type %note-head-type)
 (register-c-type %note-head-group)
@@ -67,7 +66,6 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps2 'NoteHead_Group)
 (emit-c-type-string-maps-simple "element_pid" %element-pids "Ms::Pid")
 
-(register-c-type %note-type)
 (emit-c-type-string-maps2 'NoteType)
 
 
@@ -319,13 +317,16 @@ extern Ms::MTest* g_mtest;
                   (scheme-type-name (cadr lst)))
               (register-c-type global-list)
               (emit-c-type-string-maps2 scheme-type-name)))
-  `((,%segment-type  SegmentType)
+  `(
     (,%duration-type DurationType)
     (,%select-type   SelectType)
-    (,%accidental-type AccidentalType)
     (,%updown-mode UpDownMode)
     (,%key-type Key)
     (,%tpc-enum Tpc)))
+
+; FIX: loop through %c-types and emit
+(emit-c-type-string-maps2 'SegmentType)
+(emit-c-type-string-maps2 'AccidentalType)
 
 (emit-cfun '(ms-make-fraction) 2 (list
   '(emit-pop-arg-int "numerator")

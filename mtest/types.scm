@@ -23,7 +23,17 @@
           (cond
            ((pair? type-or-list)
             (set! type (car type-or-list))
-            (set! index (cadr type-or-list)))
+            (cond
+            ((and (pair? (cadr type-or-list)) (equal? 'or (car (cadr type-or-list))))
+             (let* ((types (cdr (cadr type-or-list)))
+                    (str (format #f "~a::~a" name (car types))))
+               (do ((pair (cdr types) (cdr pair)))
+                   ((null? pair))
+                 (let ((tname (car pair)))
+                   (format #f " ~a::~a | ~a" name tname str)))
+               str))
+            (else
+              (set! index (cadr type-or-list)))))
            (else
             (set! type type-or-list)))
           (set! typename (string->symbol (format #f "~a-~a" name type)))
@@ -60,3 +70,12 @@
            ((eq? 'index what) (cadr typelst)))
           f))
       #f)))
+
+(define (eval-define-c-type args)
+  (display args)
+  (register-c-type args))
+
+(define-syntax define-c-type
+  (syntax-rules ()
+    ((_ . args)
+     (eval-define-c-type (car 'args)))))

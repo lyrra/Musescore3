@@ -61,8 +61,8 @@
   (psyntax-load (format #f "~a/mtestgen.scm" %libdir-mtest))
 
   ; musescore data structures definitions
-  (load "ms.scm")
-  )
+  (load "../libmscore/types-gen.h.scm")
+  (load "ms.scm"))
 
 (define %emit-port #f)
 
