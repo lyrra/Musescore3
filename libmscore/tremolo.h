@@ -20,7 +20,6 @@ namespace Ms {
 
 class Chord;
 
-/* generated
 // Tremolo subtypes:
 enum class TremoloType : signed char {
       INVALID_TREMOLO = -1,
@@ -32,7 +31,6 @@ enum class TremoloType : signed char {
 enum class TremoloStyle : signed char {
       DEFAULT = 0, TRADITIONAL, TRADITIONAL_ALTERNATE
       };
-*/
 
 //---------------------------------------------------------
 //   @@ Tremolo

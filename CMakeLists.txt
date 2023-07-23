@@ -638,6 +638,7 @@ endif (NOT MSVC)
 include_directories(
    ${PROJECT_SOURCE_DIR}
    ${PROJECT_BINARY_DIR}
+   ${PROJECT_BINARY_DIR}/libmscore
    ${OGG_INCDIR}
    ${VORBIS_INCDIR}
    ${SNDFILE_INCDIR}
@@ -665,6 +666,7 @@ if (OMR)
  endif (NOT USE_SYSTEM_POPPLER)
 endif (OMR)
 
+add_subdirectory(gen)
 add_subdirectory(global)
 add_subdirectory(importexport)
 add_subdirectory(main)

@@ -27,7 +27,7 @@ add_library (${MODULE} SHARED
       event.h event.cpp
       muxlib.h muxlib.cpp
       )
-add_dependencies(${MODULE} generated_source)
+add_dependencies(${MODULE} generated_sources)
 
 target_link_libraries (${MODULE}
       mux
@@ -59,7 +59,7 @@ set_target_properties (
         COMPILE_FLAGS "-g ${PCH_INCLUDE} -Wall -Wextra -Winvalid-pch"
     )
 
-add_dependencies(muxseqclient generated_source)
+add_dependencies(muxseqclient generated_sources)
 
 # xcode_pch(${MODULE} all)
 

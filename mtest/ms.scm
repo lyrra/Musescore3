@@ -380,13 +380,7 @@ TAB_DURATION_SYMBOL
     RIGHT))))
 
 ; note-direction
-(define %direction '(
-  (name   . Direction)
-  (c-type . "Direction")
-  (types  . (
-    AUTO
-    UP
-    DOWN))))
+
 
 (define %note-head-scheme '(
   HEAD_AUTO ; = -1,
@@ -504,20 +498,6 @@ TAB_DURATION_SYMBOL
     OFFSET_VAL
     USER_VAL))))
 
-(define %note-type '(
-  (name        . NoteType)
-  (c-type      . "NoteType")
-  (types       . (
-    (NORMAL          0)
-    (ACCIACCATURA    #x1)
-    (APPOGGIATURA    #x2)  ; grace notes
-    (GRACE4          #x4)
-    (GRACE16         #x8)
-    (GRACE32         #x10)
-    (GRACE8_AFTER    #x20)
-    (GRACE16_AFTER   #x40)
-    (GRACE32_AFTER   #x80)
-    (INVALID         #xFF)))))
 
 (define %hairpin-type '(
   (start-index . -1)
@@ -534,35 +514,20 @@ TAB_DURATION_SYMBOL
   (start-index . -1)
   (name        . TremoloType)
   (c-type      . "TremoloType")
+  (datatype    . "signed char")
   (types       . (
     INVALID_TREMOLO
       R8  R16  R32  R64  BUZZ_ROLL ; one note tremolo (repeat)
       C8  C16  C32  C64            ; two note tremolo (change)
       ))))
 
-;; SegmentType
-;; Type values determine the order of segments for a given tick
-(define %segment-type '(
-  (name        . SegmentType)
-  (c-type      . "SegmentType")
+(define %tremolo-style '(
+  (name        . TremoloStyle)
+  (c-type      . "TremoloStyle")
+  (datatype    . "signed char")
   (types       . (
-    (Invalid              #x0)
-    (BeginBarLine         #x1)
-    (HeaderClef           #x2)
-    (KeySig               #x4)
-    (Ambitus              #x8)
-    (TimeSig              #x10)
-    (StartRepeatBarLine   #x20)
-    (Clef                 #x40)
-    (BarLine              #x80)
-    (Breath               #x100)
-    (ChordRest            #x200)
-    (EndBarLine           #x400)
-    (KeySigAnnounce       #x800)
-    (TimeSigAnnounce      #x1000)
-    (All                  -1) ; Includes all barline types
-    (BarLineType #x4a1) ; BeginBarLine | StartRepeatBarLine | BarLine | EndBarLine
-    ))))
+    DEFAULT TRADITIONAL TRADITIONAL_ALTERNATE))))
+
 
 (define %duration-type '(
   (name   . DurationType)
@@ -588,189 +553,7 @@ TAB_DURATION_SYMBOL
   (types . (
     CHROMATIC OCTAVE DIATONIC))))
 
-;;;---------------------------------------------------------
-;;;  AccidentalType
-;;;  NOTE: keep this in sync with with accList array in accidentals.cpp
-;;;---------------------------------------------------------
 
-(define %accidental-type '(
-  (name   . AccidentalType)
-  (c-type . "AccidentalType")
-  (types . (
-    NONE
-    FLAT
-    NATURAL
-    SHARP
-    SHARP2
-    FLAT2
-    SHARP3
-    FLAT3
-    NATURAL_FLAT
-    NATURAL_SHARP
-    SHARP_SHARP
-
-    ; Gould arrow quartertone
-    FLAT_ARROW_UP
-    FLAT_ARROW_DOWN
-    NATURAL_ARROW_UP
-    NATURAL_ARROW_DOWN
-    SHARP_ARROW_UP
-    SHARP_ARROW_DOWN
-    SHARP2_ARROW_UP
-    SHARP2_ARROW_DOWN
-    FLAT2_ARROW_UP
-    FLAT2_ARROW_DOWN
-    ARROW_DOWN
-    ARROW_UP
-
-    ; Stein-Zimmermann
-    MIRRORED_FLAT
-    MIRRORED_FLAT2
-    SHARP_SLASH
-    SHARP_SLASH4
-
-    ; Arel-Ezgi-Uzdilek (AEU)
-    FLAT_SLASH2
-    FLAT_SLASH
-    SHARP_SLASH3
-    SHARP_SLASH2
-
-    ; Extended Helmholtz-Ellis accidentals (just intonation)
-    DOUBLE_FLAT_ONE_ARROW_DOWN
-    FLAT_ONE_ARROW_DOWN
-    NATURAL_ONE_ARROW_DOWN
-    SHARP_ONE_ARROW_DOWN
-    DOUBLE_SHARP_ONE_ARROW_DOWN
-    DOUBLE_FLAT_ONE_ARROW_UP
-
-    FLAT_ONE_ARROW_UP
-    NATURAL_ONE_ARROW_UP
-    SHARP_ONE_ARROW_UP
-    DOUBLE_SHARP_ONE_ARROW_UP
-    DOUBLE_FLAT_TWO_ARROWS_DOWN
-    FLAT_TWO_ARROWS_DOWN
-
-    NATURAL_TWO_ARROWS_DOWN
-    SHARP_TWO_ARROWS_DOWN
-    DOUBLE_SHARP_TWO_ARROWS_DOWN
-    DOUBLE_FLAT_TWO_ARROWS_UP
-    FLAT_TWO_ARROWS_UP
-    NATURAL_TWO_ARROWS_UP
-
-    SHARP_TWO_ARROWS_UP
-    DOUBLE_SHARP_TWO_ARROWS_UP
-    DOUBLE_FLAT_THREE_ARROWS_DOWN
-    FLAT_THREE_ARROWS_DOWN
-    NATURAL_THREE_ARROWS_DOWN
-    SHARP_THREE_ARROWS_DOWN
-
-    DOUBLE_SHARP_THREE_ARROWS_DOWN
-    DOUBLE_FLAT_THREE_ARROWS_UP
-    FLAT_THREE_ARROWS_UP
-    NATURAL_THREE_ARROWS_UP
-    SHARP_THREE_ARROWS_UP
-    DOUBLE_SHARP_THREE_ARROWS_UP
-
-    LOWER_ONE_SEPTIMAL_COMMA
-    RAISE_ONE_SEPTIMAL_COMMA
-    LOWER_TWO_SEPTIMAL_COMMAS
-    RAISE_TWO_SEPTIMAL_COMMAS
-    LOWER_ONE_UNDECIMAL_QUARTERTONE
-    RAISE_ONE_UNDECIMAL_QUARTERTONE
-
-    LOWER_ONE_TRIDECIMAL_QUARTERTONE
-    RAISE_ONE_TRIDECIMAL_QUARTERTONE
-
-    DOUBLE_FLAT_EQUAL_TEMPERED
-    FLAT_EQUAL_TEMPERED
-    NATURAL_EQUAL_TEMPERED
-    SHARP_EQUAL_TEMPERED
-    DOUBLE_SHARP_EQUAL_TEMPERED
-    QUARTER_FLAT_EQUAL_TEMPERED
-    QUARTER_SHARP_EQUAL_TEMPERED
-
-    FLAT_17
-    SHARP_17
-    FLAT_19
-    SHARP_19
-    FLAT_23
-    SHARP_23
-    FLAT_31
-    SHARP_31
-    FLAT_53
-    SHARP_53
-    ; EQUALS_ALMOST
-    ; EQUALS
-    ; TILDE
-
-    ; Persian
-    SORI
-    KORON
-
-    ; Wyschnegradsky
-    TEN_TWELFTH_FLAT
-    TEN_TWELFTH_SHARP
-    ELEVEN_TWELFTH_FLAT
-    ELEVEN_TWELFTH_SHARP
-    ONE_TWELFTH_FLAT
-    ONE_TWELFTH_SHARP
-    TWO_TWELFTH_FLAT
-    TWO_TWELFTH_SHARP
-    THREE_TWELFTH_FLAT
-    THREE_TWELFTH_SHARP
-    FOUR_TWELFTH_FLAT
-    FOUR_TWELFTH_SHARP
-    FIVE_TWELFTH_FLAT
-    FIVE_TWELFTH_SHARP
-    SIX_TWELFTH_FLAT
-    SIX_TWELFTH_SHARP
-    SEVEN_TWELFTH_FLAT
-    SEVEN_TWELFTH_SHARP
-    EIGHT_TWELFTH_FLAT
-    EIGHT_TWELFTH_SHARP
-    NINE_TWELFTH_FLAT
-    NINE_TWELFTH_SHARP
-
-    ; (Spartan) Sagittal
-    SAGITTAL_5V7KD
-    SAGITTAL_5V7KU
-    SAGITTAL_5CD
-    SAGITTAL_5CU
-    SAGITTAL_7CD
-    SAGITTAL_7CU
-    SAGITTAL_25SDD
-    SAGITTAL_25SDU
-    SAGITTAL_35MDD
-    SAGITTAL_35MDU
-    SAGITTAL_11MDD
-    SAGITTAL_11MDU
-    SAGITTAL_11LDD
-    SAGITTAL_11LDU
-    SAGITTAL_35LDD
-    SAGITTAL_35LDU
-    SAGITTAL_FLAT25SU
-    SAGITTAL_SHARP25SD
-    SAGITTAL_FLAT7CU
-    SAGITTAL_SHARP7CD
-    SAGITTAL_FLAT5CU
-    SAGITTAL_SHARP5CD
-    SAGITTAL_FLAT5V7KU
-    SAGITTAL_SHARP5V7KD
-    SAGITTAL_FLAT
-    SAGITTAL_SHARP
-
-    ; Turkish folk music
-    ONE_COMMA_FLAT
-    ONE_COMMA_SHARP
-    TWO_COMMA_FLAT
-    TWO_COMMA_SHARP
-    THREE_COMMA_FLAT
-    THREE_COMMA_SHARP
-    FOUR_COMMA_FLAT
-    ; FOUR_COMMA_SHARP
-    FIVE_COMMA_SHARP
-
-    END))))
 
 (define %key-type '(
   (name   . Key)
@@ -3805,3 +3588,6 @@ TAB_DURATION_SYMBOL
     ; END OF TABLE
 
     lastSym))))
+
+
+

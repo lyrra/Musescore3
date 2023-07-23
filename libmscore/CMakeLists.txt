@@ -43,20 +43,20 @@ include_directories(
       )
 
 set (SOURCE_FILES
-      types.h accidental.h ambitus.h arpeggio.h articulation.h audio.h bagpembell.h barline.h beam.h bend.h
-      box.h bracket.h bracketItem.h breath.h bsp.h bsymbol.h changeMap.h chord.h chordline.h chordlist.h chordrest.h clef.h
-      cleflist.h connector.h drumset.h dsp.h duration.h durationtype.h dynamic.h easeInOut.h element.h
-      elementmap.h excerpt.h fermata.h fifo.h figuredbass.h fingering.h fraction.h fret.h glissando.h groups.h hairpin.h
-      harmony.h hook.h icon.h image.h imageStore.h iname.h input.h instrchange.h instrtemplate.h instrument.h interval.h
-      jump.h key.h keylist.h keysig.h lasso.h layout.h layoutbreak.h ledgerline.h letring.h line.h location.h
-      lyrics.h marker.h mcursor.h measure.h measurebase.h mscore.h mscoreview.h musescoreCore.h navigate.h note.h notedot.h
-      noteevent.h noteline.h ossia.h ottava.h page.h palmmute.h part.h pedal.h pitch.h pitchspelling.h pitchvalue.h
-      pos.h property.h range.h read206.h realizedharmony.h rehearsalmark.h repeat.h repeatlist.h rest.h revisions.h score.h scoreOrder.h scoreElement.h segment.h
-      segmentlist.h select.h sequencer.h shadownote.h shape.h sig.h slur.h slurtie.h spacer.h spanner.h spannermap.h spatium.h
-      staff.h stafflines.h staffstate.h stafftext.h stafftextbase.h stafftype.h stafftypechange.h stafftypelist.h stem.h
-      stemslash.h stringdata.h style.h sym.h symbol.h synthesizerstate.h system.h systemdivider.h systemtext.h tempo.h
-      tempotext.h text.h mmrestrange.h measurenumberbase.h measurenumber.h textbase.h textedit.h textframe.h textline.h textlinebase.h tie.h tiemap.h timesig.h
-      tremolo.h tremolobar.h trill.h tuplet.h tupletmap.h types.h undo.h utils.h vibrato.h volta.h xml.h
+     accidental.h ambitus.h arpeggio.h articulation.h audio.h bagpembell.h barline.h beam.h bend.h
+     box.h bracket.h bracketItem.h breath.h bsp.h bsymbol.h changeMap.h chord.h chordline.h chordlist.h chordrest.h clef.h
+     cleflist.h connector.h drumset.h dsp.h duration.h durationtype.h dynamic.h easeInOut.h element.h
+     elementmap.h excerpt.h fermata.h fifo.h figuredbass.h fingering.h fraction.h fret.h glissando.h groups.h hairpin.h
+     harmony.h hook.h icon.h image.h imageStore.h iname.h input.h instrchange.h instrtemplate.h instrument.h interval.h
+     jump.h key.h keylist.h keysig.h lasso.h layout.h layoutbreak.h ledgerline.h letring.h line.h location.h
+     lyrics.h marker.h mcursor.h measure.h measurebase.h mscore.h mscoreview.h musescoreCore.h navigate.h note.h notedot.h
+     noteevent.h noteline.h ossia.h ottava.h page.h palmmute.h part.h pedal.h pitch.h pitchspelling.h pitchvalue.h
+     pos.h property.h range.h read206.h realizedharmony.h rehearsalmark.h repeat.h repeatlist.h rest.h revisions.h score.h scoreOrder.h scoreElement.h segment.h
+     segmentlist.h select.h sequencer.h shadownote.h shape.h sig.h slur.h slurtie.h spacer.h spanner.h spannermap.h spatium.h
+     staff.h stafflines.h staffstate.h stafftext.h stafftextbase.h stafftype.h stafftypechange.h stafftypelist.h stem.h
+     stemslash.h stringdata.h style.h sym.h symbol.h synthesizerstate.h system.h systemdivider.h systemtext.h tempo.h
+     tempotext.h text.h mmrestrange.h measurenumberbase.h measurenumber.h textbase.h textedit.h textframe.h textline.h textlinebase.h tie.h tiemap.h timesig.h
+     tremolo.h tremolobar.h trill.h tuplet.h tupletmap.h types.h undo.h utils.h vibrato.h volta.h xml.h
 
       segmentlist.cpp fingering.cpp accidental.cpp arpeggio.cpp
       fermata.cpp articulation.cpp barline.cpp beam.cpp bend.cpp box.cpp
@@ -172,3 +172,5 @@ if (NOT MSVC)
       ADD_DEPENDENCIES(musescore mops1)
       ADD_DEPENDENCIES(musescore mops2)
 endif (NOT MSVC)
+
+add_dependencies(musescore generated_sources)
