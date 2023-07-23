@@ -20,17 +20,7 @@ namespace Ms {
 
 class Chord;
 
-// Tremolo subtypes:
-enum class TremoloType : signed char {
-      INVALID_TREMOLO = -1,
-      R8 = 0, R16, R32, R64, BUZZ_ROLL,  // one note tremolo (repeat)
-      C8, C16, C32, C64     // two note tremolo (change)
-      };
-
-// only applicable to minim two-note tremolo in non-TAB staves
-enum class TremoloStyle : signed char {
-      DEFAULT = 0, TRADITIONAL, TRADITIONAL_ALTERNATE
-      };
+#include "tremolo-gen.h"
 
 //---------------------------------------------------------
 //   @@ Tremolo
