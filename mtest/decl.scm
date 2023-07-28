@@ -3,6 +3,15 @@
 ; initiate c and h file
 ;
 
+(define (string-lisp->c str)
+  (let ((idx (string-position "-" str)))
+    (if idx
+        (string-lisp->c
+         (string-append (substring str 0 idx)
+                        "__"
+                        (substring str (+ 1 idx))))
+        str)))
+
 (format %h "// WARNING: this file is generated~%")
 (format %c "// WARNING: this file is generated
 #include <cstdlib>
@@ -46,9 +55,10 @@ extern Ms::MTest* g_mtest;
   (format %h "  ~a,~%" name))
           %goo-types)
 
-(for-each (lambda (name)
-  (format %h "  ELEMENT_~a,~%" name))
-          %element-types)
+(for-each (lambda (type)
+  (let ((name (car type)))
+    (format %h "  ~a,~%" (string-lisp->c (symbol->string name)))))
+          (cdr (assoc 'ElementType %c-types)))
 (format %h "  END~%};~%")
 
 ;
@@ -64,7 +74,7 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps2 'note_ValueType)
 (emit-c-type-string-maps2 'NoteHead_Type)
 (emit-c-type-string-maps2 'NoteHead_Group)
-(emit-c-type-string-maps-simple "element_pid" %element-pids "Ms::Pid")
+(emit-c-type-string-maps-simple "element_pid" (cdr (assoc 'Pid %c-types)) "Ms::Pid")
 
 (emit-c-type-string-maps2 'NoteType)
 
@@ -112,13 +122,15 @@ extern Ms::MTest* g_mtest;
     if (!strcmp(symname, \"dummy\")) {
 ")
 
-(for-each (lambda (name)
-  (format %c "
+(for-each (lambda (type)
+  (let ((name (car type))
+        (cname (cadr type)))
+    (format %c "
     } else if (!strcasecmp(symname, \"~a\")) {
-        e = Element::create(ElementType::~a, g_mtest->score);
-        ty = static_cast<uint64_t>(GOO_TYPE::ELEMENT_~a);
-" name name name))
-          %element-types)
+        e = Element::create(~a, g_mtest->score);
+        ty = static_cast<uint64_t>(GOO_TYPE::~a);
+" name cname (string-lisp->c (symbol->string name)))))
+          (cdr (assoc 'ElementType %c-types)))
 
 (format %c "
     } else {
@@ -220,19 +232,18 @@ extern Ms::MTest* g_mtest;
 (emit-cfun '(ms-make-hairpin) 0 (list
   (lambda (e) (format %c "
     Hairpin* hp = new Hairpin(g_mtest->score);"))
-  '(emit-return-goo "hp" "static_cast<uint64_t>(GOO_TYPE::ELEMENT_HAIRPIN)")))
+  '(emit-return-goo "hp" "static_cast<uint64_t>(GOO_TYPE::ElementType__HAIRPIN)")))
 
 (def-goo-setters-sym "Ms::Hairpin" "hairpin" "hairpinType" "setHairpinType" "hairpin")
 
 ; tremolo
-(register-c-type %tremolo-type)
 (emit-c-type-string-maps2 'TremoloType)
 
 (emit-cfun '(ms-make-tremolo) 1 (list
   '(emit-pop-arg-goo "MasterScore*" "score")
   (lambda (e) (format %c "
     Tremolo* tr = new Tremolo(score);"))
-  '(emit-return-goo "tr" "static_cast<uint64_t>(GOO_TYPE::ELEMENT_TREMOLO)")))
+  '(emit-return-goo "tr" "static_cast<uint64_t>(GOO_TYPE::ElementType__TREMOLO)")))
 
 (def-goo-setters-sym "Ms::Tremolo" "tremolo" "tremoloType" "setTremoloType" "TremoloType")
 
@@ -335,7 +346,7 @@ extern Ms::MTest* g_mtest;
   (lambda (e)
    (format %c "
     Fraction* f = new Fraction(numerator, denominator);
-    uint64_t ty = static_cast<uint64_t>(0); // GOO_TYPE::ELEMENT_FRACTION
+    uint64_t ty = static_cast<uint64_t>(0); // GOO_TYPE::ElementType__FRACTION
     return c_make_goo(sc, ty, s7_f(sc), f);~%"))))
 
 (emit-cfun '(ms-division) 0 (lambda ()
@@ -378,7 +389,7 @@ extern Ms::MTest* g_mtest;
         return s7_f(sc);
     }
     Note* note = notes->at(i);~%"))
-  '(emit-return-goo "note" "GOO_TYPE::ELEMENT_NOTE")))
+  '(emit-return-goo "note" "GOO_TYPE::ElementType__NOTE")))
 
 (emit-string-to-ctype)
 

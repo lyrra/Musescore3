@@ -6,114 +6,113 @@
   (name        . ElementType)
   (c-type      . "ElementType")
   (types       . (
-
-      INVALID
-      BRACKET_ITEM
-      PART
-      STAFF
-      SCORE
-      SYMBOL
-      TEXT
-      MEASURE_NUMBER
-      MMREST_RANGE
-      INSTRUMENT_NAME
-      SLUR_SEGMENT
-      TIE_SEGMENT
-      BAR_LINE
-      STAFF_LINES
-      SYSTEM_DIVIDER
-      STEM_SLASH
-      ARPEGGIO
-      ACCIDENTAL
-      LEDGER_LINE
-      STEM                    ; list STEM before NOTE: notes in TAB might 'break' stems
-      NOTE                    ; and this requires stems to be drawn before notes
-      CLEF                    ; elements from CLEF to TIMESIG need to be in the order
-      KEYSIG                  ; in which they appear in a measure
-      AMBITUS
-      TIMESIG
-      REST
-      BREATH
-      REPEAT_MEASURE
-      TIE
-      ARTICULATION
-      FERMATA
-      CHORDLINE
-      DYNAMIC
-      BEAM
-      HOOK
-      LYRICS
-      FIGURED_BASS
-      MARKER
-      JUMP
-      FINGERING
-      TUPLET
-      TEMPO_TEXT
-      STAFF_TEXT
-      SYSTEM_TEXT
-      REHEARSAL_MARK
-      INSTRUMENT_CHANGE
-      STAFFTYPE_CHANGE
-      HARMONY
-      FRET_DIAGRAM
-      BEND
-      TREMOLOBAR
-      VOLTA
-      HAIRPIN_SEGMENT
-      OTTAVA_SEGMENT
-      TRILL_SEGMENT
-      LET_RING_SEGMENT
-      VIBRATO_SEGMENT
-      PALM_MUTE_SEGMENT
-      TEXTLINE_SEGMENT
-      VOLTA_SEGMENT
-      PEDAL_SEGMENT
-      LYRICSLINE_SEGMENT
-      GLISSANDO_SEGMENT
-      LAYOUT_BREAK
-      SPACER
-      STAFF_STATE
-      NOTEHEAD
-      NOTEDOT
-      TREMOLO
-      IMAGE
-      MEASURE
-      SELECTION
-      LASSO
-      SHADOW_NOTE
-      TAB_DURATION_SYMBOL
-      FSYMBOL
-      PAGE
-      HAIRPIN
-      OTTAVA
-      PEDAL
-      TRILL
-      LET_RING
-      VIBRATO
-      PALM_MUTE
-      TEXTLINE
-      TEXTLINE_BASE
-      NOTELINE
-      LYRICSLINE
-      GLISSANDO
-      BRACKET
-      SEGMENT
-      SYSTEM
-      COMPOUND
-      CHORD
-      SLUR
-      ELEMENT
-      ELEMENT_LIST
-      STAFF_LIST
-      MEASURE_LIST
-      HBOX
-      VBOX
-      TBOX
-      FBOX
-      ICON
-      OSSIA
-      BAGPIPE_EMBELLISHMENT
-      STICKING
+       INVALID
+       BRACKET_ITEM
+       PART
+       STAFF
+       SCORE
+      (SYMBOL    (create))
+      (TEXT      (create))
+      (MEASURE_NUMBER   (create))
+      (MMREST_RANGE     (create))
+      (INSTRUMENT_NAME  (create))
+       SLUR_SEGMENT
+       TIE_SEGMENT
+      (BAR_LINE         (create))
+       STAFF_LINES
+      (SYSTEM_DIVIDER   (create))
+       STEM_SLASH
+      (ARPEGGIO         (create))
+      (ACCIDENTAL       (create))
+       LEDGER_LINE
+      (STEM       (create))    ; list STEM before NOTE: notes in TAB might 'break' stems
+      (NOTE       (create))    ; and this requires stems to be drawn before notes
+      (CLEF       (create))    ; elements from CLEF to TIMESIG need to be in the order
+      (KEYSIG     (create))    ; in which they appear in a measure
+      (AMBITUS    (create))
+      (TIMESIG    (create))
+      (REST    (create))
+      (BREATH    (create))
+      (REPEAT_MEASURE    (create))
+      (TIE    (create))
+      (ARTICULATION    (create))
+      (FERMATA    (create))
+      (CHORDLINE    (create))
+      (DYNAMIC    (create))
+       BEAM
+       HOOK
+      (LYRICS        (create))
+      (FIGURED_BASS  (create))
+      (MARKER        (create))
+      (JUMP          (create))
+      (FINGERING     (create))
+       TUPLET
+      (TEMPO_TEXT          (create))
+      (STAFF_TEXT          (create))
+      (SYSTEM_TEXT         (create))
+      (REHEARSAL_MARK      (create))
+      (INSTRUMENT_CHANGE   (create))
+      (STAFFTYPE_CHANGE    (create))
+      (HARMONY             (create))
+      (FRET_DIAGRAM        (create))
+      (BEND                (create))
+      (TREMOLOBAR          (create))
+      (VOLTA               (create))
+       HAIRPIN_SEGMENT
+       OTTAVA_SEGMENT
+       TRILL_SEGMENT
+       LET_RING_SEGMENT
+       VIBRATO_SEGMENT
+       PALM_MUTE_SEGMENT
+       TEXTLINE_SEGMENT
+       VOLTA_SEGMENT
+       PEDAL_SEGMENT
+       LYRICSLINE_SEGMENT
+       GLISSANDO_SEGMENT
+      (LAYOUT_BREAK   (create))
+      (SPACER         (create))
+      (STAFF_STATE    (create))
+      (NOTEHEAD       (create))
+      (NOTEDOT        (create))
+      (TREMOLO        (create))
+      (IMAGE          (create))
+      (MEASURE        (create))
+       SELECTION
+       LASSO
+       SHADOW_NOTE
+      (TAB_DURATION_SYMBOL  (create))
+      (FSYMBOL              (create))
+       PAGE
+      (HAIRPIN      (create))
+      (OTTAVA       (create))
+      (PEDAL        (create))
+      (TRILL        (create))
+      (LET_RING     (create))
+      (VIBRATO      (create))
+      (PALM_MUTE    (create))
+      (TEXTLINE     (create))
+       TEXTLINE_BASE
+      (NOTELINE     (create))
+       LYRICSLINE
+      (GLISSANDO    (create))
+      (BRACKET      (create))
+       SEGMENT
+       SYSTEM
+       COMPOUND
+      (CHORD    (create))
+      (SLUR     (create))
+       ELEMENT
+       ELEMENT_LIST
+       STAFF_LIST
+       MEASURE_LIST
+      (HBOX    (create))
+      (VBOX    (create))
+      (TBOX    (create))
+      (FBOX    (create))
+      (ICON    (create))
+      (OSSIA    (create))
+      (BAGPIPE_EMBELLISHMENT    (create))
+      (STICKING    (create))
 
       MAXTYPE))))
 

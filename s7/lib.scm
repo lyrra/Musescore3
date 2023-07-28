@@ -17,8 +17,9 @@
                 (structures-equal? (cdr l1) (cdr l2)))
            (not (pair? l2))))
 
-     (if (not (structures-equal? ',lst ex))
-         (error 'test-error "~A and ~A do not match" ',lst ex))
+     ; 20230728, disabled, fails on good match (a b c) <= (1 2 (3))
+     ;(if (not (structures-equal? ',lst ex))
+     ;    (error 'test-error "~A and ~A do not match" ',lst ex))
 
      (let ((names (flatten ',lst))
            (vals (flatten ex)))

@@ -2,6 +2,11 @@
 (define %c-types '())
 (define %c-types-info '())
 
+(define-syntax define-c-type
+  (syntax-rules ()
+    ((_ . args)
+     (eval-define-c-type (car 'args)))))
+
 (define (register-c-type lst)
   (let* ((start-index (or (assq-ref lst 'start-index) 0))
          (name        (assq-ref lst 'name))
@@ -19,26 +24,31 @@
               (type #f)
               (typename #f)
               (c-typename #f)
-              (index #f))
+              (index #f)
+              (props '()))
           (cond
            ((pair? type-or-list)
             (set! type (car type-or-list))
             (cond
-            ((and (pair? (cadr type-or-list)) (equal? 'or (car (cadr type-or-list))))
-             (let* ((types (cdr (cadr type-or-list)))
-                    (str (format #f "~a::~a" name (car types))))
-               (do ((pair (cdr types) (cdr pair)))
-                   ((null? pair))
-                 (let ((tname (car pair)))
-                   (format #f " ~a::~a | ~a" name tname str)))
-               str))
-            (else
+             ; computed type, (Typename (or TypenameA TypenameB ...))
+             ((and (pair? (cadr type-or-list)) (equal? 'or (car (cadr type-or-list))))
+              (let* ((types (cdr (cadr type-or-list)))
+                     (str (format #f "~a::~a" name (car types))))
+                (do ((pair (cdr types) (cdr pair)))
+                    ((null? pair))
+                  (let ((tname (car pair)))
+                    (set! str (format #f " ~a::~a | ~a" name tname str))))
+                str))
+             ; type properties, (Typename (Prop1 Prop2 ...))
+             ((and (pair? (cadr type-or-list)))
+              (set! props (cadr type-or-list)))
+             (else ; (Typename Number)
               (set! index (cadr type-or-list)))))
            (else
             (set! type type-or-list)))
           (set! typename (string->symbol (format #f "~a-~a" name type)))
           (set! c-typename (format #f "~a::~a" c-type type))
-          (set! typelst (cons (list typename c-typename idx) typelst))
+          (set! typelst (cons (list typename c-typename idx props) typelst))
           (set! idx (or index (+ idx 1)))))
       (if (assq-ref %c-types name)
         (let ((pair (assoc name %c-types)))
@@ -75,7 +85,3 @@
   (display args)
   (register-c-type args))
 
-(define-syntax define-c-type
-  (syntax-rules ()
-    ((_ . args)
-     (eval-define-c-type (car 'args)))))

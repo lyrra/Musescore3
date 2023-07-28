@@ -28,7 +28,7 @@
     (apply cmdAddInterval ((int) ("std::vector<Note*>*" deref)))
     (set cmdConcertPitchChanged ((bool) (bool)))
     (set upDown ((bool) (sym UpDownMode)))
-    (get firstMeasure () ("Ms::Measure*" goo ELEMENT_MEASURE))
+    (get firstMeasure () ("Ms::Measure*" goo ElementType__MEASURE))
     (get inputState   () ("Ms::InputState*") ref)
     (get nstaves      () (int))
     (get tick2segment (("Ms::Fraction*" deref) (bool) (sym SegmentType)) ("Ms::Segment*"))
@@ -39,8 +39,8 @@
 (define-object measure
   (c-type "Ms::Measure")
   (methods
-    (get findChord (("Fraction*" deref) (int track)) ("Ms::Chord*" goo ELEMENT_CHORD))
-    (get nextMeasure () ("Ms::Measure*" goo ELEMENT_MEASURE))
+    (get findChord (("Fraction*" deref) (int track)) ("Ms::Chord*" goo ElementType__CHORD))
+    (get nextMeasure () ("Ms::Measure*" goo ElementType__MEASURE))
     ))
 
 (define-object segment

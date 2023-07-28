@@ -27,6 +27,7 @@
         (set! sarg #t))
        (sarg
         (set! %source-files (cons arg %source-files)))))))
+
 (set! %source-files (reverse %source-files))
 (set! %libdir-mtest (format #f "~a/../mtest" %libdir))
 
@@ -38,9 +39,11 @@
 
 (if (not %libdir) (error "S7 LIBDIR not found"))
 
-(format #t "-- spicing up the S7 scheme interpreter~%")
+(format #t "-- spicing up the scheme interpreter~%")
 (load (format #f "~a/psyntax-s7.scm" %libdir))
 (load (format #f "~a/psyntax-expanded.ss" %libdir))
+; for better guile compatiblity, load lib.scm
+(load (format #f "~a/lib.scm" %libdir))
 
 (define (psyntax-eval form)
   (let ((ex (sc-expand form)))
@@ -55,6 +58,18 @@
 
 ; scheme extensions
 (psyntax-load (format #f "~a/plib.scm" %libdir))
+
+(psyntax-load "types-code-gen.scm")
+; mtest helpers
+(psyntax-load (format #f "~a/mtestgen.scm" %libdir-mtest))
+;(psyntax-load (format #f "~a/mtest/types.scm" %sourcedir))
+
+; musescore data structures definitions
+;(load (format #f "~a/libmscore/types-gen.h.scm" %sourcedir))
+;(load (format #f "~a/libmscore/tremolo-gen.h.scm" %sourcedir))
+;(load (format #f "~a/libmscore/property-gen.h.scm" %sourcedir))
+
+;(load "ms.scm")
 
 (define %emit-port #f)
 
@@ -75,16 +90,18 @@
    (else
     (write form %emit-port))))
 
+; generate output file
+(set! %emit-port (open-output-file %output-file "w"))
+
+; generate header
+(format %emit-port "(load \"types-code-gen.scm\") ; load types (c++ enums)~%")
+
 (format #t "-- loading source files~%")
 
 (do ((pair %source-files (cdr pair)))
     ((null? pair))
-    (let ((file (format #f "~a/~a" %sourcedir (car pair))))
-      (format #t "-- loading source file ~s~%" file)
-      (psyntax-load file)))
+  (psyntax-load (car pair)))
 
-; generate runtime S7/Guile scheme code
-(psyntax-load (format #f "~a/types-code.scm" %sourcedir))
-(write-types-code-file "types-code-gen.scm")
+(close-output-port %emit-port)
 
-(format #t "---- scheme generate code done ----~%")
+(format #t "---- scheme generate test-code done ----~%")
