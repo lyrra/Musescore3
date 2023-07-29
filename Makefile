@@ -25,7 +25,6 @@ VERSION   := $(shell cmake -P config.cmake | sed -n -e "s/^.*VERSION  *//p")
 MUSESCORE_BUILD_CONFIG="dev"
 MUSESCORE_REVISION=""
 BUILD_NUMBER=""
-TELEMETRY_TRACK_ID=""
 
 # Override SUFFIX and LABEL when multiple versions are installed to avoid conflicts.
 SUFFIX=""# E.g.: SUFFIX="dev" --> "mscore" becomes "mscoredev"
@@ -63,14 +62,12 @@ release:
 	  -DMUSESCORE_BUILD_CONFIG="${MUSESCORE_BUILD_CONFIG}" \
 	  -DMUSESCORE_REVISION="${MUSESCORE_REVISION}" \
   	  -DCMAKE_BUILD_NUMBER="${BUILD_NUMBER}"   \
-  	  -DTELEMETRY_TRACK_ID="${TELEMETRY_TRACK_ID}" \
   	  -DBUILD_LAME="${BUILD_LAME}"             \
   	  -DBUILD_PULSEAUDIO="${BUILD_PULSEAUDIO}" \
   	  -DBUILD_PORTMIDI="${BUILD_PORTMIDI}"  \
   	  -DBUILD_JACK="${BUILD_JACK}"             \
   	  -DBUILD_ALSA="${BUILD_ALSA}"              \
    	  -DBUILD_PORTAUDIO="${BUILD_PORTAUDIO}"   \
-   	  -DBUILD_WEBENGINE="${BUILD_WEBENGINE}"   \
    	  -DDOWNLOAD_SOUNDFONT="${DOWNLOAD_SOUNDFONT}"   \
 	  -DUSE_ZITA_REVERB="${USE_ZITA_REVERB}"   \
   	  -DCMAKE_SKIP_RPATH="${NO_RPATH}"     ..; \

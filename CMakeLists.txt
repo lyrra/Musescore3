@@ -60,19 +60,6 @@ if (MSVC)
    set (MINGW false)
 endif (MSVC)
 
-# We need this early, before FindQt5
-option(BUILD_WEBENGINE "Built in webengine support" ON)
-
-if (BUILD_WEBENGINE)
-   if (MINGW)
-      SET (USE_WEBENGINE 0)
-   else (MINGW)
-      SET (USE_WEBENGINE 0)
-   endif(MINGW)
-else (BUILD_WEBENGINE)
-   SET (USE_WEBENGINE 0)
-endif (BUILD_WEBENGINE)
-
 set(SCRIPT_INTERFACE  TRUE)
 #  Look for Qt5
 if (SCRIPT_INTERFACE)
@@ -145,7 +132,6 @@ option(DOWNLOAD_SOUNDFONT "Download the latest soundfont version as part of the 
 set(OCR OFF)
 
 option(BUILD_PCH "Build using precompiled headers." ON)
-option(BUILD_FOR_WINSTORE "Build for the Windows Store." OFF)
 option(COVERAGE "Build with instrumentation to record code coverage." OFF)
 option(BUILD_64 "Build 64 bit version of editor" ON)
 option(BUILD_AUTOUPDATE "Build with autoupdate support" OFF)
@@ -156,7 +142,6 @@ option(PACKAGE_FILE_ASSOCIATION "File types association" OFF)
 
 if (MSCORE_UNSTABLE)
       message("Build is unstable = ${MSCORE_UNSTABLE}")
-      add_definitions(-DTELEMETRY_DISABLED)
 endif(MSCORE_UNSTABLE)
 
 if (BUILD_CRASH_REPORTER)
@@ -356,10 +341,6 @@ if (DOWNLOAD_SOUNDFONT)
   endif()
 endif(DOWNLOAD_SOUNDFONT)
 
-
-if (BUILD_FOR_WINSTORE)
-  set(FOR_WINSTORE 1)
-endif(BUILD_FOR_WINSTORE)
 
 if (GUILE)
   # Guile needs libmusescore as a shared library

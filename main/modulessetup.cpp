@@ -20,10 +20,6 @@
 #include "modulessetup.h"
 #include "config.h"
 
-#ifdef BUILD_TELEMETRY_MODULE
-#include "telemetry/telemetrysetup.h"
-#endif
-
 #ifdef AVSOMR
 #include "avsomr/avsomrsetup.h"
 #endif
@@ -36,9 +32,6 @@ ModulesSetup::ModulesSetup()
       {
 
       m_modulesSetupList
-#ifdef BUILD_TELEMETRY_MODULE
-              << new TelemetrySetup()
-#endif
 #ifdef AVSOMR
               << new Ms::Avs::AvsOmrSetup()
 #endif

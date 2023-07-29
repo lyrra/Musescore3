@@ -339,7 +339,6 @@ void PreferenceDialog::start()
                   new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWSPLASHSCREEN, showSplashScreen),
                   new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWSTARTCENTER, showStartcenter),
                   new BoolPreferenceItem(PREF_UI_APP_STARTUP_SHOWTOURS, showTours),
-                  new BoolPreferenceItem(PREF_APP_TELEMETRY_ALLOWED, collectTelemetry),
                   new BoolPreferenceItem(PREF_SCORE_NOTE_WARNPITCHRANGE, warnPitchRange),
                   new StringPreferenceItem(PREF_IMPORT_OVERTURE_CHARSET, importCharsetListOve, nullptr, [&](){ updateCharsetListOve(); }),      // keep the default apply
                   new StringPreferenceItem(PREF_IMPORT_GUITARPRO_CHARSET, importCharsetListGP, nullptr, [&](){ updateCharsetListGP(); }),       // keep the default apply

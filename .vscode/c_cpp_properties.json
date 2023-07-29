@@ -36,7 +36,6 @@
                     "${workspaceFolder}/rdoc/",
                     "${workspaceFolder}/share/",
                     "${workspaceFolder}/test/",
-                    "${workspaceFolder}/telemetry/",
                     "${workspaceFolder}/thirdparty/",
                     "${workspaceFolder}/vtest/",
                     "${workspaceFolder}/*"

@@ -53,10 +53,6 @@ include_directories(
       ${GUILE_INCLUDE_DIRS}
       )
 
-if (BUILD_TELEMETRY_MODULE)
-      include_directories(${PROJECT_SOURCE_DIR}/telemetry)
-endif (BUILD_TELEMETRY_MODULE)
-
 if (SCRIPT_INTERFACE)
     include(${CMAKE_CURRENT_LIST_DIR}/plugin/plugin.cmake)
 endif (SCRIPT_INTERFACE)

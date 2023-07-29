@@ -26,7 +26,6 @@
 #include "scoreview.h"
 #include "script/script.h"
 #include "resetButton.h"
-#include "telemetrymanager.h"
 #include "tourhandler.h"
 
 namespace Ms {
@@ -706,39 +705,9 @@ bool InspectorScrollPreventer::eventFilter(QObject* watched, QEvent* event)
 
 void InspectorEventObserver::event(EventType evtType, const InspectorItem& ii, const Element* e)
       {
-#ifndef TELEMETRY_DISABLED
-      //if inspector data IS the enabled telemetry data
-      if (Ms::enabledTelemetryDataTypes & Ms::TelemetryDataCollectionType::COLLECT_INSPECTOR_DATA) {
-            QString evtCategory;
-            switch (evtType) {
-                  case EventType::PropertyChange:
-                        evtCategory = QStringLiteral("inspector-property-change");
-                        break;
-                  case EventType::PropertyReset:
-                        evtCategory = QStringLiteral("inspector-property-reset");
-                        break;
-                  case EventType::PropertySetStyle:
-                        evtCategory = QStringLiteral("inspector-property-set-style");
-                        break;
-                  }
-
-            const QObject* w = ii.w;
-            const QObject* p = w->parent();
-            while (p && !qobject_cast<const InspectorBase*>(p)) {
-                  w = p;
-                  p = p->parent();
-                  }
-            const QString inspectorName = w->objectName();
-
-            const QString evtAction = QStringLiteral("%1/%2").arg(inspectorName).arg(propertyName(ii.t));
-            const QString evtLabel = e ? e->name() : "null";
-            TelemetryManager::telemetryService()->sendEvent(evtCategory, evtAction, evtLabel);
-            }
-#else
       Q_UNUSED(evtType);
       Q_UNUSED(ii);
       Q_UNUSED(e);
-#endif
       }
 }
 

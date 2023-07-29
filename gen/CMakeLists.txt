@@ -2,7 +2,7 @@ set(MODULE gen)
 
 add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/libmscore/types-gen.h
-    COMMAND guile -l ${PROJECT_SOURCE_DIR}/gen/gen.scm --
+    COMMAND guile -q -l ${PROJECT_SOURCE_DIR}/gen/gen.scm --
             ${PROJECT_SOURCE_DIR}/libmscore/types-gen.h.scm
             ${PROJECT_BINARY_DIR}/libmscore/types-gen.h
     DEPENDS ${PROJECT_SOURCE_DIR}/libmscore/types-gen.h.scm
@@ -10,7 +10,7 @@ add_custom_command(
 )
 add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/libmscore/tremolo-gen.h
-    COMMAND guile -l ${PROJECT_SOURCE_DIR}/gen/gen.scm --
+    COMMAND guile -q -l ${PROJECT_SOURCE_DIR}/gen/gen.scm --
             ${PROJECT_SOURCE_DIR}/libmscore/tremolo-gen.h.scm
             ${PROJECT_BINARY_DIR}/libmscore/tremolo-gen.h
     DEPENDS ${PROJECT_SOURCE_DIR}/libmscore/tremolo-gen.h.scm
@@ -18,7 +18,7 @@ add_custom_command(
 )
 add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/libmscore/property-gen.h
-    COMMAND guile -l ${PROJECT_SOURCE_DIR}/gen/gen.scm --
+    COMMAND guile -q -l ${PROJECT_SOURCE_DIR}/gen/gen.scm --
             ${PROJECT_SOURCE_DIR}/libmscore/property-gen.h.scm
             ${PROJECT_BINARY_DIR}/libmscore/property-gen.h
     DEPENDS ${PROJECT_SOURCE_DIR}/libmscore/property-gen.h.scm

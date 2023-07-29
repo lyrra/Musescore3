@@ -151,8 +151,6 @@ void Preferences::init(bool storeInMemoryOnly)
             {PREF_APP_STARTUP_SESSIONSTART,                        new EnumPreference(QVariant::fromValue(SessionStart::SCORE), false)},
             {PREF_APP_STARTUP_STARTSCORE,                          new StringPreference(":/data/My_First_Score.mscx", false)},
             {PREF_APP_WORKSPACE,                                   new StringPreference("Basic", false)},
-            {PREF_APP_TELEMETRY_ALLOWED,                           new BoolPreference(false, false)},
-            {PREF_APP_STARTUP_TELEMETRY_ACCESS_REQUESTED,          new StringPreference("", false)},
             {PREF_MIGRATION_DO_NOT_ASK_ME_AGAIN,                   new BoolPreference(false, false)},
             {PREF_MIGRATION_APPLY_LELAND_STYLE,                    new BoolPreference(false, false)},
             {PREF_MIGRATION_APPLY_EDWIN_STYLE,                     new BoolPreference(false, false)},

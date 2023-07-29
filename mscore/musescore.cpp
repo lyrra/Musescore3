@@ -158,12 +158,6 @@
 #include "thirdparty/libcrashreporter-qt/src/libcrashreporter-handler/Handler.h"
 #endif
 
-#ifndef TELEMETRY_DISABLED
-#include "actioneventobserver.h"
-#include "widgets/telemetrypermissiondialog.h"
-#endif
-#include "telemetrymanager.h"
-
 #include "muxcommon.h"
 #include "muxlib.h"
 #include "muxseq_client.h"
@@ -294,10 +288,6 @@ const std::list<const char*> MuseScore::_allPlaybackControlEntries {
 extern TextPalette* textPalette;
 
 static const char* saveOnlineMenuItem = "file-save-online";
-
-#ifdef BUILD_TELEMETRY_MODULE
-std::unique_ptr<TelemetryManager> TelemetryManager::mgr;
-#endif
 
 //---------------------------------------------------------
 // cmdInsertMeasure
@@ -7133,41 +7123,6 @@ bool MuseScore::saveMp3(Score* score, QIODevice* device, bool& wasCanceled)
 #endif
       }
 
-#ifndef TELEMETRY_DISABLED
-
-//---------------------------------------------------------
-//   tryToRequestTelemetryPermission
-//---------------------------------------------------------
-
-void tryToRequestTelemetryPermission()
-      {
-      static const QString telemetryVersion = "3.4.1";
-      QString accessRequestedAtVersion = preferences.getString(PREF_APP_STARTUP_TELEMETRY_ACCESS_REQUESTED);
-
-      if (accessRequestedAtVersion == telemetryVersion)
-            return;
-
-      // Disable telemetry until the permission is explicitly confirmed by user
-      preferences.setPreference(PREF_APP_TELEMETRY_ALLOWED, false);
-
-      if (MScore::noGui)
-            return;
-
-      QEventLoop eventLoop;
-
-      TelemetryPermissionDialog *requestDialog = new TelemetryPermissionDialog(mscore->getQmlUiEngine());
-      QObject::connect(requestDialog, &TelemetryPermissionDialog::closeRequested, [&eventLoop] () {
-            eventLoop.quit();
-            });
-
-      requestDialog->show();
-      eventLoop.exec();
-      requestDialog->deleteLater();
-
-      preferences.setPreference(PREF_APP_STARTUP_TELEMETRY_ACCESS_REQUESTED, telemetryVersion);
-      }
-#endif
-
 //---------------------------------------------------------
 //   updateUiStyleAndTheme
 //---------------------------------------------------------
@@ -7959,10 +7914,6 @@ void MuseScore::init(QStringList& argv)
       gscore->setScoreFont(scoreFont);
       gscore->setNoteHeadWidth(scoreFont->width(SymId::noteheadBlack, gscore->spatium()) / SPATIUM20);
 
-#ifndef TELEMETRY_DISABLED
-      tryToRequestTelemetryPermission();
-#endif
-
       showSplashMessage(sc, tr("Reading translations…"));
       //read languages list
       mscore->readLanguages(mscoreGlobalShare + "locale/languages.xml");
@@ -8014,12 +7965,6 @@ void MuseScore::init(QStringList& argv)
             }
 
       QApplication::instance()->installEventFilter(mscore);
-
-#ifndef TELEMETRY_DISABLED
-      QApplication::instance()->installEventFilter(ActionEventObserver::instance());
-      ActionEventObserver::instance()->setScoreState(mscore->state());
-      QObject::connect(mscore, &MuseScore::scoreStateChanged, ActionEventObserver::instance(), &ActionEventObserver::setScoreState);
-#endif
 
       mscore->setRevision(Ms::revision);
       int files = 0;

@@ -6612,12 +6612,14 @@ void ScoreFont::initScoreFonts()
       QFont::insertSubstitution("ScoreFont",      "Leland Text"); // alias for current Musical Text Font
       ScoreFont::fallbackFont();   // load fallback font
 
-      QString userFontsPath = preferences.getString(PREF_APP_PATHS_MYSCOREFONTS);
+      QString userFontsPath = ""; /* FIX:20230730 preferences.getString(PREF_APP_PATHS_MYSCOREFONTS); */
       scanUserFonts(userFontsPath);
+#if 0 // FIX:20230730 need an handler to preferences which exist outside libmusescore
       preferences.addOnSetListener([](const QString& key, const QVariant& value) {
             if (key == PREF_APP_PATHS_MYSCOREFONTS)
                   scanUserFonts(value.toString());
             });
+#endif
 
       // as per https://w3c.github.io/smufl/latest/specification/font-metadata-locations.html
       // Window: "%LOCALAPPDATA%/SMuFL/Fonts", "%COMMONPROGRAMFILES%/SMuFL/Fonts"

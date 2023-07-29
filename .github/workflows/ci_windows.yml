@@ -57,7 +57,7 @@ jobs:
     - name: Clone repo master
       uses: actions/checkout@v3
       with:
-        ref: master
+        ref: main
         path: m
     - name: Setup
       shell: msys2 {0}
@@ -109,7 +109,7 @@ jobs:
       contents: write
     needs:
       - build_x64
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     steps:
       - uses: actions/download-artifact@v2

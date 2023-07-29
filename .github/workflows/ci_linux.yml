@@ -82,4 +82,3 @@ jobs:
         shell: bash
         run: |
           gh release upload weekly-linux musescore3* --clobber -R ${{ github.repository }}
->>>>>>> ef861252a5 (CI merge branch funnel)
