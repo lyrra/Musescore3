@@ -449,10 +449,7 @@ EditStyle::EditStyle(Score* s, QWidget* parent)
       pageList->setCurrentRow(0);
       accidentalsGroup->setVisible(false); // disable, not yet implemented
 
-      musicalSymbolFont->clear();
-      for (auto i : get_scoreFonts()) {
-            musicalSymbolFont->addItem(i->name(), i->name());
-            }
+      fillScoreFontsComboBoxes();
 
       static const SymId ids[] = {
             SymId::systemDivider, SymId::systemDividerLong, SymId::systemDividerExtraLong
@@ -1421,31 +1418,7 @@ void EditStyle::setValues()
       doubleSpinFBVertPos->setValue(lstyle.value(Sid::figuredBassYOffset).toDouble());
       spinFBLineHeight->setValue(lstyle.value(Sid::figuredBassLineHeight).toDouble() * 100.0);
 
-      QString mfont(lstyle.value(Sid::MusicalSymbolFont).toString());
-      int idx = 0;
-      for (const auto& i : get_scoreFonts()) {
-            if (i->name().toLower() == mfont.toLower()) {
-                  musicalSymbolFont->setCurrentIndex(idx);
-                  break;
-                  }
-            ++idx;
-            }
-      musicalTextFont->blockSignals(true);
-      musicalTextFont->clear();
-      // CAUTION: the second element, the itemdata, is a font family name!
-      // It's also stored in score file as the musicalTextFont
-      musicalTextFont->addItem("Leland Text", "Leland Text");
-      musicalTextFont->addItem("Bravura Text", "Bravura Text");
-      musicalTextFont->addItem("Emmentaler Text", "MScore Text");
-      musicalTextFont->addItem("Gonville Text", "Gootville Text");
-      musicalTextFont->addItem("MuseJazz Text", "MuseJazz Text");
-      musicalTextFont->addItem("Petaluma Text", "Petaluma Text");
-      musicalTextFont->addItem("Finale Maestro Text", "Finale Maestro Text");
-      musicalTextFont->addItem("Finale Broadway Text", "Finale Broadway Text");
-      QString tfont(lstyle.value(Sid::MusicalTextFont).toString());
-      idx = musicalTextFont->findData(tfont);
-      musicalTextFont->setCurrentIndex(idx);
-      musicalTextFont->blockSignals(false);
+      fillScoreFontsComboBoxes();
 
       toggleHeaderOddEven(lstyle.value(Sid::headerOddEven).toBool());
       toggleFooterOddEven(lstyle.value(Sid::footerOddEven).toBool());

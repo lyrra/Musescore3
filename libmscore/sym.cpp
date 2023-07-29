@@ -36,20 +36,35 @@ namespace Ms {
 
 static const int FALLBACK_FONT = 1;       // Bravura
 
-QVector<ScoreFont*> _scoreFonts;
+QVector<ScoreFont> ScoreFont::_builtinScoreFonts {
+      ScoreFont("Leland",     "Leland",      ":/fonts/leland/",    "Leland.otf"   ),
+      ScoreFont("Bravura",    "Bravura",     ":/fonts/bravura/",   "Bravura.otf"  ),
+      ScoreFont("Emmentaler", "MScore",      ":/fonts/mscore/",    "mscore.ttf"   ),
+      ScoreFont("Gonville",   "Gootville",   ":/fonts/gootville/", "Gootville.otf"),
+      ScoreFont("MuseJazz",   "MuseJazz",    ":/fonts/musejazz/",  "MuseJazz.otf" ),
+      ScoreFont("Petaluma",   "Petaluma",    ":/fonts/petaluma/",  "Petaluma.otf" ),
+      ScoreFont("Finale Maestro", "Finale Maestro", ":/fonts/finalemaestro/", "FinaleMaestro.otf"),
+      ScoreFont("Finale Broadway", "Finale Broadway", ":/fonts/finalebroadway/", "FinaleBroadway.otf"),
+      };
+QVector<ScoreFont> ScoreFont::_userScoreFonts {};
+QVector<ScoreFont> ScoreFont::_systemScoreFonts {};
+QVector<ScoreFont> ScoreFont::_allScoreFonts {};
 
 int not_initialized = 0;
+
 void init_scoreFonts() {
+      /*
       not_initialized = 1;
       //_scoreFonts = new QVector<ScoreFont*>();
-      _scoreFonts.append(new ScoreFont("Leland",     "Leland",      ":/fonts/leland/",    "Leland.otf"));
-      _scoreFonts.append(new ScoreFont("Bravura",    "Bravura",     ":/fonts/bravura/",   "Bravura.otf"  ));
-      _scoreFonts.append(new ScoreFont("Emmentaler", "MScore",      ":/fonts/mscore/",    "mscore.ttf"   ));
-      _scoreFonts.append(new ScoreFont("Gonville",   "Gootville",   ":/fonts/gootville/", "Gootville.otf"));
-      _scoreFonts.append(new ScoreFont("MuseJazz",   "MuseJazz",    ":/fonts/musejazz/",  "MuseJazz.otf" ));
-      _scoreFonts.append(new ScoreFont("Petaluma",   "Petaluma",    ":/fonts/petaluma/",  "Petaluma.otf" ));
-      _scoreFonts.append(new ScoreFont("Finale Maestro", "Finale Maestro", ":/fonts/finalemaestro/", "FinaleMaestro.otf"));
-      _scoreFonts.append(new ScoreFont("Finale Broadway", "Finale Broadway", ":/fonts/finalebroadway/", "FinaleBroadway.otf"));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("Leland",     "Leland",      ":/fonts/leland/",    "Leland.otf"));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("Bravura",    "Bravura",     ":/fonts/bravura/",   "Bravura.otf"  ));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("Emmentaler", "MScore",      ":/fonts/mscore/",    "mscore.ttf"   ));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("Gonville",   "Gootville",   ":/fonts/gootville/", "Gootville.otf"));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("MuseJazz",   "MuseJazz",    ":/fonts/musejazz/",  "MuseJazz.otf" ));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("Petaluma",   "Petaluma",    ":/fonts/petaluma/",  "Petaluma.otf" ));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("Finale Maestro", "Finale Maestro", ":/fonts/finalemaestro/", "FinaleMaestro.otf"));
+      ScoreFont::_builtinScoreFonts.append(new ScoreFont("Finale Broadway", "Finale Broadway", ":/fonts/finalebroadway/", "FinaleBroadway.otf"));
+      */
       }
 
 
@@ -6390,11 +6405,6 @@ Sym ScoreFont::sym(SymId id) const
     return Sym();
 }
 
-QVector<ScoreFont*>& get_scoreFonts()
-{
-        return _scoreFonts;
-}
-
 //---------------------------------------------------------
 //   draw
 //---------------------------------------------------------
@@ -7072,17 +7082,17 @@ void ScoreFont::load(bool system)
 ScoreFont* ScoreFont::fontFactory(QString s)
       {
       ScoreFont* f = 0;
-      for (ScoreFont* sf : _scoreFonts) {
-            if (sf->name().toLower() == s.toLower()) { // ignore letter case
-                  f = sf;
+      for (ScoreFont& sf : _allScoreFonts) {
+            if (sf.name().toLower() == s.toLower()) { // ignore letter case
+                  f = &sf;
                   break;
                   }
             }
       if (!f) {
             qDebug("ScoreFont <%s> not found in list", qPrintable(s));
-            for (ScoreFont* sf : _scoreFonts)
-                  qDebug("   %s", qPrintable(sf->name()));
-            qDebug("Using fallback font <%s> instead", qPrintable(_scoreFonts[FALLBACK_FONT]->name()));
+            for (ScoreFont& sf : _allScoreFonts)
+                  qDebug("   %s", qPrintable(sf.name()));
+            qDebug("Using fallback font <%s> instead", qPrintable(_builtinScoreFonts[FALLBACK_FONT].name()));
             return fallbackFont();
             }
 
@@ -7097,7 +7107,7 @@ ScoreFont* ScoreFont::fontFactory(QString s)
 
 ScoreFont* ScoreFont::fallbackFont()
       {
-      ScoreFont* f = _scoreFonts[FALLBACK_FONT];
+      ScoreFont* f = &_builtinScoreFonts[FALLBACK_FONT];
       if (!f->face)
             f->load();
       return f;
