@@ -13,10 +13,13 @@
 #ifndef __ELEMENT_H__
 #define __ELEMENT_H__
 
+#include "elementgroup.h"
 #include "spatium.h"
 #include "fraction.h"
 #include "scoreElement.h"
 #include "shape.h"
+#include "sig.h"
+#include "sym.h"
 
 namespace Ms {
 
@@ -30,12 +33,10 @@ namespace Ms {
 #define VOICES 4
 #endif
 
-class ConnectorInfoReader;
 class XmlReader;
 class XmlWriter;
-enum class SymId;
 enum class Pid;
-enum class OffsetType : char;
+class StaffType;
 
 //---------------------------------------------------------
 //   Grip
@@ -48,6 +49,16 @@ enum class Grip {
       /*START, END , */
           BEZIER1 = 2, SHOULDER = 3, BEZIER2 = 4, DRAG = 5, // Slur
       GRIPS = 6                     // number of grips for slur
+      };
+
+//---------------------------------------------------------
+//   OffsetChange
+//---------------------------------------------------------
+
+enum class OffsetChange {
+      RELATIVE_OFFSET   = -1,
+      NONE              =  0,
+      ABSOLUTE_OFFSET   =  1
       };
 
 //---------------------------------------------------------
@@ -111,14 +122,17 @@ class EditData {
 
       QPointF pos;
       QPointF startMove;
+      QPointF normalizedStartMove; ///< Introduced for transition of drag logic. Don't use in new code.
       QPoint  startMovePixel;
       QPointF lastPos;
-      QPointF delta;
+      QPointF delta; ///< This property is deprecated, use evtDelta or moveDelta instead. In normal drag equals to moveDelta, in edit drag - to evtDelta
+      QPointF evtDelta; ///< Mouse offset for the last mouse move event
+      QPointF moveDelta; ///< Mouse offset from the start of mouse move
       bool hRaster                     { false };
       bool vRaster                     { false };
 
       int key                          { 0     };
-      Qt::KeyboardModifiers modifiers  { 0     };
+      Qt::KeyboardModifiers modifiers  { /*0*/ };   // '0' initialized via default constructor, doing it here too results in compiler warning with Qt 5.15
       QString s;
 
       Qt::MouseButtons buttons         { Qt::NoButton };
@@ -127,10 +141,8 @@ class EditData {
       QPointF dragOffset;
       Element* element                 { 0     };
       Element* dropElement             { 0     };
-      Fraction duration                { Fraction(1,4) };
 
-      EditData(MuseScoreView* v) : view(v) {}
-      void init();
+      EditData(MuseScoreView* v = nullptr) : view(v) {}
       void clearData();
 
       ElementEditData* getData(const Element*) const;
@@ -152,12 +164,21 @@ class Element : public ScoreElement {
       Element* _parent { 0 };
       mutable QRectF _bbox;       ///< Bounding box relative to _pos + _offset
       qreal _mag;                 ///< standard magnification (derived value)
-      QPointF _pos;               ///< Reference position, relative to _parent.
+      QPointF _pos;               ///< Reference position, relative to _parent, set by autoplace
       QPointF _offset;            ///< offset from reference position, set by autoplace or user
+      OffsetChange  _offsetChanged; ///< set by user actions that change offset, used by autoplace
+      QPointF _changedPos;        ///< position set when changing offset
+      Spatium _minDistance;       ///< autoplace min distance
       int _track;                 ///< staffIdx * VOICES + voice
       mutable ElementFlags _flags;
                                   ///< valid after call to layout()
       uint _tag;                  ///< tag bitmask
+
+   public:
+      enum class EditBehavior {
+            SelectOnly,
+            Edit,
+            };
 
   protected:
       mutable int _z;
@@ -173,8 +194,14 @@ class Element : public ScoreElement {
       Q_INVOKABLE virtual Ms::Element* clone() const = 0;
       virtual Element* linkedClone();
 
+      void deleteLater();
+
       Element* parent() const                 { return _parent;     }
       void setParent(Element* e)              { _parent = e;        }
+
+      Element* findAncestor(ElementType t);
+      const Element* findAncestor(ElementType t) const;
+
       Measure* findMeasure();
       const Measure* findMeasure() const;
       MeasureBase* findMeasureBase();
@@ -183,6 +210,8 @@ class Element : public ScoreElement {
       virtual bool isElement() const override { return true;        }
 
       qreal spatium() const;
+      std::pair<int, float>barbeat() const;
+      QString accessibleBarbeat() const;
 
       inline void setFlag(ElementFlag f, bool v)       { if (v) _flags |= f; else _flags &= ~ElementFlags(f); }
       inline void setFlag(ElementFlag f, bool v) const { if (v) _flags |= f; else _flags &= ~ElementFlags(f); }
@@ -196,18 +225,23 @@ class Element : public ScoreElement {
 
       virtual bool sizeIsSpatiumDependent() const override { return !flag(ElementFlag::SIZE_SPATIUM_DEPENDENT); }
       void setSizeIsSpatiumDependent(bool v)  { setFlag(ElementFlag::SIZE_SPATIUM_DEPENDENT, !v); }
+      virtual bool offsetIsSpatiumDependent() const override;
 
       Placement placement() const             { return Placement(!flag(ElementFlag::PLACE_ABOVE));  }
       void setPlacement(Placement val)        { setFlag(ElementFlag::PLACE_ABOVE, !bool(val)); }
       bool placeAbove() const                 { return placement() == Placement::ABOVE; }
       bool placeBelow() const                 { return placement() == Placement::BELOW; }
+      virtual bool placeMultiple() const      { return true; }
 
       bool generated() const                  { return flag(ElementFlag::GENERATED);  }
       void setGenerated(bool val)             { setFlag(ElementFlag::GENERATED, val);   }
 
-      //TODO: rename to pos()
+      Spatium minDistance() const             { return _minDistance;    }
+      void setMinDistance(Spatium v)          { _minDistance = v;       }
+      OffsetChange offsetChanged() const      { return _offsetChanged;  }
+      void setOffsetChanged(bool v, bool absolute = true, const QPointF& diff = QPointF());
+
       const QPointF& ipos() const             { return _pos;                    }
-      //TODO: rename to posWithUserOffset()
       virtual const QPointF pos() const       { return _pos + _offset;          }
       virtual qreal x() const                 { return _pos.x() + _offset.x(); }
       virtual qreal y() const                 { return _pos.y() + _offset.y(); }
@@ -223,12 +257,21 @@ class Element : public ScoreElement {
       qreal pageX() const;
       qreal canvasX() const;
 
-      const QPointF& offset() const            { return _offset;  }
-      virtual void setOffset(const QPointF& o) { _offset = o;     }
-      void setOffset(qreal x, qreal y) { _offset.rx() = x, _offset.ry() = y; }
-      QPointF& roffset()                       { return _offset; }
-      qreal& rxoffset()                        { return _offset.rx(); }
-      qreal& ryoffset()                        { return _offset.ry(); }
+      QPointF mapFromCanvas(const QPointF& p) const { return p - canvasPos(); }
+      QPointF mapToCanvas(const QPointF& p) const { return p + canvasPos(); }
+
+      const QPointF& offset() const               { return _offset;  }
+      virtual void setOffset(const QPointF& o)    { _offset = o;     }
+      void setOffset(qreal x, qreal y)            { _offset.rx() = x, _offset.ry() = y; }
+      QPointF& roffset()                          { return _offset; }
+      qreal& rxoffset()                           { return _offset.rx(); }
+      qreal& ryoffset()                           { return _offset.ry(); }
+
+      virtual Fraction tick() const;
+      virtual Fraction rtick() const;
+      virtual Fraction playTick() const; ///< Returns the tick at which playback should begin when this element is selected. Defaults to the element's own tick position.
+
+      Fraction beat() const;
 
       bool isNudged() const                       { return !_offset.isNull(); }
 
@@ -263,10 +306,24 @@ class Element : public ScoreElement {
       virtual void write(XmlWriter&) const;
       virtual void read(XmlReader&);
 
+//       virtual ElementGroup getElementGroup() { return SingleElementGroup(this); }
+      virtual std::unique_ptr<ElementGroup> getDragGroup(std::function<bool(const Element*)> isDragged) { Q_UNUSED(isDragged); return std::unique_ptr<ElementGroup>(new SingleElementGroup(this)); }
+
       virtual void startDrag(EditData&);
       virtual QRectF drag(EditData&);
       virtual void endDrag(EditData&);
-      virtual QLineF dragAnchor() const       { return QLineF(); }
+      /** Returns anchor lines displayed while dragging element in canvas coordinates. */
+      virtual QVector<QLineF> dragAnchorLines() const       { return QVector<QLineF>(); }
+      /**
+       * A generic \ref dragAnchorLines() implementation which can be used in
+       * dragAnchorLines() overrides in descendants. It is not made its default
+       * implementation in Element class since showing anchor lines is not
+       * desirable for most element types.
+       * TODO: maybe Annotation class could be extracted which would be a base
+       * class of various annotation types and which would have this
+       * dragAnchorLines() implementation by default.
+       */
+      QVector<QLineF> genericDragAnchorLines() const;
 
       virtual bool isEditable() const         { return !flag(ElementFlag::GENERATED); }
 
@@ -280,10 +337,18 @@ class Element : public ScoreElement {
       virtual void editCut(EditData&)            {}
       virtual void editCopy(EditData&)           {}
 
-      virtual void updateGrips(EditData&) const  {}
+      void updateGrips(EditData&) const;
       virtual bool nextGrip(EditData&) const;
       virtual bool prevGrip(EditData&) const;
-      virtual QPointF gripAnchor(Grip) const     { return QPointF(); }
+      /** Returns anchor lines displayed while dragging element's grip in canvas coordinates. */
+      virtual QVector<QLineF> gripAnchorLines(Grip) const     { return QVector<QLineF>(); }
+
+      virtual EditBehavior normalModeEditBehavior() const { return EditBehavior::SelectOnly; }
+      virtual int gripsCount() const { return 0; }
+      virtual Grip initialEditModeGrip() const { return Grip::NO_GRIP; }
+      virtual Grip defaultGrip() const { return Grip::NO_GRIP; }
+      /** Returns grips positions in page coordinates. */
+      virtual std::vector<QPointF> gripsPositions(const EditData& = EditData()) const { return std::vector<QPointF>(); }
 
       int track() const                       { return _track; }
       virtual void setTrack(int val)          { _track = val;  }
@@ -296,6 +361,8 @@ class Element : public ScoreElement {
       int voice() const                       { return _track & 3;         }
       void setVoice(int v)                    { _track = (_track / VOICES) * VOICES + v; }
       Staff* staff() const;
+      const StaffType* staffType() const;
+      bool onTabStaff() const;
       Part* part() const;
 
       virtual void add(Element*);
@@ -312,7 +379,6 @@ class Element : public ScoreElement {
       //@ Returns the human-readable name of the element type
       //@ Returns the name of the element type
       virtual Q_INVOKABLE QString _name() const { return QString(name()); }
-      void dumpQPointF(const char*) const;
 
       virtual QColor color() const             { return _color; }
       QColor curColor() const;
@@ -323,8 +389,9 @@ class Element : public ScoreElement {
       void undoSetVisible(bool v);
 
       static ElementType readType(XmlReader& node, QPointF*, Fraction*);
+      static Element* readMimeData(Score* score, const QByteArray& data, QPointF*, Fraction*);
 
-      QByteArray mimeData(const QPointF&) const;
+      virtual QByteArray mimeData(const QPointF&) const;
 /**
  Return true if this element accepts a drop at canvas relative \a pos
  of given element \a type and \a subtype.
@@ -364,17 +431,6 @@ class Element : public ScoreElement {
       bool isPrintable() const;
       qreal point(const Spatium sp) const { return sp.val() * spatium(); }
 
-      virtual int tick() const;       // utility, searches for segment / segment parent
-      virtual int rtick() const;      // utility, searches for segment / segment parent
-      virtual Fraction rfrac() const; // utility, searches for segment / segment parent
-      virtual Fraction afrac() const; // utility, searches for segment / segment parent
-
-      //
-      // check element for consistency; return false if element
-      // is not valid
-      //
-      virtual bool check() const { return true; }
-
       static Ms::Element* create(Ms::ElementType type, Score*);
       static Element* name2Element(const QStringRef&, Score*);
 
@@ -404,8 +460,9 @@ class Element : public ScoreElement {
       uint tag() const                 { return _tag;                      }
       void setTag(uint val)            { _tag = val;                       }
 
-      bool autoplace() const           { return !flag(ElementFlag::NO_AUTOPLACE); }
-      void setAutoplace(bool v)        { setFlag(ElementFlag::NO_AUTOPLACE, !v); }
+      bool autoplace() const;
+      virtual void setAutoplace(bool v)   { setFlag(ElementFlag::NO_AUTOPLACE, !v); }
+      bool addToSkyline() const           { return !(_flags & (ElementFlag::INVISIBLE|ElementFlag::NO_AUTOPLACE)); }
 
       virtual QVariant getProperty(Pid) const override;
       virtual bool setProperty(Pid, const QVariant&) override;
@@ -430,6 +487,8 @@ class Element : public ScoreElement {
       QRectF symBbox(const std::vector<SymId>&) const;
       QPointF symStemDownNW(SymId id) const;
       QPointF symStemUpSE(SymId id) const;
+      QPointF symStemDownSW(SymId id) const;
+      QPointF symStemUpNW(SymId id) const;
       QPointF symCutOutNE(SymId id) const;
       QPointF symCutOutNW(SymId id) const;
       QPointF symCutOutSE(SymId id) const;
@@ -453,10 +512,17 @@ class Element : public ScoreElement {
             }
 
       virtual void triggerLayout() const;
+      virtual void triggerLayoutAll() const;
       virtual void drawEditMode(QPainter*, EditData&);
 
-      void autoplaceSegmentElement(qreal minDistance);      // helper function
-      void autoplaceMeasureElement(qreal minDistance);
+      void autoplaceSegmentElement(bool above, bool add);        // helper functions
+      void autoplaceMeasureElement(bool above, bool add);
+      void autoplaceSegmentElement(bool add = true) { autoplaceSegmentElement(placeAbove(), add); }
+      void autoplaceMeasureElement(bool add = true) { autoplaceMeasureElement(placeAbove(), add); }
+      void autoplaceCalculateOffset(QRectF& r, qreal minDistance);
+      qreal rebaseOffset(bool nox = true);
+      bool rebaseMinDistance(qreal& md, qreal& yd, qreal sp, qreal rebase, bool above, bool fix);
+
       qreal styleP(Sid idx) const;
       };
 
@@ -469,17 +535,29 @@ class Element : public ScoreElement {
 //    endEditDrag(EditData&)      use data to create undo records
 //-----------------------------------------------------------------------------
 
+enum class EditDataType : signed char {
+      ElementEditData,
+      TextEditData,
+      BarLineEditData,
+      BeamEditData,
+      NoteEditData,
+      };
+
 struct PropertyData {
       Pid id;
       QVariant data;
+      PropertyFlags f;
       };
 
 class ElementEditData {
    public:
       Element* e;
       QList<PropertyData> propertyData;
+      QPointF initOffset; ///< for dragging: difference between actual offset and editData.moveDelta
 
-      void pushProperty(Pid pid) { propertyData.push_back(PropertyData({pid, e->getProperty(pid) })); }
+      virtual ~ElementEditData() = default;
+      void pushProperty(Pid pid) { propertyData.push_back(PropertyData({ pid, e->getProperty(pid), e->propertyFlags(pid) })); }
+      virtual EditDataType type()   { return EditDataType::ElementEditData; }
       };
 
 //---------------------------------------------------------

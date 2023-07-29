@@ -95,6 +95,8 @@ class TestParts : public QObject, public MTest
       void undoRemoveChordline();
       void undoRedoRemoveChordline();
 
+      void createPartStemless();
+
 //      void createPartImage();
 //      void addImage();
 //      void undoAddImage();
@@ -112,6 +114,8 @@ class TestParts : public QObject, public MTest
 //      void staffStyles();
 
       void measureProperties();
+
+      void textLines();
 
  // second part has system text on empty chordrest segment
       void createPart3() {
@@ -214,6 +218,26 @@ void TestParts::voicesExcerpt()
 
       trackList.clear();
       trackList.insert(11, 0);
+
+      ex = new Excerpt(score);
+      ex->setPartScore(nscore);
+      nscore->setExcerpt(ex);
+      score->excerpts().append(ex);
+      ex->setTitle(parts.front()->longName());
+      ex->setParts(parts);
+      ex->setTracks(trackList);
+      Excerpt::createExcerpt(ex);
+      QVERIFY(nscore);
+
+      //
+      // create second part
+      //
+      parts.clear();
+      parts.append(score->parts().at(1));
+      nscore = new Score(score);
+
+      trackList.clear();
+      trackList.insert(8, 0);
 
       ex = new Excerpt(score);
       ex->setPartScore(nscore);
@@ -389,6 +413,11 @@ void TestParts::createPartChordline()
       testPartCreation("part-chordline");
       }
 
+void TestParts::createPartStemless()
+      {
+      testPartCreation("part-stemless");
+      }
+
 #if 0
 void TestParts::createPartImage()
       {
@@ -404,7 +433,7 @@ MasterScore* TestParts::doAddBreath()
       MasterScore* score = readScore(DIR + "part-empty-parts.mscx");
 
       Measure* m   = score->firstMeasure();
-      Segment* s   = m->tick2segment(MScore::division);
+      Segment* s   = m->tick2segment(Fraction(1,4));
       Ms::Chord* chord = toChord(s->element(0));
       Note* note   = chord->upNote();
       EditData dd(0);
@@ -525,7 +554,7 @@ MasterScore* TestParts::doAddFingering()
       MasterScore* score = readScore(DIR + "part-empty-parts.mscx");
 
       Measure* m   = score->firstMeasure();
-      Segment* s   = m->tick2segment(MScore::division);
+      Segment* s   = m->tick2segment(Fraction(1,4));
       Ms::Chord* chord = static_cast<Ms::Chord*>(s->element(0));
       Note* note   = chord->upNote();
       EditData dd(0);
@@ -648,7 +677,7 @@ MasterScore* TestParts::doAddSymbol()
       MasterScore* score = readScore(DIR + "part-empty-parts.mscx");
 
       Measure* m   = score->firstMeasure();
-      Segment* s   = m->tick2segment(MScore::division);
+      Segment* s   = m->tick2segment(Fraction(1,4));
       Ms::Chord* chord = static_cast<Ms::Chord*>(s->element(0));
       Note* note   = chord->upNote();
       EditData dd(0);
@@ -771,7 +800,7 @@ MasterScore* TestParts::doAddChordline()
       MasterScore* score = readScore(DIR + "part-empty-parts.mscx");
 
       Measure* m   = score->firstMeasure();
-      Segment* s   = m->tick2segment(MScore::division);
+      Segment* s   = m->tick2segment(Fraction(1,4));
       Ms::Chord* chord = static_cast<Ms::Chord*>(s->element(0));
       Note* note   = chord->upNote();
       EditData dd(0);
@@ -1046,6 +1075,14 @@ void TestParts::measureProperties()
       {
       }
 
+//---------------------------------------------------------
+//   textLines
+//---------------------------------------------------------
+
+void TestParts::textLines()
+      {
+      testPartCreation("part-textlines");
+      }
 
 QTEST_MAIN(TestParts)
 

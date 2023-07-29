@@ -28,13 +28,13 @@
 #include "libmscore/chord.h"
 #include "libmscore/note.h"
 #include "libmscore/undo.h"
-#include "mixer.h"
+#include "mixer/mixer.h"
 #include "parteditbase.h"
 #include "scoreview.h"
 #include "playpanel.h"
 #include "preferences.h"
 #include "seq.h"
-#include "synthesizer/msynthesizer.h"
+#include "audio/midi/msynthesizer.h"
 #include "shortcut.h"
 
 #ifdef OSC
@@ -96,8 +96,8 @@ void MuseScore::initOsc()
       oo = new PathObject( "/close-all", QVariant::Invalid, osc);
       QObject::connect(oo, SIGNAL(data()), SLOT(oscCloseAll()));
 
-      oo = new PathObject( "/plugin", QVariant::String, osc);
-      QObject::connect(oo, SIGNAL(data(QString)), SLOT(oscTriggerPlugin(QString)));
+      oo = new PathObject( "/plugin(/[^/.]*)+", QVariant::List, osc);
+      QObject::connect(oo, SIGNAL(data(QString, QVariant)), SLOT(oscTriggerPlugin(QString, QVariant)));
 
       oo = new PathObject( "/color-note", QVariant::List, osc);
       QObject::connect(oo, SIGNAL(data(QVariantList)), SLOT(oscColorNote(QVariantList)));
@@ -191,30 +191,42 @@ void MuseScore::oscTempo(int val)
             val = 300;
       qreal t = val * .01;
       if (playPanel)
-            playPanel->setRelTempo(t);
+            playPanel->setSpeed(t);
       if (seq)
             seq->setRelTempo(double(t));
+      }
+
+void addOscPrefix(QString* methodName)
+      {
+      methodName->replace(0, 1, methodName[0][0].toUpper());
+      methodName->prepend("osc");
       }
 
 //---------------------------------------------------------
 //   oscTriggerPlugin
 //---------------------------------------------------------
 
-void MuseScore::oscTriggerPlugin(QString /*s*/)
+void MuseScore::oscTriggerPlugin(QString path, QVariant args)
       {
-#if 0 // TODO
-      QStringList args = s.split(",");
-      if(args.length() > 0) {
-            int idx = pluginIdxFromPath(args.at(0));
-            if(idx != -1) {
-                  for(int i = 1; i < args.length()-1; i++) {
-                        addGlobalObjectToPluginEngine(qPrintable(args.at(i)), args.at(i+1));
-                        i++;
-                        }
-                  pluginTriggered(idx);
-                  }
+      QStringList pathElts = path.split("/");
+      QString pluginName;
+
+      for (int i = 0 ; i < 3 ; i++) {
+            if (i == 2)
+                  pluginName = pathElts.first();
+
+            pathElts.removeFirst();
             }
-#endif
+
+      qDebug() << "[OSC] Plugin called : " << pluginName;
+
+      int idx = pluginIdxFromPath(pluginName);
+      if (idx != -1) {
+            addOscPrefix(&pathElts.last());
+            oscControlPlugin(idx, pathElts, args);
+            }
+      else
+            qDebug() << "[OSC] Unknow plugin : " << pluginName;
       }
 
 //---------------------------------------------------------
@@ -243,10 +255,10 @@ void MuseScore::oscColorNote(QVariantList list)
                   noteColor = color;
             }
 
-      Measure* measure = cs->tick2measure(tick);
+      Measure* measure = cs->tick2measure(Fraction::fromTicks(tick));
       if(!measure)
             return;
-      Segment* s = measure->findSegment(SegmentType::ChordRest, tick);
+      Segment* s = measure->findSegment(SegmentType::ChordRest, Fraction::fromTicks(tick));
       if (!s)
             return;
       //get all chords in segment...
@@ -290,10 +302,10 @@ void MuseScore::oscVolChannel(double val)
       PathObject* po = (PathObject*) sender();
 
       int i = po->path().mid(4).toInt() - 1;
-      QList<MidiMapping>* mms = cs->masterScore()->midiMapping();
-      if( i >= 0 && i < mms->size()) {
-            MidiMapping mm = mms->at(i);
-            Channel* channel = mm.articulation;
+      auto& mms = cs->masterScore()->midiMapping();
+      if( i >= 0 && i < int(mms.size())) {
+            MidiMapping& mm = mms[i];
+            Channel* channel = mm.articulation();
             int iv = lrint(val*127);
             seq->setController(channel->channel(), CTRL_VOLUME, iv);
             channel->setVolume(val * 100.0);
@@ -313,10 +325,10 @@ void MuseScore::oscPanChannel(double val)
       PathObject* po = (PathObject*) sender();
 
       int i = po->path().mid(4).toInt() - 1;
-      QList<MidiMapping>* mms = cs->masterScore()->midiMapping();
-      if (i >= 0 && i < mms->size()) {
-            MidiMapping mm = mms->at(i);
-            Channel* channel = mm.articulation;
+      auto& mms = cs->masterScore()->midiMapping();
+      if (i >= 0 && i < int(mms.size())) {
+            MidiMapping& mm = mms[i];
+            Channel* channel = mm.articulation();
             int iv = lrint((val + 1) * 64);
             seq->setController(channel->channel(), CTRL_PANPOT, iv);
             channel->setPan(val * 180.0);
@@ -336,10 +348,10 @@ void MuseScore::oscMuteChannel(double val)
       PathObject* po = (PathObject*) sender();
 
       int i = po->path().mid(5).toInt() - 1;
-      QList<MidiMapping>* mms = cs->masterScore()->midiMapping();
-      if (i >= 0 && i < mms->size()) {
-            MidiMapping mm = mms->at(i);
-            Channel* channel = mm.articulation;
+      auto& mms = cs->masterScore()->midiMapping();
+      if (i >= 0 && i < int(mms.size())) {
+            MidiMapping& mm = mms[i];
+            Channel* channel = mm.articulation();
             channel->setMute(val==0.0f ? false : true);
             if (mixer)
                   mixer->getPartAtIndex(i)->mute->setChecked(channel->mute());

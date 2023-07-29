@@ -17,37 +17,62 @@ add_executable(
       ${TARGET}.cpp
       )
 
+if (MTEST_LINK_MSCOREAPP)
+      target_link_libraries(${TARGET} testutils_mscoreapp mscoreapp)
+else (MTEST_LINK_MSCOREAPP)
+      target_link_libraries(${TARGET} testutils)
+endif (MTEST_LINK_MSCOREAPP)
+
+if (MSVC)
+      set(_all_h_file "${PROJECT_SOURCE_DIR}/all.h")
+      target_sources(${TARGET} PRIVATE
+            ${_all_h_file}
+            ${PCH}
+            )
+      include(FindStaticLibrary)
+endif (MSVC)
+
 target_link_libraries(
       ${TARGET}
+      ${QT_LIBRARIES}
       ${QT_QTTEST_LIBRARY}
-      testutils
       testResources
       "-L${PROJECT_BINARY_DIR}/libmscore -lmusescore -Wl,-rpath -Wl,${PROJECT_BINARY_DIR}/libmscore"
-      synthesizer
-      midi
+      audio
       qzip
-      z
       )
 
 if (OMR)
-      target_link_libraries(${TARGET} omr poppler)
+      target_link_libraries(${TARGET} omr poppler-qt5)
       if (OCR)
             target_link_libraries(${TARGET} tesseract_api)
       endif (OCR)
 endif (OMR)
 
-target_link_libraries(
-      ${TARGET}
-      ${QT_LIBRARIES}
-      mscore_freetype
-      z
-      )
+# ZIP library
+if (MSVC)
+      target_link_libraries(
+            ${TARGET}
+            zlibstat
+            )
+else (MSVC)
+      target_link_libraries(
+            ${TARGET}
+            z
+            )
+endif (MSVC)
 
-if (NOT MINGW AND NOT APPLE)
+if (USE_SYSTEM_FREETYPE)
+      target_link_libraries(${TARGET} freetype)
+else (USE_SYSTEM_FREETYPE)
+      target_link_libraries(${TARGET} mscore_freetype)
+endif (USE_SYSTEM_FREETYPE)
+
+if (NOT MINGW AND NOT APPLE AND NOT MSVC)
    target_link_libraries(${TARGET}
       dl
       pthread)
-endif (NOT MINGW AND NOT APPLE)
+endif (NOT MINGW AND NOT APPLE AND NOT MSVC)
 
 if (APPLE)
 target_link_libraries(${TARGET} ${OsxFrameworks})
@@ -63,13 +88,22 @@ set_target_properties (
       LINK_FLAGS    "-g -stdlib=libc++"
       )
 else(APPLE)
-set_target_properties (
-      ${TARGET}
-      PROPERTIES
-      AUTOMOC true
-      COMPILE_FLAGS "-include all.h -D QT_GUI_LIB -D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\" -g -Wall -Wextra"
-      LINK_FLAGS    "-g"
-      )
+      if (MSVC)
+            set_target_properties (
+                  ${TARGET}
+                  PROPERTIES
+                  AUTOMOC true
+                  COMPILE_FLAGS "/Zi ${PCH_INCLUDE} /D QT_GUI_LIB  /D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\""
+                  )
+      else (MSVC)
+            set_target_properties (
+                  ${TARGET}
+                  PROPERTIES
+                  AUTOMOC true
+                  COMPILE_FLAGS "-include all.h -D QT_GUI_LIB -D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\" -g -Wall -Wextra"
+                  LINK_FLAGS    "-g"
+                  )
+      endif (MSVC)
 endif(APPLE)
 
 if (APPLE AND (CMAKE_VERSION VERSION_LESS "3.5.0"))
@@ -81,3 +115,20 @@ set_target_properties (
 endif (APPLE AND (CMAKE_VERSION VERSION_LESS "3.5.0"))
 
 add_test(${TARGET} ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}  -xunitxml -o result.xml)
+
+# On Windows some tests need access to supporting files
+# MSVC has a different definition for CMAKE_CURRENT_BINARY_DIR
+# so we use this install destination variable instead
+if (MSVC)
+      set_target_properties(
+            ${TARGET}
+            PROPERTIES
+            MTEST_INSTALL_DESTINATION_DIR "${CMAKE_CURRENT_BINARY_DIR}"
+            )
+else (MSVC)
+      set_target_properties(
+            ${TARGET}
+            PROPERTIES
+            MTEST_INSTALL_DESTINATION_DIR "${CMAKE_CURRENT_BINARY_DIR}/.."
+            )
+endif (MSVC)

@@ -25,6 +25,7 @@
 #include "undo.h"
 #include "range.h"
 #include "excerpt.h"
+#include "accidental.h"
 
 namespace Ms {
 
@@ -32,12 +33,12 @@ namespace Ms {
 //   noteValForPosition
 //---------------------------------------------------------
 
-NoteVal Score::noteValForPosition(Position pos, bool &error)
+NoteVal Score::noteValForPosition(Position pos, AccidentalType at, bool &error)
       {
       error           = false;
       Segment* s      = pos.segment;
       int line        = pos.line;
-      int tick        = s->tick();
+      Fraction tick   = s->tick();
       int staffIdx    = pos.staffIdx;
       Staff* st       = staff(staffIdx);
       ClefType clef   = st->clef(tick);
@@ -45,7 +46,12 @@ NoteVal Score::noteValForPosition(Position pos, bool &error)
       NoteVal nval;
       const StringData* stringData = 0;
 
-      switch (st->staffType(tick)->group()) {
+      // pitched/unpitched note entry depends on instrument (override StaffGroup)
+      StaffGroup staffGroup = st->staffType(tick)->group();
+      if (staffGroup != StaffGroup::TAB) 
+            staffGroup = instr->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
+
+      switch (staffGroup) {
             case StaffGroup::PERCUSSION: {
                   if (_is.rest())
                         break;
@@ -68,13 +74,14 @@ NoteVal Score::noteValForPosition(Position pos, bool &error)
                         return nval;
                         }
                   stringData = instr->stringData();
+                  line = st->staffType(tick)->visualStringToPhys(line);
                   if (line < 0 || line >= stringData->strings()) {
                         error = true;
                         return nval;
                         }
                   // build a default NoteVal for that string
                   nval.string = line;
-                  if (pos.fret != FRET_NONE)          // if a fret is given, use it
+                  if (pos.fret != INVALID_FRET_INDEX)          // if a fret is given, use it
                         nval.fret = pos.fret;
                   else {                              // if no fret, use 0 as default
                         _is.setString(line);
@@ -92,7 +99,7 @@ NoteVal Score::noteValForPosition(Position pos, bool &error)
                   }
 
             case StaffGroup::STANDARD: {
-                  AccidentalVal acci = s->measure()->findAccidental(s, staffIdx, line, error);
+                  AccidentalVal acci = (at == AccidentalType::NONE ? s->measure()->findAccidental(s, staffIdx, line, error) : Accidental::subtype2value(at));
                   if (error)
                         return nval;
                   int step           = absStep(line, clef);
@@ -119,62 +126,64 @@ NoteVal Score::noteValForPosition(Position pos, bool &error)
 //   addPitch
 //---------------------------------------------------------
 
-Note* Score::addPitch(NoteVal& nval, bool addFlag)
+Note* Score::addPitch(NoteVal& nval, bool addFlag, InputState* externalInputState)
       {
+      InputState& is = externalInputState ? (*externalInputState) : _is;
+
       if (addFlag) {
-            Chord* c = toChord(_is.lastSegment()->element(_is.track()));
+            ChordRest* c = toChordRest(is.lastSegment()->element(is.track()));
 
             if (c == 0 || !c->isChord()) {
                   qDebug("Score::addPitch: cr %s", c ? c->name() : "zero");
                   return 0;
                   }
-            Note* note = addNote(c, nval);
-            if (_is.lastSegment() == _is.segment()) {
-                  NoteEntryMethod entryMethod = _is.noteEntryMethod();
+            Note* note = addNote(toChord(c), nval, /* forceAccidental */ false, externalInputState);
+            if (is.lastSegment() == is.segment()) {
+                  NoteEntryMethod entryMethod = is.noteEntryMethod();
                   if (entryMethod != NoteEntryMethod::REALTIME_AUTO && entryMethod != NoteEntryMethod::REALTIME_MANUAL)
-                        _is.moveToNextInputPos();
+                        is.moveToNextInputPos();
                   }
             return note;
             }
-      expandVoice();
+      expandVoice(is.segment(), is.track());
 
       // insert note
       Direction stemDirection = Direction::AUTO;
-      int track               = _is.track();
-      if (_is.drumNote() != -1) {
-            nval.pitch        = _is.drumNote();
-            const Drumset* ds = _is.drumset();
+      int track               = is.track();
+      if (is.drumNote() != -1) {
+            nval.pitch        = is.drumNote();
+            const Drumset* ds = is.drumset();
             nval.headGroup    = ds->noteHead(nval.pitch);
             stemDirection     = ds->stemDirection(nval.pitch);
-            track             = ds->voice(nval.pitch) + (_is.track() / VOICES) * VOICES;
-            _is.setTrack(track);
-            expandVoice();
+            track             = ds->voice(nval.pitch) + (is.track() / VOICES) * VOICES;
+            is.setTrack(track);
+            expandVoice(is.segment(), is.track());
             }
-      if (!_is.cr())
+      if (!is.cr())
             return 0;
       Fraction duration;
-      if (_is.usingNoteEntryMethod(NoteEntryMethod::REPITCH)) {
-            duration = _is.cr()->duration();
+      if (is.usingNoteEntryMethod(NoteEntryMethod::REPITCH)) {
+            duration = is.cr()->ticks();
             }
-      else if (_is.usingNoteEntryMethod(NoteEntryMethod::REALTIME_AUTO) || _is.usingNoteEntryMethod(NoteEntryMethod::REALTIME_MANUAL)) {
+      else if (is.usingNoteEntryMethod(NoteEntryMethod::REALTIME_AUTO) || is.usingNoteEntryMethod(NoteEntryMethod::REALTIME_MANUAL)) {
             // FIXME: truncate duration at barline in real-time modes.
             //   The user might try to enter a duration that is too long to fit in the remaining space in the measure.
             //   We could split the duration at the barline and continue into the next bar, but this would create extra
             //   notes, extra ties, and extra pain. Instead, we simply truncate the duration at the barline.
-            int ticks2measureEnd = _is.segment()->measure()->ticks() - _is.segment()->rtick();
-            duration = _is.duration().ticks() > ticks2measureEnd ? Fraction::fromTicks(ticks2measureEnd) : _is.duration().fraction();
+            Fraction ticks2measureEnd = is.segment()->measure()->ticks() - is.segment()->rtick();
+            duration = is.duration().fraction() > ticks2measureEnd ? ticks2measureEnd : is.duration().fraction();
             }
       else {
-            duration = _is.duration().fraction();
+            duration = is.duration().fraction();
             }
       Note* note = 0;
       Note* firstTiedNote = 0;
       Note* lastTiedNote = 0;
-      if (_is.usingNoteEntryMethod(NoteEntryMethod::REPITCH) && _is.cr()->isChord()) {
+      if (is.usingNoteEntryMethod(NoteEntryMethod::REPITCH) && is.cr()->isChord()) {
             // repitch mode for MIDI input (where we are given a pitch) is handled here
             // for keyboard input (where we are given a staff position), there is a separate function Score::repitchNote()
             // the code is similar enough that it could possibly be refactored
-            Chord* chord = toChord(_is.cr());
+            Chord* chord = toChord(is.cr());
             note = new Note(this);
             note->setParent(chord);
             note->setTrack(chord->track());
@@ -225,54 +234,58 @@ Note* Score::addPitch(NoteVal& nval, bool addFlag)
                   Tie* tie = new Tie(this);
                   tie->setStartNote(note);
                   tie->setEndNote(firstTiedNote);
+                  tie->setTick(tie->startNote()->tick());
+                  tie->setTick2(tie->endNote()->tick());
                   tie->setTrack(note->track());
                   undoAddElement(tie);
                   }
             select(lastTiedNote);
             }
-      else if (!_is.usingNoteEntryMethod(NoteEntryMethod::REPITCH)) {
-            Segment* seg = setNoteRest(_is.segment(), track, nval, duration, stemDirection);
+      else if (!is.usingNoteEntryMethod(NoteEntryMethod::REPITCH)) {
+            Segment* seg = setNoteRest(is.segment(), track, nval, duration, stemDirection, /* forceAccidental */ false, /* rhythmic */ false, externalInputState);
             if (seg) {
                   note = toChord(seg->element(track))->upNote();
                   }
             }
 
-      if (_is.slur()) {
+      if (is.slur()) {
             //
             // extend slur
             //
-            ChordRest* e = searchNote(_is.tick(), _is.track());
+            ChordRest* e = searchNote(is.tick(), is.track());
             if (e) {
-                  int stick = 0;
-                  Element* ee = _is.slur()->startElement();
-                  if (ee->isChordRest())
-                        stick = toChordRest(ee)->tick();
-                  else if (ee->isNote())
-                        stick = toNote(ee)->chord()->tick();
-                  if (stick == e->tick()) {
-                        _is.slur()->setTick(stick);
-                        _is.slur()->setStartElement(e);
-                        }
-                  else {
-                        _is.slur()->setTick2(e->tick());
-                        _is.slur()->setEndElement(e);
+                  Fraction stick = Fraction(0, 1);
+                  Element* ee = is.slur()->startElement();
+                  if (ee) {
+                        if (ee->isChordRest())
+                              stick = toChordRest(ee)->tick();
+                        else if (ee->isNote())
+                              stick = toNote(ee)->chord()->tick();
+                        if (stick == e->tick()) {
+                              is.slur()->setTick(stick);
+                              is.slur()->setStartElement(e);
+                              }
+                        else {
+                              is.slur()->setTick2(e->tick());
+                              is.slur()->setEndElement(e);
+                              }
                         }
                   }
             else
                   qDebug("addPitch: cannot find slur note");
             }
-      if (_is.usingNoteEntryMethod(NoteEntryMethod::REPITCH)) {
+      if (is.usingNoteEntryMethod(NoteEntryMethod::REPITCH)) {
             // move cursor to next note, but skip tied notes (they were already repitched above)
-            ChordRest* next = lastTiedNote ? nextChordRest(lastTiedNote->chord()) : nextChordRest(_is.cr());
+            ChordRest* next = lastTiedNote ? nextChordRest(lastTiedNote->chord()) : nextChordRest(is.cr());
             while (next && !next->isChord())
                   next = nextChordRest(next);
             if (next)
-                  _is.moveInputPos(next->segment());
+                  is.moveInputPos(next->segment());
             }
       else {
-            NoteEntryMethod entryMethod = _is.noteEntryMethod();
+            NoteEntryMethod entryMethod = is.noteEntryMethod();
             if (entryMethod != NoteEntryMethod::REALTIME_AUTO && entryMethod != NoteEntryMethod::REALTIME_MANUAL)
-                  _is.moveToNextInputPos();
+                  is.moveToNextInputPos();
             }
       return note;
       }
@@ -292,6 +305,14 @@ void Score::putNote(const QPointF& pos, bool replace, bool insert)
       Score* score = p.segment->score();
       // it is not safe to call Score::repitchNote() if p is on a TAB staff
       bool isTablature = staff(p.staffIdx)->isTabStaff(p.segment->tick());
+
+      //  calculate actual clicked line from staffType offset and stepOffset
+      Staff* ss = score->staff(p.staffIdx);
+      int stepOffset = ss->staffType(p.segment->tick())->stepOffset();
+      qreal stYOffset = ss->staffType(p.segment->tick())->yoffset().val();
+      qreal lineDist = ss->staffType(p.segment->tick())->lineDistance().val();
+      p.line -= stepOffset + 2 * stYOffset / lineDist;
+
       if (score->inputState().usingNoteEntryMethod(NoteEntryMethod::REPITCH) && !isTablature)
             score->repitchNote(p, replace);
       else {
@@ -316,12 +337,18 @@ void Score::putNote(const Position& p, bool replace)
 
       Direction stemDirection = Direction::AUTO;
       bool error;
-      NoteVal nval = noteValForPosition(p, error);
+      NoteVal nval = noteValForPosition(p, _is.accidentalType(), error);
       if (error)
             return;
 
       const StringData* stringData = 0;
-      switch (st->staffType(s->tick())->group()) {
+
+      // pitched/unpitched note entry depends on instrument (override StaffGroup)
+      StaffGroup staffGroup = st->staffType(s->tick())->group();
+      if (staffGroup != StaffGroup::TAB)
+            staffGroup = st->part()->instrument(s->tick())->useDrumset() ? StaffGroup::PERCUSSION : StaffGroup::STANDARD;
+
+      switch (staffGroup) {
             case StaffGroup::PERCUSSION: {
                   const Drumset* ds = st->part()->instrument(s->tick())->drumset();
                   stemDirection     = ds->stemDirection(nval.pitch);
@@ -386,9 +413,15 @@ void Score::putNote(const Position& p, bool replace)
                   addToChord = true;            // if no special case, add note to chord
                   }
             }
+      bool forceAccidental = false;
+      if (_is.accidentalType() != AccidentalType::NONE) {
+            NoteVal nval2 = noteValForPosition(p, AccidentalType::NONE, error);
+            forceAccidental = (nval.pitch == nval2.pitch);
+            }
       if (addToChord && cr->isChord()) {
             // if adding, add!
-            addNote(toChord(cr), nval);
+            addNote(toChord(cr), nval, forceAccidental);
+            _is.setAccidentalType(AccidentalType::NONE);
             return;
             }
       else {
@@ -396,7 +429,8 @@ void Score::putNote(const Position& p, bool replace)
 
             if (_is.rest())
                   nval.pitch = -1;
-            setNoteRest(_is.segment(), _is.track(), nval, _is.duration().fraction(), stemDirection);
+            setNoteRest(_is.segment(), _is.track(), nval, _is.duration().fraction(), stemDirection, forceAccidental);
+            _is.setAccidentalType(AccidentalType::NONE);
             }
       if (!st->isTabStaff(cr->tick()))
             _is.moveToNextInputPos();
@@ -409,24 +443,30 @@ void Score::putNote(const Position& p, bool replace)
 void Score::repitchNote(const Position& p, bool replace)
       {
       Segment* s      = p.segment;
-      int tick        = s->tick();
+      Fraction tick   = s->tick();
       Staff* st       = staff(p.staffIdx);
       ClefType clef   = st->clef(tick);
 
       NoteVal nval;
       bool error = false;
-      AccidentalVal acci = s->measure()->findAccidental(s, p.staffIdx, p.line, error);
-      if (error)
-            return;
-      int step   = absStep(p.line, clef);
-      int octave = step / 7;
-      nval.pitch = step2pitch(step) + octave * 12 + int(acci);
-
-      if (styleB(Sid::concertPitch))
-            nval.tpc1 = step2tpc(step % 7, acci);
+      AccidentalType at = _is.accidentalType();
+      if (_is.drumset() && _is.drumNote() != -1) {
+            nval.pitch = _is.drumNote();
+            }
       else {
-            nval.pitch += st->part()->instrument(s->tick())->transpose().chromatic;
-            nval.tpc2 = step2tpc(step % 7, acci);
+            AccidentalVal acci = (at == AccidentalType::NONE ? s->measure()->findAccidental(s, p.staffIdx, p.line, error) : Accidental::subtype2value(at));
+            if (error)
+                  return;
+            int step   = absStep(p.line, clef);
+            int octave = step / 7;
+            nval.pitch = step2pitch(step) + octave * 12 + int(acci);
+
+            if (styleB(Sid::concertPitch))
+                  nval.tpc1 = step2tpc(step % 7, acci);
+            else {
+                  nval.pitch += st->part()->instrument(s->tick())->transpose().chromatic;
+                  nval.tpc2 = step2tpc(step % 7, acci);
+                  }
             }
 
       if (!_is.segment())
@@ -492,9 +532,24 @@ void Score::repitchNote(const Position& p, bool replace)
             // the new note will be added below
             while (!chord->notes().empty())
                   undoRemoveElement(chord->notes().front());
-            }
+      }
       // add new note to chord
       undoAddElement(note);
+      bool forceAccidental = false;
+      if (_is.accidentalType() != AccidentalType::NONE) {
+            NoteVal nval2 = noteValForPosition(p, AccidentalType::NONE, error);
+            forceAccidental = (nval.pitch == nval2.pitch);
+            }
+      if (forceAccidental) {
+            int tpc = styleB(Sid::concertPitch) ? nval.tpc1 : nval.tpc2;
+            AccidentalVal alter = tpc2alter(tpc);
+            at = Accidental::value2subtype(alter);
+            Accidental* a = new Accidental(this);
+            a->setAccidentalType(at);
+            a->setRole(AccidentalRole::USER);
+            a->setParent(note);
+            undoAddElement(a);
+            }
       setPlayNote(true);
       setPlayChord(true);
       // recreate tie forward if there is a note to tie to
@@ -503,6 +558,8 @@ void Score::repitchNote(const Position& p, bool replace)
             Tie* tie = new Tie(this);
             tie->setStartNote(note);
             tie->setEndNote(firstTiedNote);
+            tie->setTick(tie->startNote()->tick());
+            tie->setTick2(tie->endNote()->tick());
             tie->setTrack(note->track());
             undoAddElement(tie);
             }
@@ -548,11 +605,11 @@ void Score::localInsertChord(const Position& pos)
       {
       const TDuration duration = _is.duration();
       const Fraction fraction  = duration.fraction();
-      const int len            = fraction.ticks();
+      const Fraction len       = fraction;
       Segment* seg             = pos.segment;
-      const int tick           = seg->tick();
+      Fraction tick            = seg->tick();
       Measure* measure         = seg->measure()->isMMRest() ? seg->measure()->mmRestFirst() : seg->measure();
-      const Fraction targetMeasureLen = measure->len() + fraction;
+      const Fraction targetMeasureLen = measure->ticks() + fraction;
 
       // Shift spanners, enlarge the measure.
       // The approach is similar to that in Measure::adjustToLen() but does
@@ -585,8 +642,8 @@ void Score::localInsertChord(const Position& pos)
                   Rest* measureRest = toRest(maybeRest);
                   // If measure rest is situated at measure start we will fill
                   // the whole measure with rests.
-                  measureIsFull = (measureRest->rtick() == 0);
-                  const Fraction fillLen = measureIsFull ? targetMeasureLen : measureRest->duration();
+                  measureIsFull = measureRest->rtick().isZero();
+                  const Fraction fillLen = measureIsFull ? targetMeasureLen : measureRest->ticks();
                   ms->setRest(measureRest->tick(), track, fillLen, /* useDots */ false, /* tuplet */ nullptr, /* useFullMeasureRest */ false);
                   }
 
@@ -595,21 +652,21 @@ void Score::localInsertChord(const Position& pos)
                   ChordRest* cr = ms->findCR(tick, track);
                   if (cr && cr->tick() < tick && (cr->tick() + cr->actualTicks()) > tick) {
                         if (cr->isRest()) {
-                              const Fraction fillLen = cr->duration() + fraction;
+                              const Fraction fillLen = cr->ticks() + fraction;
                               ms->undoRemoveElement(cr);
                               ms->setRest(cr->tick(), track, fillLen, /* useDots */ false, /* tuplet */ nullptr, /* useFullMeasureRest */ false);
                               }
                         else if (cr->isChord()) {
                               Chord* chord = toChord(cr);
-                              std::vector<TDuration> durations = toDurationList(chord->duration() + fraction, /* useDots */ true);
-                              Fraction pos = chord->afrac();
+                              std::vector<TDuration> durations = toDurationList(chord->ticks() + fraction, /* useDots */ true);
+                              Fraction p = chord->tick();
                               ms->undoRemoveElement(chord);
                               Chord* prevChord = nullptr;
                               for (const TDuration& dur : durations) {
                                     Chord* prototype = prevChord ? prevChord : chord;
                                     const bool genTie = bool(prevChord);
-                                    prevChord = ms->addChord(pos.ticks(), dur, prototype, genTie, /* tuplet */ nullptr);
-                                    pos += dur.fraction();
+                                    prevChord = ms->addChord(p, dur, prototype, genTie, /* tuplet */ nullptr);
+                                    p += dur.fraction();
                                     }
                               // TODO: reconnect ties if this chord was tied to other
                               }
@@ -648,20 +705,20 @@ void Score::globalInsertChord(const Position& pos)
 
       int strack = 0;                      // for now for all tracks
       int etrack = nstaves() * VOICES;
-      int stick  = s1->tick();
-      int etick  = s2->tick();
-      int ticks  = fraction.ticks();
+      Fraction stick  = s1->tick();
+      Fraction etick  = s2->tick();
+      Fraction ticks  = fraction;
+      Fraction len    = r.ticks();
 
-      Fraction len = r.duration();
       if (!r.truncate(fraction))
             appendMeasures(1);
 
       putNote(pos, true);
-      int dtick = s1->tick() + ticks;
+      Fraction dtick = s1->tick() + ticks;
       int voiceOffsets[VOICES] { 0, 0, 0, 0 };
-      len = r.duration();
+      len = r.ticks();
       for (int staffIdx = 0; staffIdx < nstaves(); ++staffIdx)
-            makeGap1(dtick, staffIdx, r.duration(), voiceOffsets);
+            makeGap1(dtick, staffIdx, r.ticks(), voiceOffsets);
       r.write(this, dtick);
 
       for (auto i :  spanner()) {

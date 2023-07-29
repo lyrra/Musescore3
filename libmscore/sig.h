@@ -20,6 +20,8 @@ namespace Ms {
 class XmlWriter;
 class XmlReader;
 
+int ticks_beat(int n);
+
 //-------------------------------------------------------------------
 //   BeatType
 //-------------------------------------------------------------------
@@ -44,7 +46,6 @@ class TimeSigFrac : public Fraction {
       using Fraction::Fraction;
       constexpr TimeSigFrac(int n = 0, int d = 1) : Fraction(n, d) {}
       TimeSigFrac(const Fraction& f) : TimeSigFrac(f.numerator(), f.denominator()) {}
-      TimeSigFrac(const TimeSigFrac& f) : TimeSigFrac(f.numerator(), f.denominator()) {}
 
       // isCompound? Note: 3/8, 3/16, ... are NOT considered compound.
       bool isCompound() const { return numerator() > 3 /*&& denominator() >= 8*/ && numerator() % 3 == 0; }
@@ -106,7 +107,6 @@ class SigEvent {
          : _timesig(s), _nominal(s), _bar(bar) {}
       SigEvent(const Fraction& s, const Fraction& ss, int bar = 0)
          : _timesig(s), _nominal(ss), _bar(bar) {}
-      SigEvent(const SigEvent& e);
 
       bool operator==(const SigEvent& e) const;
       bool valid() const       { return _timesig.isValid(); }
@@ -140,6 +140,7 @@ class TimeSigMap : public std::map<int, SigEvent > {
       void dump() const;
 
       const SigEvent& timesig(int tick) const;
+      const SigEvent& timesig(const Fraction& f) const { return timesig(f.ticks()); }
 
       void tickValues(int t, int* bar, int* beat, int* tick) const;
       int bar2tick(int bar, int beat) const;

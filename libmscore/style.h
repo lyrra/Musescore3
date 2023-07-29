@@ -14,6 +14,7 @@
 #define __STYLE_H__
 
 #include "chordlist.h"
+#include "types.h"
 
 namespace Ms {
 
@@ -23,13 +24,31 @@ struct ChordDescription;
 class Element;
 class Score;
 
+// Needs to be duplicated here and in sym.h since moc doesn't handle macros from #include'd files
+#ifdef SCRIPT_INTERFACE
+#define BEGIN_QT_REGISTERED_ENUM(Name) \
+class MSQE_##Name { \
+      Q_GADGET \
+   public:
+#define END_QT_REGISTERED_ENUM(Name) \
+      Q_ENUM(Name); \
+      }; \
+using Name = MSQE_##Name::Name;
+#else
+#define BEGIN_QT_REGISTERED_ENUM(Name)
+#define END_QT_REGISTERED_ENUM(Name)
+#endif
+
 //---------------------------------------------------------
 //   Sid
+///   Enumerates the list of score style settings
 //
 //    Keep in sync with styleTypes[] in style.cpp
 //---------------------------------------------------------
 
+BEGIN_QT_REGISTERED_ENUM(Sid)
 enum class Sid {
+      ///.\{
       NOSTYLE = -1,
 
       pageWidth,
@@ -45,17 +64,29 @@ enum class Sid {
 
       staffUpperBorder,
       staffLowerBorder,
+      staffHeaderFooterPadding,
       staffDistance,
       akkoladeDistance,
-
       minSystemDistance,
       maxSystemDistance,
+
+      enableVerticalSpread,
+      spreadSystem,
+      spreadSquareBracket,
+      spreadCurlyBracket,
+      minSystemSpread,
+      maxSystemSpread,
+      minStaffSpread,
+      maxStaffSpread,
+      maxAkkoladeDistance,
+      maxPageFillSpread,
 
       lyricsPlacement,
       lyricsPosAbove,
       lyricsPosBelow,
       lyricsMinTopDistance,
       lyricsMinBottomDistance,
+      lyricsMinDistance,
       lyricsLineHeight,
       lyricsDashMinLength,
       lyricsDashMaxLength,
@@ -71,8 +102,10 @@ enum class Sid {
 
       lyricsOddFontFace,
       lyricsOddFontSize,
+      lyricsOddLineSpacing,
       lyricsOddFontSpatiumDependent,
       lyricsOddFontStyle,
+      lyricsOddColor,
       lyricsOddAlign,
       lyricsOddFrameType,
       lyricsOddFramePadding,
@@ -83,8 +116,10 @@ enum class Sid {
 
       lyricsEvenFontFace,
       lyricsEvenFontSize,
+      lyricsEvenLineSpacing,
       lyricsEvenFontSpatiumDependent,
       lyricsEvenFontStyle,
+      lyricsEvenColor,
       lyricsEvenAlign,
       lyricsEvenFrameType,
       lyricsEvenFramePadding,
@@ -132,6 +167,7 @@ enum class Sid {
       timesigLeftMargin,
       timesigScale,
 
+      midClefKeyRightMargin,
       clefKeyRightMargin,
       clefKeyDistance,
       clefTimesigDistance,
@@ -139,6 +175,7 @@ enum class Sid {
       keyBarlineDistance,
       systemHeaderDistance,
       systemHeaderTimeSigDistance,
+      systemTrailerRightMargin,
 
       clefBarlineDistance,
       timesigBarlineDistance,
@@ -160,6 +197,8 @@ enum class Sid {
       ledgerLineLength,
       accidentalDistance,
       accidentalNoteDistance,
+      bracketedAccidentalPadding,
+      alignAccidentalsLeft,
       beamWidth,
       beamDistance,
       beamMinLen,
@@ -174,6 +213,9 @@ enum class Sid {
       propertyDistance,
       articulationMag,
       articulationPosAbove,
+      articulationAnchorDefault,
+      articulationAnchorLuteFingering,
+      articulationAnchorOther,
       lastSystemFillLimit,
 
       hairpinPlacement,
@@ -186,8 +228,10 @@ enum class Sid {
       hairpinLineWidth,
       hairpinFontFace,
       hairpinFontSize,
+      hairpinLineSpacing,
       hairpinFontSpatiumDependent,
       hairpinFontStyle,
+      hairpinColor,
       hairpinTextAlign,
       hairpinFrameType,
       hairpinFramePadding,
@@ -212,8 +256,10 @@ enum class Sid {
       pedalHookHeight,
       pedalFontFace,
       pedalFontSize,
+      pedalLineSpacing,
       pedalFontSpatiumDependent,
       pedalFontStyle,
+      pedalColor,
       pedalTextAlign,
       pedalFrameType,
       pedalFramePadding,
@@ -233,7 +279,16 @@ enum class Sid {
       harmonyFretDist,
       minHarmonyDistance,
       maxHarmonyBarDistance,
+      maxChordShiftAbove,
+      maxChordShiftBelow,
+
       harmonyPlacement,
+      romanNumeralPlacement,
+      nashvilleNumberPlacement,
+      harmonyPlay,
+      harmonyVoiceLiteral,
+      harmonyVoicing,
+      harmonyDuration,
 
       chordSymbolAPosAbove,
       chordSymbolAPosBelow,
@@ -241,10 +296,18 @@ enum class Sid {
       chordSymbolBPosAbove,
       chordSymbolBPosBelow,
 
+      romanNumeralPosAbove,
+      romanNumeralPosBelow,
+
+      nashvilleNumberPosAbove,
+      nashvilleNumberPosBelow,
+
       chordSymbolAFontFace,
       chordSymbolAFontSize,
+      chordSymbolALineSpacing,
       chordSymbolAFontSpatiumDependent,
       chordSymbolAFontStyle,
+      chordSymbolAColor,
       chordSymbolAAlign,
       chordSymbolAFrameType,
       chordSymbolAFramePadding,
@@ -255,8 +318,10 @@ enum class Sid {
 
       chordSymbolBFontFace,
       chordSymbolBFontSize,
+      chordSymbolBLineSpacing,
       chordSymbolBFontSpatiumDependent,
       chordSymbolBFontStyle,
+      chordSymbolBColor,
       chordSymbolBAlign,
       chordSymbolBFrameType,
       chordSymbolBFramePadding,
@@ -264,6 +329,34 @@ enum class Sid {
       chordSymbolBFrameRound,
       chordSymbolBFrameFgColor,
       chordSymbolBFrameBgColor,
+
+      romanNumeralFontFace,
+      romanNumeralFontSize,
+      romanNumeralLineSpacing,
+      romanNumeralFontSpatiumDependent,
+      romanNumeralFontStyle,
+      romanNumeralColor,
+      romanNumeralAlign,
+      romanNumeralFrameType,
+      romanNumeralFramePadding,
+      romanNumeralFrameWidth,
+      romanNumeralFrameRound,
+      romanNumeralFrameFgColor,
+      romanNumeralFrameBgColor,
+
+      nashvilleNumberFontFace,
+      nashvilleNumberFontSize,
+      nashvilleNumberLineSpacing,
+      nashvilleNumberFontSpatiumDependent,
+      nashvilleNumberFontStyle,
+      nashvilleNumberColor,
+      nashvilleNumberAlign,
+      nashvilleNumberFrameType,
+      nashvilleNumberFramePadding,
+      nashvilleNumberFrameWidth,
+      nashvilleNumberFrameRound,
+      nashvilleNumberFrameFgColor,
+      nashvilleNumberFrameBgColor,
 
       capoPosition,
       fretNumMag,
@@ -274,8 +367,13 @@ enum class Sid {
       fretPlacement,
       fretStrings,
       fretFrets,
-      fretOffset,
-      fretBarre,
+      fretNut,
+      fretDotSize,
+      fretStringSpacing,
+      fretFretSpacing,
+      fretOrientation,
+      maxFretShiftAbove,
+      maxFretShiftBelow,
 
       showPageNumber,
       showPageNumberOne,
@@ -284,8 +382,8 @@ enum class Sid {
       showMeasureNumberOne,
       measureNumberInterval,
       measureNumberSystem,
+      measureNumberAllStaves,
 
-      measureNumberAllStaffs,
       smallNoteMag,
       graceNoteMag,
       smallStaffMag,
@@ -311,12 +409,20 @@ enum class Sid {
       chordStyle,
       chordsXmlFile,
       chordDescriptionFile,
+      chordExtensionMag,
+      chordExtensionAdjust,
+      chordModifierMag,
+      chordModifierAdjust,
       concertPitch,
       createMultiMeasureRests,
       minEmptyMeasures,
       minMMRestWidth,
+      mmRestNumberPos,
       hideEmptyStaves,
       dontHideStavesInFirstSystem,
+      enableIndentationOnFirstSystem,
+      firstSystemIndentationValue,
+      alwaysShowBracketsWhenEmptyStavesAreHidden,
       hideInstrumentNameIfOneInstrument,
       gateTime,
       tenutoGateTime,
@@ -324,6 +430,8 @@ enum class Sid {
       slurGateTime,
 
       ArpeggioNoteDistance,
+      ArpeggioAccidentalDistance,
+      ArpeggioAccidentalDistanceMin,
       ArpeggioLineWidth,
       ArpeggioHookLen,
       ArpeggioHiddenInStdIfTab,
@@ -351,6 +459,7 @@ enum class Sid {
       showFooter,
       footerFirstPage,
       footerOddEven,
+      footerInsideMargins,
       evenFooterL,
       evenFooterC,
       evenFooterR,
@@ -364,8 +473,10 @@ enum class Sid {
       voltaLineStyle,
       voltaFontFace,
       voltaFontSize,
+      voltaLineSpacing,
       voltaFontSpatiumDependent,
       voltaFontStyle,
+      voltaColor,
       voltaAlign,
       voltaOffset,
       voltaFrameType,
@@ -383,18 +494,30 @@ enum class Sid {
       ottava22MBPlacement,
 
       ottava8VAText,
+      ottava8VAContinueText,
       ottava8VBText,
+      ottava8VBContinueText,
       ottava15MAText,
+      ottava15MAContinueText,
       ottava15MBText,
+      ottava15MBContinueText,
       ottava22MAText,
+      ottava22MAContinueText,
       ottava22MBText,
+      ottava22MBContinueText,
 
       ottava8VAnoText,
+      ottava8VAnoContinueText,
       ottava8VBnoText,
+      ottava8VBnoContinueText,
       ottava15MAnoText,
+      ottava15MAnoContinueText,
       ottava15MBnoText,
+      ottava15MBnoContinueText,
       ottava22MAnoText,
+      ottava22MAnoContinueText,
       ottava22MBnoText,
+      ottava22MBnoContinueText,
 
       ottavaPosAbove,
       ottavaPosBelow,
@@ -405,8 +528,10 @@ enum class Sid {
       ottavaNumbersOnly,
       ottavaFontFace,
       ottavaFontSize,
+      ottavaLineSpacing,
       ottavaFontSpatiumDependent,
       ottavaFontStyle,
+      ottavaColor,
       ottavaTextAlign,
       ottavaFrameType,
       ottavaFramePadding,
@@ -421,7 +546,8 @@ enum class Sid {
       tremoloBoxHeight,
       tremoloStrokeWidth,
       tremoloDistance,
-      // TODO tremoloBeamLengthMultiplier,
+      tremoloStyle,
+      tremoloStrokeLengthMultiplier,
       // TODO tremoloMaxBeamLength,
 
       linearStretch,
@@ -442,8 +568,10 @@ enum class Sid {
       tupletBracketType,
       tupletFontFace,
       tupletFontSize,
+      tupletLineSpacing,
       tupletFontSpatiumDependent,
       tupletFontStyle,
+      tupletColor,
       tupletAlign,
       tupletBracketHookHeight,
       tupletOffset,
@@ -481,14 +609,26 @@ enum class Sid {
       textLineFrameFgColor,
       textLineFrameBgColor,
 
+      systemTextLinePlacement,
+      systemTextLinePosAbove,
+      systemTextLinePosBelow,
+      systemTextLineFrameType,
+      systemTextLineFramePadding,
+      systemTextLineFrameWidth,
+      systemTextLineFrameRound,
+      systemTextLineFrameFgColor,
+      systemTextLineFrameBgColor,
+
       tremoloBarLineWidth,
       jumpPosAbove,
       markerPosAbove,
 
       defaultFontFace,
       defaultFontSize,
+      defaultLineSpacing,
       defaultFontSpatiumDependent,
       defaultFontStyle,
+      defaultColor,
       defaultAlign,
       defaultFrameType,
       defaultFramePadding,
@@ -503,8 +643,10 @@ enum class Sid {
 
       titleFontFace,
       titleFontSize,
+      titleLineSpacing,
       titleFontSpatiumDependent,
       titleFontStyle,
+      titleColor,
       titleAlign,
       titleOffset,
       titleOffsetType,
@@ -517,8 +659,10 @@ enum class Sid {
 
       subTitleFontFace,
       subTitleFontSize,
+      subTitleLineSpacing,
       subTitleFontSpatiumDependent,
       subTitleFontStyle,
+      subTitleColor,
       subTitleAlign,
       subTitleOffset,
       subTitleOffsetType,
@@ -531,8 +675,10 @@ enum class Sid {
 
       composerFontFace,
       composerFontSize,
+      composerLineSpacing,
       composerFontSpatiumDependent,
       composerFontStyle,
+      composerColor,
       composerAlign,
       composerOffset,
       composerOffsetType,
@@ -545,8 +691,10 @@ enum class Sid {
 
       lyricistFontFace,
       lyricistFontSize,
+      lyricistLineSpacing,
       lyricistFontSpatiumDependent,
       lyricistFontStyle,
+      lyricistColor,
       lyricistAlign,
       lyricistOffset,
       lyricistOffsetType,
@@ -559,8 +707,10 @@ enum class Sid {
 
       fingeringFontFace,
       fingeringFontSize,
+      fingeringLineSpacing,
       fingeringFontSpatiumDependent,
       fingeringFontStyle,
+      fingeringColor,
       fingeringAlign,
       fingeringFrameType,
       fingeringFramePadding,
@@ -572,8 +722,10 @@ enum class Sid {
 
       lhGuitarFingeringFontFace,
       lhGuitarFingeringFontSize,
+      lhGuitarFingeringLineSpacing,
       lhGuitarFingeringFontSpatiumDependent,
       lhGuitarFingeringFontStyle,
+      lhGuitarFingeringColor,
       lhGuitarFingeringAlign,
       lhGuitarFingeringFrameType,
       lhGuitarFingeringFramePadding,
@@ -585,8 +737,10 @@ enum class Sid {
 
       rhGuitarFingeringFontFace,
       rhGuitarFingeringFontSize,
+      rhGuitarFingeringLineSpacing,
       rhGuitarFingeringFontSpatiumDependent,
       rhGuitarFingeringFontStyle,
+      rhGuitarFingeringColor,
       rhGuitarFingeringAlign,
       rhGuitarFingeringFrameType,
       rhGuitarFingeringFramePadding,
@@ -598,8 +752,10 @@ enum class Sid {
 
       stringNumberFontFace,
       stringNumberFontSize,
+      stringNumberLineSpacing,
       stringNumberFontSpatiumDependent,
       stringNumberFontStyle,
+      stringNumberColor,
       stringNumberAlign,
       stringNumberFrameType,
       stringNumberFramePadding,
@@ -611,8 +767,10 @@ enum class Sid {
 
       longInstrumentFontFace,
       longInstrumentFontSize,
+      longInstrumentLineSpacing,
       longInstrumentFontSpatiumDependent,
       longInstrumentFontStyle,
+      longInstrumentColor,
       longInstrumentAlign,
       longInstrumentOffset,
       longInstrumentFrameType,
@@ -624,8 +782,10 @@ enum class Sid {
 
       shortInstrumentFontFace,
       shortInstrumentFontSize,
+      shortInstrumentLineSpacing,
       shortInstrumentFontSpatiumDependent,
       shortInstrumentFontStyle,
+      shortInstrumentColor,
       shortInstrumentAlign,
       shortInstrumentOffset,
       shortInstrumentFrameType,
@@ -637,8 +797,10 @@ enum class Sid {
 
       partInstrumentFontFace,
       partInstrumentFontSize,
+      partInstrumentLineSpacing,
       partInstrumentFontSpatiumDependent,
       partInstrumentFontStyle,
+      partInstrumentColor,
       partInstrumentAlign,
       partInstrumentOffset,
       partInstrumentFrameType,
@@ -650,8 +812,10 @@ enum class Sid {
 
       dynamicsFontFace,
       dynamicsFontSize,
+      dynamicsLineSpacing,
       dynamicsFontSpatiumDependent,
       dynamicsFontStyle,
+      dynamicsColor,
       dynamicsAlign,
       dynamicsFrameType,
       dynamicsFramePadding,
@@ -662,8 +826,10 @@ enum class Sid {
 
       expressionFontFace,
       expressionFontSize,
+      expressionLineSpacing,
       expressionFontSpatiumDependent,
       expressionFontStyle,
+      expressionColor,
       expressionAlign,
       expressionPlacement,
       expressionOffset,
@@ -676,8 +842,10 @@ enum class Sid {
 
       tempoFontFace,
       tempoFontSize,
+      tempoLineSpacing,
       tempoFontSpatiumDependent,
       tempoFontStyle,
+      tempoColor,
       tempoAlign,
       tempoSystemFlag,
       tempoPlacement,
@@ -693,8 +861,10 @@ enum class Sid {
 
       metronomeFontFace,
       metronomeFontSize,
+      metronomeLineSpacing,
       metronomeFontSpatiumDependent,
       metronomeFontStyle,
+      metronomeColor,
       metronomePlacement,
       metronomeAlign,
       metronomeOffset,
@@ -707,10 +877,15 @@ enum class Sid {
 
       measureNumberFontFace,
       measureNumberFontSize,
+      measureNumberLineSpacing,
       measureNumberFontSpatiumDependent,
       measureNumberFontStyle,
-      measureNumberOffset,
+      measureNumberColor,
+      measureNumberPosAbove,
+      measureNumberPosBelow,
       measureNumberOffsetType,
+      measureNumberVPlacement,
+      measureNumberHPlacement,
       measureNumberAlign,
       measureNumberFrameType,
       measureNumberFramePadding,
@@ -719,10 +894,33 @@ enum class Sid {
       measureNumberFrameFgColor,
       measureNumberFrameBgColor,
 
+      mmRestShowMeasureNumberRange,
+      mmRestRangeBracketType,
+
+      mmRestRangeFontFace,
+      mmRestRangeFontSize,
+      mmRestRangeFontSpatiumDependent,
+      mmRestRangeFontStyle,
+      mmRestRangeColor,
+      mmRestRangePosAbove,
+      mmRestRangePosBelow,
+      mmRestRangeOffsetType,
+      mmRestRangeVPlacement,
+      mmRestRangeHPlacement,
+      mmRestRangeAlign,
+      mmRestRangeFrameType,
+      mmRestRangeFramePadding,
+      mmRestRangeFrameWidth,
+      mmRestRangeFrameRound,
+      mmRestRangeFrameFgColor,
+      mmRestRangeFrameBgColor,
+
       translatorFontFace,
       translatorFontSize,
+      translatorLineSpacing,
       translatorFontSpatiumDependent,
       translatorFontStyle,
+      translatorColor,
       translatorAlign,
       translatorOffset,
       translatorFrameType,
@@ -734,8 +932,10 @@ enum class Sid {
 
       systemTextFontFace,
       systemTextFontSize,
+      systemTextLineSpacing,
       systemTextFontSpatiumDependent,
       systemTextFontStyle,
+      systemTextColor,
       systemTextAlign,
       systemTextOffsetType,
       systemTextPlacement,
@@ -751,8 +951,10 @@ enum class Sid {
 
       staffTextFontFace,
       staffTextFontSize,
+      staffTextLineSpacing,
       staffTextFontSpatiumDependent,
       staffTextFontStyle,
+      staffTextColor,
       staffTextAlign,
       staffTextOffsetType,
       staffTextPlacement,
@@ -768,8 +970,10 @@ enum class Sid {
 
       rehearsalMarkFontFace,
       rehearsalMarkFontSize,
+      rehearsalMarkLineSpacing,
       rehearsalMarkFontSpatiumDependent,
       rehearsalMarkFontStyle,
+      rehearsalMarkColor,
       rehearsalMarkAlign,
       rehearsalMarkFrameType,
       rehearsalMarkFramePadding,
@@ -784,8 +988,10 @@ enum class Sid {
 
       repeatLeftFontFace,
       repeatLeftFontSize,
+      repeatLeftLineSpacing,
       repeatLeftFontSpatiumDependent,
       repeatLeftFontStyle,
+      repeatLeftColor,
       repeatLeftAlign,
       repeatLeftPlacement,
       repeatLeftFrameType,
@@ -797,8 +1003,10 @@ enum class Sid {
 
       repeatRightFontFace,
       repeatRightFontSize,
+      repeatRightLineSpacing,
       repeatRightFontSpatiumDependent,
       repeatRightFontStyle,
+      repeatRightColor,
       repeatRightAlign,
       repeatRightPlacement,
       repeatRightFrameType,
@@ -810,8 +1018,10 @@ enum class Sid {
 
       frameFontFace,
       frameFontSize,
+      frameLineSpacing,
       frameFontSpatiumDependent,
       frameFontStyle,
+      frameColor,
       frameAlign,
       frameOffset,
       frameFrameType,
@@ -823,14 +1033,27 @@ enum class Sid {
 
       textLineFontFace,
       textLineFontSize,
+      textLineLineSpacing,
       textLineFontSpatiumDependent,
       textLineFontStyle,
+      textLineColor,
       textLineTextAlign,
+      textLineSystemFlag,
+
+      systemTextLineFontFace,
+      systemTextLineFontSize,
+      systemTextLineFontSpatiumDependent,
+      systemTextLineFontStyle,
+      systemTextLineColor,
+      systemTextLineTextAlign,
+      systemTextLineSystemFlag,
 
       glissandoFontFace,
       glissandoFontSize,
+      glissandoLineSpacing,
       glissandoFontSpatiumDependent,
       glissandoFontStyle,
+      glissandoColor,
       glissandoAlign,
       glissandoOffset,
       glissandoFrameType,
@@ -844,8 +1067,10 @@ enum class Sid {
 
       bendFontFace,
       bendFontSize,
+      bendLineSpacing,
       bendFontSpatiumDependent,
       bendFontStyle,
+      bendColor,
       bendAlign,
       bendOffset,
       bendFrameType,
@@ -859,8 +1084,10 @@ enum class Sid {
 
       headerFontFace,
       headerFontSize,
+      headerLineSpacing,
       headerFontSpatiumDependent,
       headerFontStyle,
+      headerColor,
       headerAlign,
       headerOffset,
       headerFrameType,
@@ -872,8 +1099,10 @@ enum class Sid {
 
       footerFontFace,
       footerFontSize,
+      footerLineSpacing,
       footerFontSpatiumDependent,
       footerFontStyle,
+      footerColor,
       footerAlign,
       footerOffset,
       footerFrameType,
@@ -885,8 +1114,10 @@ enum class Sid {
 
       instrumentChangeFontFace,
       instrumentChangeFontSize,
+      instrumentChangeLineSpacing,
       instrumentChangeFontSpatiumDependent,
       instrumentChangeFontStyle,
+      instrumentChangeColor,
       instrumentChangeAlign,
       instrumentChangeOffset,
       instrumentChangePlacement,
@@ -900,16 +1131,39 @@ enum class Sid {
       instrumentChangeFrameFgColor,
       instrumentChangeFrameBgColor,
 
+      stickingFontFace,
+      stickingFontSize,
+      stickingLineSpacing,
+      stickingFontSpatiumDependent,
+      stickingFontStyle,
+      stickingColor,
+      stickingAlign,
+      stickingOffset,
+      stickingPlacement,
+      stickingPosAbove,
+      stickingPosBelow,
+      stickingMinDistance,
+      stickingFrameType,
+      stickingFramePadding,
+      stickingFrameWidth,
+      stickingFrameRound,
+      stickingFrameFgColor,
+      stickingFrameBgColor,
+
       figuredBassFontFace,
       figuredBassFontSize,
+      figuredBassLineSpacing,
       figuredBassFontSpatiumDependent,
       figuredBassFontStyle,
+      figuredBassColor,
 
       user1Name,
       user1FontFace,
       user1FontSize,
+      user1LineSpacing,
       user1FontSpatiumDependent,
       user1FontStyle,
+      user1Color,
       user1Align,
       user1Offset,
       user1OffsetType,
@@ -923,8 +1177,10 @@ enum class Sid {
       user2Name,
       user2FontFace,
       user2FontSize,
+      user2LineSpacing,
       user2FontSpatiumDependent,
       user2FontStyle,
+      user2Color,
       user2Align,
       user2Offset,
       user2OffsetType,
@@ -938,8 +1194,10 @@ enum class Sid {
       user3Name,
       user3FontFace,
       user3FontSize,
+      user3LineSpacing,
       user3FontSpatiumDependent,
       user3FontStyle,
+      user3Color,
       user3Align,
       user3Offset,
       user3OffsetType,
@@ -953,8 +1211,10 @@ enum class Sid {
       user4Name,
       user4FontFace,
       user4FontSize,
+      user4LineSpacing,
       user4FontSpatiumDependent,
       user4FontStyle,
+      user4Color,
       user4Align,
       user4Offset,
       user4OffsetType,
@@ -968,8 +1228,10 @@ enum class Sid {
       user5Name,
       user5FontFace,
       user5FontSize,
+      user5LineSpacing,
       user5FontSpatiumDependent,
       user5FontStyle,
+      user5Color,
       user5Align,
       user5Offset,
       user5OffsetType,
@@ -983,8 +1245,10 @@ enum class Sid {
       user6Name,
       user6FontFace,
       user6FontSize,
+      user6LineSpacing,
       user6FontSpatiumDependent,
       user6FontStyle,
+      user6Color,
       user6Align,
       user6Offset,
       user6OffsetType,
@@ -995,10 +1259,114 @@ enum class Sid {
       user6FrameFgColor,
       user6FrameBgColor,
 
+      user7Name,
+      user7FontFace,
+      user7FontSize,
+      user7LineSpacing,
+      user7FontSpatiumDependent,
+      user7FontStyle,
+      user7Color,
+      user7Align,
+      user7Offset,
+      user7OffsetType,
+      user7FrameType,
+      user7FramePadding,
+      user7FrameWidth,
+      user7FrameRound,
+      user7FrameFgColor,
+      user7FrameBgColor,
+
+      user8Name,
+      user8FontFace,
+      user8FontSize,
+      user8LineSpacing,
+      user8FontSpatiumDependent,
+      user8FontStyle,
+      user8Color,
+      user8Align,
+      user8Offset,
+      user8OffsetType,
+      user8FrameType,
+      user8FramePadding,
+      user8FrameWidth,
+      user8FrameRound,
+      user8FrameFgColor,
+      user8FrameBgColor,
+
+      user9Name,
+      user9FontFace,
+      user9FontSize,
+      user9LineSpacing,
+      user9FontSpatiumDependent,
+      user9FontStyle,
+      user9Color,
+      user9Align,
+      user9Offset,
+      user9OffsetType,
+      user9FrameType,
+      user9FramePadding,
+      user9FrameWidth,
+      user9FrameRound,
+      user9FrameFgColor,
+      user9FrameBgColor,
+
+      user10Name,
+      user10FontFace,
+      user10FontSize,
+      user10LineSpacing,
+      user10FontSpatiumDependent,
+      user10FontStyle,
+      user10Color,
+      user10Align,
+      user10Offset,
+      user10OffsetType,
+      user10FrameType,
+      user10FramePadding,
+      user10FrameWidth,
+      user10FrameRound,
+      user10FrameFgColor,
+      user10FrameBgColor,
+
+      user11Name,
+      user11FontFace,
+      user11FontSize,
+      user11LineSpacing,
+      user11FontSpatiumDependent,
+      user11FontStyle,
+      user11Color,
+      user11Align,
+      user11Offset,
+      user11OffsetType,
+      user11FrameType,
+      user11FramePadding,
+      user11FrameWidth,
+      user11FrameRound,
+      user11FrameFgColor,
+      user11FrameBgColor,
+
+      user12Name,
+      user12FontFace,
+      user12FontSize,
+      user12LineSpacing,
+      user12FontSpatiumDependent,
+      user12FontStyle,
+      user12Color,
+      user12Align,
+      user12Offset,
+      user12OffsetType,
+      user12FrameType,
+      user12FramePadding,
+      user12FrameWidth,
+      user12FrameRound,
+      user12FrameFgColor,
+      user12FrameBgColor,
+
       letRingFontFace,
       letRingFontSize,
+      letRingLineSpacing,
       letRingFontSpatiumDependent,
       letRingFontStyle,
+      letRingColor,
       letRingTextAlign,
       letRingHookHeight,
       letRingPlacement,
@@ -1014,11 +1382,14 @@ enum class Sid {
       letRingFrameRound,
       letRingFrameFgColor,
       letRingFrameBgColor,
+      letRingEndHookType,
 
       palmMuteFontFace,
       palmMuteFontSize,
+      palmMuteLineSpacing,
       palmMuteFontSpatiumDependent,
       palmMuteFontStyle,
+      palmMuteColor,
       palmMuteTextAlign,
       palmMuteHookHeight,
       palmMutePlacement,
@@ -1034,73 +1405,47 @@ enum class Sid {
       palmMuteFrameRound,
       palmMuteFrameFgColor,
       palmMuteFrameBgColor,
+      palmMuteEndHookType,
 
       fermataPosAbove,
       fermataPosBelow,
       fermataMinDistance,
 
+      fingeringPlacement,
+
+      articulationMinDistance,
+      fingeringMinDistance,
+      hairpinMinDistance,
+      letRingMinDistance,
+      ottavaMinDistance,
+      palmMuteMinDistance,
+      pedalMinDistance,
+      repeatMinDistance,
+      textLineMinDistance,
+      systemTextLineMinDistance,
+      trillMinDistance,
+      vibratoMinDistance,
+      voltaMinDistance,
+      figuredBassMinDistance,
+      tupletMinDistance,
+
+      autoplaceEnabled,
+      usePre_3_6_defaults,
+      defaultsVersion,
+
       STYLES
+      ///\}
       };
+END_QT_REGISTERED_ENUM(Sid)
 
-//-------------------------------------------------------------------
-//   Tid
-//    Enumerate the list of built-in text substyles
-//    must be in sync with textStyles array
-//-------------------------------------------------------------------
-
-enum class Tid {
-      DEFAULT,
-      TITLE,
-      SUBTITLE,
-      COMPOSER,
-      POET,
-      LYRICS_ODD,
-      LYRICS_EVEN,
-      FINGERING,
-      LH_GUITAR_FINGERING,
-      RH_GUITAR_FINGERING,
-      STRING_NUMBER,
-      INSTRUMENT_LONG,
-      INSTRUMENT_SHORT,
-      INSTRUMENT_EXCERPT,
-      DYNAMICS,
-      EXPRESSION,
-      TEMPO,
-      METRONOME,
-      MEASURE_NUMBER,
-      TRANSLATOR,
-      TUPLET,
-      SYSTEM,
-      STAFF,
-      HARMONY_A,
-      HARMONY_B,
-      REHEARSAL_MARK,
-      REPEAT_LEFT,       // align to start of measure
-      REPEAT_RIGHT,      // align to end of measure
-      FRAME,
-      TEXTLINE,
-      GLISSANDO,
-      OTTAVA,
-      VOLTA,
-      PEDAL,
-      LET_RING,
-      PALM_MUTE,
-      HAIRPIN,
-      BEND,
-      HEADER,
-      FOOTER,
-      INSTRUMENT_CHANGE,
-      USER1,
-      USER2,
-      USER3,
-      USER4,
-      USER5,
-      USER6,
-      TEXT_STYLES
-      };
+inline uint qHash(Sid id)
+{
+    return static_cast<uint>(id);
+}
 
 //---------------------------------------------------------
 //   MStyle
+///   \cond PLUGIN_API \private \endcond
 //    the name "Style" gives problems with some microsoft
 //    header files...
 //---------------------------------------------------------
@@ -1111,38 +1456,46 @@ class MStyle {
 
       ChordList _chordList;
       bool _customChordList;        // if true, chordlist will be saved as part of score
+      int _defaultStyleVersion = -1;
 
    public:
       MStyle();
 
       void precomputeValues();
-      QVariant value(Sid idx) const;
+      const QVariant& value(Sid idx) const;
       qreal pvalue(Sid idx) const    { return _precomputedValues[int(idx)]; }
       void set(Sid idx, const QVariant& v);
 
       bool isDefault(Sid idx) const;
+      void setDefaultStyleVersion(const int defaultsVersion);
+      int defaultStyleVersion() const { return _defaultStyleVersion; }
 
       const ChordDescription* chordDescription(int id) const;
       ChordList* chordList()  { return &_chordList; }
       void setChordList(ChordList*, bool custom = true);    // Style gets ownership of ChordList
       void setCustomChordList(bool t) { _customChordList = t; }
+      void checkChordList();
 
-      bool load(QFile* qf);
+      bool load(QFile* qf, bool ign = false);
       void load(XmlReader& e);
+      void applyNewDefaults(const MStyle& other, const int defaultsVersion);
       void save(XmlWriter& xml, bool optimize);
       bool readProperties(XmlReader&);
       bool readStyleValCompat(XmlReader&);
       bool readTextStyleValCompat(XmlReader&);
 
-      void reset(Score*);
+      void resetAllStyles(Score* score, const QSet<Sid>& ignoredStyles = QSet<Sid>());
+      void resetStyles(Score* score, const QSet<Sid>& stylesToReset);
 
       static const char* valueType(const Sid);
       static const char* valueName(const Sid);
       static Sid styleIdx(const QString& name);
+      static MStyle* resolveStyleDefaults(const int defaultsVersion);
       };
 
 //---------------------------------------------------------
 //   StyledProperty
+///   \cond PLUGIN_API \private \endcond
 //---------------------------------------------------------
 
 struct StyledProperty {
@@ -1152,7 +1505,7 @@ struct StyledProperty {
 
 typedef std::vector<StyledProperty> ElementStyle;
 
-#define TEXT_STYLE_SIZE 12
+#define TEXT_STYLE_SIZE 14
 
 typedef std::array<StyledProperty, TEXT_STYLE_SIZE> TextStyle;
 
@@ -1166,6 +1519,9 @@ Tid textStyleFromName(const QString&);
 
 const std::vector<Tid>& allTextStyles();
 const std::vector<Tid>& primaryTextStyles();
+
+QSet<Sid> pageStyles();
+QSet<Sid> fretStyles();
 
 #ifndef NDEBUG
 extern void checkStyles();

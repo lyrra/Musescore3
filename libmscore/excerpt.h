@@ -13,6 +13,10 @@
 #ifndef __EXCERPT_H__
 #define __EXCERPT_H__
 
+#include <QMultiMap>
+
+#include "fraction.h"
+
 namespace Ms {
 
 class MasterScore;
@@ -25,11 +29,8 @@ class XmlReader;
 
 //---------------------------------------------------------
 //   @@ Excerpt
-//   @P partScore  Score      the score object for this part
-//   @P title      string     the title of this part
 //---------------------------------------------------------
 
-#include <QMultiMap>
 
 class Excerpt : public QObject {
       MasterScore* _oscore;
@@ -41,11 +42,14 @@ class Excerpt : public QObject {
 
    public:
       Excerpt(MasterScore* s = 0)          { _oscore = s;       }
+      Excerpt(const Excerpt& ex, bool copyPartScore = true);
+
       ~Excerpt();
 
       QList<Part*>& parts()                { return _parts;     }
       void setParts(const QList<Part*>& p) { _parts = p;        }
 
+      int nstaves() const;
 
       QMultiMap<int, int>& tracks()                  { return _tracks;    }
       void setTracks(const QMultiMap<int, int>& t)   { _tracks = t;       }
@@ -67,7 +71,8 @@ class Excerpt : public QObject {
       static void createExcerpt(Excerpt*);
       static void cloneStaves(Score* oscore, Score* score, const QList<int>& map, QMultiMap<int, int>& allTracks);
       static void cloneStaff(Staff* ostaff, Staff* nstaff);
-      static void cloneStaff2(Staff* ostaff, Staff* nstaff, int stick, int etick);
+      static void cloneStaff2(Staff* ostaff, Staff* nstaff, const Fraction& stick, const Fraction& etick);
+      static void processLinkedClone(Element* ne, Score* score, int strack);
       };
 
 }     // namespace Ms

@@ -19,7 +19,7 @@ namespace Ms {
 //   ticks_beat
 //---------------------------------------------------------
 
-static int ticks_beat(int n)
+int ticks_beat(int n)
       {
       int m = (MScore::division * 4) / n;
       if ((MScore::division * 4) % n) {
@@ -391,17 +391,6 @@ void TimeSigMap::read(XmlReader& e, int fileDivision)
                   e.unknown();
             }
       normalize();
-      }
-
-//---------------------------------------------------------
-//   SigEvent
-//---------------------------------------------------------
-
-SigEvent::SigEvent(const SigEvent& e)
-      {
-      _timesig = e._timesig;
-      _nominal = e._nominal;
-      _bar     = e._bar;
       }
 
 //---------------------------------------------------------

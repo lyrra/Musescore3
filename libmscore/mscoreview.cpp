@@ -24,6 +24,8 @@ static bool elementLower(const Element* e1, const Element* e2)
       {
       if (!e1->selectable())
             return false;
+      if (!e2->selectable())
+            return true;
       return e1->z() < e2->z();
       }
 
@@ -72,7 +74,7 @@ const QList<Element*> MuseScoreView::elementsAt(const QPointF& p)
       Page* page = point2page(p);
       if (page) {
             el = page->items(p - page->pos());
-            qSort(el.begin(), el.end(), elementLower);
+            std::sort(el.begin(), el.end(), elementLower);
             }
       return el;
       }

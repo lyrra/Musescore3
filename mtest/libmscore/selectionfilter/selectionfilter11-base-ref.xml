@@ -1,10 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<StaffList version="2.00" tick="0" len="1920" staff="0" staves="1">
+<StaffList version="2.00" tick="0/1" len="4/4" staff="0" staves="1">
   <Staff id="0">
     <voiceOffset>
       <voice id="0">0</voice>
       </voiceOffset>
     <FretDiagram>
+      <fretDiagram>
+        <string no="0">
+          <marker>cross</marker>
+          </string>
+        <string no="1">
+          <dot fret="3">normal</dot>
+          </string>
+        <string no="2">
+          <dot fret="2">normal</dot>
+          </string>
+        <string no="3">
+          <marker>circle</marker>
+          </string>
+        <string no="4">
+          <marker>circle</marker>
+          </string>
+        <string no="5">
+          <dot fret="1">normal</dot>
+          </string>
+        </fretDiagram>
       <string no="0">
         <marker>88</marker>
         </string>

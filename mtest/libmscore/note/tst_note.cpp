@@ -48,6 +48,7 @@ class TestNote : public QObject, public MTest
       void tpcTranspose2();
       void noteLimits();
       void tpcDegrees();
+      void alteredUnison();
       void LongNoteAfterShort_183746();
       };
 
@@ -93,7 +94,7 @@ void TestNote::note()
    // small
       note->setSmall(true);
       n = static_cast<Note*>(writeReadElement(note));
-      QVERIFY(n->small());
+      QVERIFY(n->isSmall());
       delete n;
 
    // mirror
@@ -209,12 +210,12 @@ void TestNote::note()
    // small
       note->setProperty(Pid::SMALL, false);
       n = static_cast<Note*>(writeReadElement(note));
-      QVERIFY(!n->small());
+      QVERIFY(!n->isSmall());
       delete n;
 
       note->setProperty(Pid::SMALL, true);
       n = static_cast<Note*>(writeReadElement(note));
-      QVERIFY(n->small());
+      QVERIFY(n->isSmall());
       delete n;
 
    // mirror
@@ -310,7 +311,7 @@ void TestNote::note()
       n = static_cast<Note*>(writeReadElement(note));
       QCOMPARE(n->veloType(), Note::ValueType::OFFSET_VAL);
       delete n;
-      
+
       delete chord;
       }
 
@@ -323,7 +324,7 @@ void TestNote::grace()
       {
       MasterScore* score = readScore(DIR + "grace.mscx");
       score->doLayout();
-      Ms::Chord* chord = score->firstMeasure()->findChord(0, 0);
+      Ms::Chord* chord = score->firstMeasure()->findChord(Fraction(0,1), 0);
       Note* note = chord->upNote();
 
       // create
@@ -377,7 +378,7 @@ void TestNote::tpc()
       MasterScore* score = readScore(DIR + "tpc.mscx");
 
       score->inputState().setTrack(0);
-      score->inputState().setSegment(score->tick2segment(0, false, SegmentType::ChordRest));
+      score->inputState().setSegment(score->tick2segment(Fraction(0,1), false, SegmentType::ChordRest));
       score->inputState().setDuration(TDuration::DurationType::V_QUARTER);
       score->inputState().setNoteEntryMode(true);
       int octave = 5 * 7;
@@ -434,7 +435,7 @@ void TestNote::tpcTranspose2()
       MasterScore* score = readScore(DIR + "tpc-transpose2.mscx");
 
       score->inputState().setTrack(0);
-      score->inputState().setSegment(score->tick2segment(0, false, SegmentType::ChordRest));
+      score->inputState().setSegment(score->tick2segment(Fraction(0,1), false, SegmentType::ChordRest));
       score->inputState().setDuration(TDuration::DurationType::V_QUARTER);
       score->inputState().setNoteEntryMode(true);
       int octave = 5 * 7;
@@ -458,7 +459,7 @@ void TestNote::noteLimits()
       MasterScore* score = readScore(DIR + "empty.mscx");
 
       score->inputState().setTrack(0);
-      score->inputState().setSegment(score->tick2segment(0, false, SegmentType::ChordRest));
+      score->inputState().setSegment(score->tick2segment(Fraction(0,1), false, SegmentType::ChordRest));
       score->inputState().setDuration(TDuration::DurationType::V_QUARTER);
       score->inputState().setNoteEntryMode(true);
 
@@ -488,6 +489,22 @@ void TestNote::noteLimits()
       QVERIFY(saveCompareScore(score, "notelimits-test.mscx", DIR + "notelimits-ref.mscx"));
       }
 
+void TestNote::alteredUnison()
+      {
+      MasterScore* score = readScore(DIR + "altered-unison.mscx");
+      Measure* m = score->firstMeasure();
+#ifdef __MINGW32__ // apparently defined for 64bit too. Needed to avoid a conflict with windows.h and its declaration of `Chord`
+      Ms::Chord* c = m->findChord(Fraction(0, 1), 0);
+#else
+      Chord* c = m->findChord(Fraction(0, 1), 0);
+#endif
+      QVERIFY(c->downNote()->accidental() && c->downNote()->accidental()->accidentalType() == Ms::AccidentalType::FLAT);
+      QVERIFY(c->upNote()->accidental() && c->upNote()->accidental()->accidentalType() == Ms::AccidentalType::NATURAL);
+      c = m->findChord(Fraction(1, 4), 0);
+      QVERIFY(c->downNote()->accidental() && c->downNote()->accidental()->accidentalType() == Ms::AccidentalType::NATURAL);
+      QVERIFY(c->upNote()->accidental() && c->upNote()->accidental()->accidentalType() == Ms::AccidentalType::SHARP);
+      }
+
 void TestNote::tpcDegrees()
       {
       QCOMPARE(tpc2degree(Tpc::TPC_C,   Key::C),   0);
@@ -514,7 +531,7 @@ void TestNote::LongNoteAfterShort_183746() {
       score->doLayout();
 
       score->inputState().setTrack(0);
-      score->inputState().setSegment(score->tick2segment(0, false, SegmentType::ChordRest));
+      score->inputState().setSegment(score->tick2segment(Fraction(0,1), false, SegmentType::ChordRest));
       score->inputState().setDuration(TDuration::DurationType::V_128TH);
       score->inputState().setNoteEntryMode(true);
 
@@ -525,16 +542,19 @@ void TestNote::LongNoteAfterShort_183746() {
 
       Segment* s = score->tick2segment(TDuration(TDuration::DurationType::V_128TH).ticks());
       QVERIFY(s && s->segmentType() == SegmentType::ChordRest);
+      QVERIFY(s->tick() == Fraction(1,128));
 
       Element* e = s->firstElement(0);
       QVERIFY(e && e->isNote());
 
-      int totalTicks = 0;
-      std::vector<Note*> nl = static_cast<Note*>(e)->tiedNotes();
+      std::vector<Note*> nl = toNote(e)->tiedNotes();
       QVERIFY(nl.size() >= 3); // the breve must be divided across at least 3 measures
-      for (Note* n : nl)
-            totalTicks += static_cast<Ms::Chord*>(n->parent())->durationTypeTicks();
-      QVERIFY(totalTicks == TDuration(TDuration::DurationType::V_BREVE).ticks()); // total duration same as a breve
+      Fraction totalTicks = Fraction(0,1);
+      for (Note* n : nl) {
+            totalTicks += n->chord()->durationTypeTicks();
+            }
+      Fraction breveTicks = TDuration(TDuration::DurationType::V_BREVE).ticks();
+      QVERIFY(totalTicks == breveTicks); // total duration same as a breve
       }
 
 QTEST_MAIN(TestNote)

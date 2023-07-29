@@ -15,4 +15,12 @@ set(TARGET tst_runscripts)
 include(${PROJECT_SOURCE_DIR}/mtest/cmake.inc)
 
 add_dependencies(tst_runscripts mscore)
-add_definitions(-DMSCORE_EXECUTABLE="$<TARGET_FILE:mscore>")
+add_definitions(-DMSCORE_EXECUTABLE_PATH="$<TARGET_FILE:mscore>")
+
+if (MSVC)
+      install(DIRECTORY
+            ${CMAKE_INSTALL_PREFIX}/workspaces
+            USE_SOURCE_PERMISSIONS
+            DESTINATION $<TARGET_FILE_DIR:mscore>/..
+            )
+endif (MSVC)

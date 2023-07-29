@@ -20,7 +20,8 @@
 #include "libmscore/staff.h"
 #include "libmscore/part.h"
 #include "libmscore/undo.h"
-#include "synthesizer/midipatch.h"
+
+#include "audio/midi/midipatch.h"
 
 #define DIR QString("libmscore/instrumentchange/")
 
@@ -83,8 +84,9 @@ void TestInstrumentChange::testAdd()
       ic->setParent(s);
       ic->setTrack(0);
       ic->setXmlText("Instrument");
+      score->startCmd();
       score->undoAddElement(ic);
-      score->doLayout();
+      score->endCmd();
       test_post(score, "add");
       }
 

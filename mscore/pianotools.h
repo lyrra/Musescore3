@@ -60,6 +60,9 @@ class HPiano : public QGraphicsView {
       Q_OBJECT
       int _firstKey;
       int _lastKey;
+      //Pitches pressed due to playback
+      QSet<int> _pressedPlaybackPitches;
+      //Pitches pressed due to user interaction
       QSet<int> _pressedPitches;
       QList<PianoKeyItem*> keys;
       qreal scaleVal;
@@ -75,12 +78,17 @@ class HPiano : public QGraphicsView {
    public:
       HPiano(QWidget* parent = 0);
       friend class PianoKeyItem;
-      void setPressedPitches(QSet<int> pitches);
+      void setPressedPlaybackPitches(QSet<int> pitches);
+      // User interaction
       void pressPitch(int pitch);
       void releasePitch(int pitch);
+      // Playback
+      void pressPlaybackPitch(int pitch);
+      void releasePlaybackPitch(int pitch);
       void clearSelection();
       void changeSelection(const Selection& selection);
       void updateAllKeys();
+      QSet<int>& pressedPlaybackPitches() { return _pressedPlaybackPitches; }
       virtual QSize sizeHint() const;
 
    public slots:
@@ -106,11 +114,17 @@ class PianoTools : public QDockWidget {
 
    public:
       PianoTools(QWidget* parent = 0);
+      // User Interaction
       void pressPitch(int pitch)    { _piano->pressPitch(pitch);   }
       void releasePitch(int pitch)  { _piano->releasePitch(pitch); }
-      void heartBeat(QList<const Note*> notes);
+      // Playback
+      void pressPlaybackPitch(int pitch)   { _piano->pressPlaybackPitch(pitch);   }
+      void releasePlaybackPitch(int pitch) { _piano->releasePlaybackPitch(pitch); }
+      QSet<int> pressedPlaybackPitches()   { return _piano->pressedPlaybackPitches(); }
+      void setPlaybackNotes(QList<const Note*> notes);
       void clearSelection();
       void changeSelection(const Selection& selection);
+      void updateAllKeys() { _piano->updateAllKeys(); }
       };
 
 

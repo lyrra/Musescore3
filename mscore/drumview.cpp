@@ -63,7 +63,7 @@ DrumItem::DrumItem(Note* n)
       setSelected(_note->selected());
       setData(0, QVariant::fromValue<void*>(_note));
 
-      setPos(_note->chord()->tick() + 480, pitch2y(pitch) + keyHeight / 4);
+      setPos(_note->chord()->tick().ticks() + 480, pitch2y(pitch) + keyHeight / 4);
       setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
       }
 
@@ -298,7 +298,7 @@ void DrumView::setStaff(Staff* s, Pos* l)
       scene()->blockSignals(false);
 
       Measure* lm = staff->score()->lastMeasure();
-      ticks       = lm->tick() + lm->ticks();
+      ticks       = (lm->tick() + lm->ticks()).ticks();
       scene()->setSceneRect(0.0, 0.0, double(ticks + 960), keyHeight * 75);
 
       for (int i = 0; i < 3; ++i)
@@ -337,7 +337,7 @@ void DrumView::moveLocator(int i)
 
 void DrumView::wheelEvent(QWheelEvent* event)
       {
-      int step = event->delta() / 120;
+      int step = event->angleDelta().y() / 120;
       double xmag = transform().m11();
       double ymag = transform().m22();
 

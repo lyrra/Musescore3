@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="3.01">
+<museScore version="3.02">
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
     <Division>480</Division>
     <Style>
       <ArpeggioHiddenInStdIfTab>1</ArpeggioHiddenInStdIfTab>
-      <Spatium>1.76389</Spatium>
+      <Spatium>1.74978</Spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -33,6 +33,7 @@
       <Instrument>
         <longName>Track 1</longName>
         <trackName></trackName>
+        <singleNoteDynamics>0</singleNoteDynamics>
         <StringData>
           <frets>24</frets>
           <string>40</string>
@@ -125,7 +126,7 @@
       <Division>480</Division>
       <Style>
         <ArpeggioHiddenInStdIfTab>1</ArpeggioHiddenInStdIfTab>
-        <Spatium>1.76389</Spatium>
+        <Spatium>1.74978</Spatium>
         </Style>
       <showInvisible>1</showInvisible>
       <showUnprintable>1</showUnprintable>
@@ -167,6 +168,7 @@
         <Instrument>
           <longName>Track 1</longName>
           <trackName></trackName>
+          <singleNoteDynamics>0</singleNoteDynamics>
           <StringData>
             <frets>24</frets>
             <string>40</string>

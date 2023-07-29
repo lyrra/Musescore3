@@ -42,11 +42,11 @@ class EditStaff : public QDialog, private Ui::EditStaffBase {
       Staff*      orgStaff;
       Instrument  instrument;
       int         _minPitchA, _maxPitchA, _minPitchP, _maxPitchP;
-      int         _tickStart, _tickEnd;
+      Fraction    _tickStart, _tickEnd;
 
       virtual void hideEvent(QHideEvent*);
       void apply();
-      void setStaff(Staff*);
+      void setStaff(Staff*, const Fraction& tick);
       void updateInterval(const Interval&);
       void updateStaffType();
       void updateInstrument();
@@ -69,14 +69,16 @@ class EditStaff : public QDialog, private Ui::EditStaffBase {
       void showClefChanged();
       void showTimeSigChanged();
       void showBarlinesChanged();
+      void invisibleChanged();
       void gotoNextStaff();
       void gotoPreviousStaff();
+      void transpositionChanged();
 
    signals:
       void instrumentChanged();
 
    public:
-      EditStaff(Staff*, int tick, QWidget* parent = 0);
+      EditStaff(Staff*, const Fraction& tick, QWidget* parent = 0);
       };
 
 

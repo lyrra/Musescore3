@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="3.01">
-  <programVersion>3.0.0</programVersion>
+  <programVersion>3.5.0</programVersion>
   <programRevision>cc16e73</programRevision>
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
@@ -26,7 +26,7 @@
     <metaTag name="lyricist"></metaTag>
     <metaTag name="movementNumber"></metaTag>
     <metaTag name="movementTitle"></metaTag>
-    <metaTag name="platform">Linux</metaTag>
+    <metaTag name="platform"></metaTag>
     <metaTag name="poet"></metaTag>
     <metaTag name="source"></metaTag>
     <metaTag name="translator"></metaTag>
@@ -347,28 +347,28 @@
           <Chord>
             <durationType>quarter</durationType>
             <Note>
-              <pitch>57</pitch>
+              <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>
           <Chord>
             <durationType>quarter</durationType>
             <Note>
-              <pitch>57</pitch>
+              <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>
           <Chord>
             <durationType>quarter</durationType>
             <Note>
-              <pitch>57</pitch>
+              <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>
           <Chord>
             <durationType>quarter</durationType>
             <Note>
-              <pitch>57</pitch>
+              <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>
@@ -379,7 +379,7 @@
           <Chord>
             <durationType>quarter</durationType>
             <Note>
-              <pitch>57</pitch>
+              <pitch>69</pitch>
               <tpc>17</tpc>
               </Note>
             </Chord>

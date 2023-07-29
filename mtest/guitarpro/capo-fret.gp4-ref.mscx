@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<museScore version="3.01">
+<museScore version="3.02">
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
     <Division>480</Division>
     <Style>
       <ArpeggioHiddenInStdIfTab>1</ArpeggioHiddenInStdIfTab>
-      <Spatium>1.76389</Spatium>
+      <Spatium>1.74978</Spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -33,6 +33,7 @@
       <Instrument>
         <longName>Track 1</longName>
         <trackName></trackName>
+        <singleNoteDynamics>0</singleNoteDynamics>
         <StringData>
           <frets>24</frets>
           <string>36</string>
@@ -85,7 +86,7 @@
             <linkedMain/>
             </Dynamic>
           <Tempo>
-            <tempo>1.16667</tempo>
+            <tempo>1.1666666666666667</tempo>
             <linkedMain/>
             <text><sym>metNoteQuarterUp</sym> = 70</text>
             </Tempo>
@@ -157,7 +158,7 @@
       <Division>480</Division>
       <Style>
         <ArpeggioHiddenInStdIfTab>1</ArpeggioHiddenInStdIfTab>
-        <Spatium>1.76389</Spatium>
+        <Spatium>1.74978</Spatium>
         </Style>
       <showInvisible>1</showInvisible>
       <showUnprintable>1</showUnprintable>
@@ -199,6 +200,7 @@
         <Instrument>
           <longName>Track 1</longName>
           <trackName></trackName>
+          <singleNoteDynamics>0</singleNoteDynamics>
           <StringData>
             <frets>24</frets>
             <string>36</string>
@@ -262,7 +264,7 @@
                 </linked>
               </Dynamic>
             <Tempo>
-              <tempo>1.16667</tempo>
+              <tempo>1.1666666666666667</tempo>
               <linked>
                 </linked>
               <text><sym>metNoteQuarterUp</sym> = 70</text>

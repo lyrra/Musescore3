@@ -15,11 +15,11 @@
 
 #include "mscore.h"
 #include "interval.h"
+#include "sym.h"
 
 namespace Ms {
 
 enum class Key;
-enum class SymId;
 
 //---------------------------------------------------------
 //   cycles
@@ -40,6 +40,7 @@ class Element;
 class Note;
 class Tuplet;
 class BarLine;
+class Fraction;
 
 enum class ClefType : signed char;
 
@@ -55,7 +56,8 @@ extern void transposeInterval(int pitch, int tpc, int* rpitch, int* rtpc,
    Interval, bool useDoubleSharpsFlats);
 extern int transposeTpc(int tpc, Interval interval, bool useDoubleSharpsFlats);
 
-extern Interval intervalList[26];
+constexpr int intervalListSize = 26;
+extern Interval intervalList[intervalListSize];
 extern int searchInterval(int steps, int semitones);
 extern int chromatic2diatonic(int val);
 
@@ -86,8 +88,10 @@ extern int step2pitch(int step);
 
 extern Segment* skipTuplet(Tuplet* tuplet);
 extern std::vector<SymId> toTimeSigString(const QString&);
+extern Fraction actualTicks(Fraction duration, Tuplet* tuplet, Fraction timeStretch);
 
 
+extern double yStaffDifference(const System* system1, int staffIdx1, const System* system2, int staffIdx2);
 }     // namespace Ms
 #endif
 

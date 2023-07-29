@@ -16,6 +16,8 @@
 #include "libmscore/part.h"
 #include "libmscore/undo.h"
 #include "libmscore/measure.h"
+#include "libmscore/measurenumber.h"
+#include "libmscore/mmrestrange.h"
 #include "libmscore/chord.h"
 #include "libmscore/note.h"
 #include "libmscore/breath.h"
@@ -56,6 +58,9 @@ class TestMeasure : public QObject, public MTest
       void deleteLast();
 //      void minWidth();
       void undoDelInitialVBox_269919();
+      void mmrest();
+      void mmrestRange();
+      void measureNumbers();
 
       void gap();
       void checkMeasure();
@@ -375,7 +380,7 @@ void TestMeasure::gap()
       //Select and delete third quarter rest in first Measure (voice 2)
       score->startCmd();
       Measure* m  = score->firstMeasure();
-      Segment* s  = m->undoGetSegment(SegmentType::ChordRest, 960);
+      Segment* s  = m->undoGetSegment(SegmentType::ChordRest, Fraction::fromTicks(960));
       Element* el = s->element(1);
       score->select(el);
       score->cmdDeleteSelection();
@@ -389,7 +394,7 @@ void TestMeasure::gap()
       //Select and delete second quarter rest in third Measure (voice 4)
       score->startCmd();
       m  = m->nextMeasure()->nextMeasure();
-      s  = m->undoGetSegment(SegmentType::ChordRest, 4320);
+      s  = m->undoGetSegment(SegmentType::ChordRest, Fraction::fromTicks(4320));
       el = s->element(3);
       score->select(el);
       score->cmdDeleteSelection();
@@ -402,7 +407,7 @@ void TestMeasure::gap()
 
       //Select and delete first quarter rest in third Measure (voice 4)
       score->startCmd();
-      s  = m->undoGetSegment(SegmentType::ChordRest, 3840);
+      s  = m->undoGetSegment(SegmentType::ChordRest, Fraction::fromTicks(3840));
       el = s->element(3);
       score->select(el);
       score->cmdDeleteSelection();
@@ -411,7 +416,10 @@ void TestMeasure::gap()
       tst = s->element(3);
       Q_ASSERT(tst);
 
-      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == 960/*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/);
+      QVERIFY(tst->isRest() && toRest(tst)->isGap()
+         && toRest(tst)->actualTicks() == Fraction::fromTicks(960)
+         /*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/
+         );
 
 
       delete score;
@@ -430,31 +438,37 @@ void TestMeasure::checkMeasure()
       Element* tst       = 0;
       Measure* m         = score->firstMeasure()->nextMeasure();
 
-      Segment* s = m->undoGetSegment(SegmentType::ChordRest, 2880);
+      Segment* s = m->undoGetSegment(SegmentType::ChordRest, Fraction::fromTicks(2880));
       tst = s->element(1);
       Q_ASSERT(tst);
 
-      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == 480/*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/);
+      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == Fraction::fromTicks(480)
+         /*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/
+         );
 
       m = m->nextMeasure();
-//      s = m->undoGetSegment(SegmentType::ChordRest, 3840);
+//      s = m->undoGetSegment(SegmentType::ChordRest, Fraction::fromTicks(3840));
 //      tst = s->element(2);
 //      Q_ASSERT(tst);
 
 //      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == 480/*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/);
 
       m = m->nextMeasure();
-      s = m->undoGetSegment(SegmentType::ChordRest, 6240);
+      s = m->undoGetSegment(SegmentType::ChordRest, Fraction::fromTicks(6240));
       tst = s->element(1);
       Q_ASSERT(tst);
 
-      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == 120/*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/);
+      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == Fraction::fromTicks(120)
+         /*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/
+         );
 
-      s = m->undoGetSegment(SegmentType::ChordRest, 6480);
+      s = m->undoGetSegment(SegmentType::ChordRest, Fraction::fromTicks(6480));
       tst = s->element(1);
       Q_ASSERT(tst);
 
-      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == 120/*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/);
+      QVERIFY(tst->isRest() && toRest(tst)->isGap() && toRest(tst)->actualTicks() == Fraction::fromTicks(120)
+         /*&& toRest(tst)->durationType() == TDuration::DurationType::V_HALF*/
+         );
 
       delete score;
       }
@@ -481,7 +495,7 @@ void TestMeasure::undoDelInitialVBox_269919()
       // 2. change duration of first chordrest
       score->startCmd();
       Measure* m = score->firstMeasure();
-      ChordRest* cr = m->findChordRest(0, 0);
+      ChordRest* cr = m->findChordRest(Fraction(0,1), 0);
       Fraction quarter(4, 1);
       score->changeCRlen(cr, quarter);
       score->endCmd();
@@ -494,6 +508,116 @@ void TestMeasure::undoDelInitialVBox_269919()
 
       QVERIFY(saveCompareScore(score, "undoDelInitialVBox_269919.mscx", DIR + "undoDelInitialVBox_269919-ref.mscx"));
       delete score;
+      }
+
+//---------------------------------------------------------
+///   mmrest
+///    mmrest creation
+//---------------------------------------------------------
+
+void TestMeasure::mmrest()
+      {
+      MasterScore* score = readScore(DIR + "mmrest.mscx");
+      score->startCmd();
+      score->undo(new ChangeStyleVal(score, Sid::createMultiMeasureRests, true));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "mmrest.mscx", DIR + "mmrest-ref.mscx"));
+      delete score;
+      }
+
+//---------------------------------------------------------
+///   mmrestRange
+//---------------------------------------------------------
+
+void TestMeasure::mmrestRange()
+      {
+      MMRestRange* mmRestRange = new MMRestRange(score);
+
+   // bracketing
+      mmRestRange->setBracketType(MMRestRangeBracketType::BRACKETS);
+      mmRestRange->setPropertyFlags(Pid::MMREST_RANGE_BRACKET_TYPE, PropertyFlags::UNSTYLED);
+      MMRestRange* mm = static_cast<MMRestRange*>(writeReadElement(mmRestRange));
+      QCOMPARE(mm->bracketType(), MMRestRangeBracketType::BRACKETS);
+      delete mm;
+      delete mmRestRange;
+      }
+
+//---------------------------------------------------------
+///   measureNumbers
+///    test measure numbers properties
+//---------------------------------------------------------
+
+void TestMeasure::measureNumbers()
+      {
+      MeasureNumber* measureNumber = new MeasureNumber(score);
+
+   // horizontal placement
+      measureNumber->setHPlacement(HPlacement::CENTER);
+      measureNumber->setPropertyFlags(Pid::HPLACEMENT, PropertyFlags::UNSTYLED);
+      MeasureNumber* mn = static_cast<MeasureNumber*>(writeReadElement(measureNumber));
+      QCOMPARE(mn->hPlacement(), HPlacement::CENTER);
+      delete mn;
+      delete measureNumber;
+
+      MasterScore* score = readScore(DIR + "measurenumber.mscx");
+
+      // Place measure numbers below
+      score->startCmd();
+      score->undo(new ChangeStyleVal(score, Sid::measureNumberVPlacement, QVariant(int (Placement::BELOW))));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "measurenumber-1.mscx", DIR + "measurenumber-1-ref.mscx"));
+
+      // center measure numbers
+      score->startCmd();
+      score->undo(new ChangeStyleVal(score, Sid::measureNumberHPlacement, QVariant(int (HPlacement::CENTER))));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "measurenumber-2.mscx", DIR + "measurenumber-2-ref.mscx"));
+
+      // show on first system too
+      score->undo(new ChangeStyleVal(score, Sid::showMeasureNumberOne, QVariant(true)));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "measurenumber-3.mscx", DIR + "measurenumber-3-ref.mscx"));
+
+      // every 5 measures (default interval)
+      score->startCmd();
+      // to know wheter measure numbers are shown at regular intervals or on every system,
+      // musescore simply checks if measure numbers are shown at system or not.
+      score->undo(new ChangeStyleVal(score, Sid::measureNumberSystem, QVariant(false)));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "measurenumber-4.mscx", DIR + "measurenumber-4-ref.mscx"));
+
+      // do not show first measure number. This should shift all measure numbers,
+      // because they are still placed at regular intervals.
+      // Instead of being at 1-6-11-16-21, etc. They should be at 5-10-15-20-25, etc.
+      score->startCmd();
+      score->undo(new ChangeStyleVal(score, Sid::showMeasureNumberOne, QVariant(false)));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "measurenumber-5.mscx", DIR + "measurenumber-5-ref.mscx"));
+
+      // show at every measure (except fist)
+      score->startCmd();
+      score->undo(new ChangeStyleVal(score, Sid::measureNumberInterval, QVariant(1)));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "measurenumber-6.mscx", DIR + "measurenumber-6-ref.mscx"));
+
+      // Disable measure numbers
+      score->startCmd();
+      // to know wheter measure numbers are shown at regular intervals or on every system,
+      // musescore simply checks if measure numbers are shown at system or not.
+      score->undo(new ChangeStyleVal(score, Sid::showMeasureNumber, QVariant(false)));
+      score->setLayoutAll();
+      score->endCmd();
+      QVERIFY(saveCompareScore(score, "measurenumber-7.mscx", DIR + "measurenumber-7-ref.mscx"));
+
+      delete score;
+
       }
 
 

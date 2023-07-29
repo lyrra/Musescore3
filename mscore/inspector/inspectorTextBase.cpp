@@ -34,6 +34,7 @@ InspectorTextBase::InspectorTextBase(QWidget* parent)
             { Pid::SIZE_SPATIUM_DEPENDENT,        0,  t.spatiumDependent,    t.resetSpatiumDependent    },
             { Pid::FONT_STYLE,        0, t.fontStyle,    t.resetFontStyle    },
             { Pid::FRAME_TYPE,        0, t.frameType,    t.resetFrameType    },
+            { Pid::TEXT_LINE_SPACING, 0, t.textLineSpacing, t.resetTextLineSpacing                      },
             { Pid::FRAME_FG_COLOR,    0, t.frameColor,   t.resetFrameColor   },
             { Pid::FRAME_BG_COLOR,    0, t.bgColor,      t.resetBgColor      },
             { Pid::FRAME_WIDTH,       0, t.frameWidth,   t.resetFrameWidth   },
@@ -50,8 +51,8 @@ InspectorTextBase::InspectorTextBase(QWidget* parent)
             pList.push_back(i);
       QComboBox* b = t.frameType;
       b->clear();
-      b->addItem(b->QObject::tr("No frame"), int(FrameType::NO_FRAME));
-      b->addItem(b->QObject::tr("Square"), int(FrameType::SQUARE));
+      b->addItem(b->QObject::tr("None", "no frame for text"), int(FrameType::NO_FRAME));
+      b->addItem(b->QObject::tr("Rectangle"), int(FrameType::SQUARE));
       b->addItem(b->QObject::tr("Circle"), int(FrameType::CIRCLE));
 
       connect(t.resetToStyle, SIGNAL(clicked()), SLOT(resetToStyle()));
@@ -107,19 +108,19 @@ const std::vector<Tid>& InspectorTextBase::allowedTextStyles()
 //   populateStyle
 //---------------------------------------------------------
 
-void InspectorTextBase::populateStyle(QComboBox* style)
+void InspectorTextBase::populateStyle(QComboBox* s)
       {
-      if (style) {
-            this->style = style;
+      if (s) {
+            this->style = s;
             Score* score = inspector->element()->score();
-            style->blockSignals(true);
-            int idx = style->currentIndex();
-            style->clear();
+            s->blockSignals(true);
+            int idx = s->currentIndex();
+            s->clear();
             for (auto ss : allowedTextStyles())
-                  style->addItem(score->getTextStyleUserName(ss), int(ss));
-            style->setCurrentIndex(idx);
-            style->blockSignals(false);
-            }
+                  s->addItem(score->getTextStyleUserName(ss), int(ss));
+            s->setCurrentIndex(idx);
+            s->blockSignals(false);
+           }
       }
 
 } // namespace Ms

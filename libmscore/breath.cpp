@@ -17,6 +17,7 @@
 #include "measure.h"
 #include "score.h"
 #include "xml.h"
+#include "staff.h"
 
 namespace Ms {
 
@@ -25,10 +26,12 @@ const std::vector<BreathType> Breath::breathList {
       { SymId::breathMarkTick,       false, 0.0 },
       { SymId::breathMarkSalzedo,    false, 0.0 },
       { SymId::breathMarkUpbow,      false, 0.0 },
-      { SymId::caesuraCurved,        true,  0.0 },
-      { SymId::caesura,              true,  0.0 },
-      { SymId::caesuraShort,         true,  0.0 },
-      { SymId::caesuraThick,         true,  0.0 },
+      { SymId::caesuraCurved,        true,  2.0 },
+      { SymId::caesura,              true,  2.0 },
+      { SymId::caesuraShort,         true,  2.0 },
+      { SymId::caesuraThick,         true,  2.0 },
+      { SymId::chantCaesura,         true,  2.0 },
+      { SymId::caesuraSingleStroke,  true,  2.0 },
       };
 
 //---------------------------------------------------------
@@ -61,10 +64,16 @@ bool Breath::isCaesura() const
 
 void Breath::layout()
       {
-      if (isCaesura())
-            setPos(x(), spatium());
-      else
-            setPos(x(), 0.5 * spatium());
+      bool palette = (!staff() || track() == -1);
+      if (!palette) {
+            int voiceOffset = placeBelow() * (staff()->lines(tick()) - 1) * spatium();
+            if (isCaesura())
+                  setPos(rxpos(), spatium() + voiceOffset);
+            else if ((score()->styleSt(Sid::MusicalSymbolFont) == "Emmentaler") && (symId() == SymId::breathMarkComma))
+                  setPos(rxpos(), 0.5 * spatium() + voiceOffset);
+            else
+                  setPos(rxpos(), -0.5 * spatium() + voiceOffset);
+            }
       setbbox(symBbox(_symId));
       }
 
@@ -112,6 +121,15 @@ void Breath::read(XmlReader& e)
             else if (!Element::readProperties(e))
                   e.unknown();
             }
+      }
+
+//---------------------------------------------------------
+//   mag
+//---------------------------------------------------------
+
+qreal Breath::mag() const
+      {
+      return staff() ? staff()->mag(tick()) : 1.0;
       }
 
 //---------------------------------------------------------
@@ -165,7 +183,6 @@ bool Breath::setProperty(Pid propertyId, const QVariant& v)
             case Pid::SYMBOL:
                   setSymId(v.value<SymId>());
                   break;
-
             case Pid::PAUSE:
                   setPause(v.toDouble());
                   break;
@@ -188,6 +205,8 @@ QVariant Breath::propertyDefault(Pid id) const
       switch(id) {
             case Pid::PAUSE:
                   return 0.0;
+            case Pid::PLACEMENT:
+                  return track() & 1 ? int(Placement::BELOW) : int(Placement::ABOVE);
             default:
                   return Element::propertyDefault(id);
             }

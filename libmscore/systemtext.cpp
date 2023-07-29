@@ -20,6 +20,7 @@ namespace Ms {
 
 static const ElementStyle systemStyle {
       { Sid::systemTextPlacement,                Pid::PLACEMENT              },
+      { Sid::systemTextMinDistance,              Pid::MIN_DISTANCE           },
       };
 
 //---------------------------------------------------------
@@ -53,18 +54,7 @@ QVariant SystemText::propertyDefault(Pid id) const
 void SystemText::layout()
       {
       TextBase::layout();
-      autoplaceSegmentElement(styleP(Sid::systemTextMinDistance));
-      }
-
-//---------------------------------------------------------
-//   getPropertyStyle
-//---------------------------------------------------------
-
-Sid SystemText::getPropertyStyle(Pid pid) const
-      {
-      if (pid == Pid::OFFSET)
-            return placeAbove() ? Sid::systemTextPosAbove : Sid::systemTextPosBelow;
-      return TextBase::getPropertyStyle(pid);
+      autoplaceSegmentElement();
       }
 
 } // namespace Ms

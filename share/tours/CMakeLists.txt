@@ -17,15 +17,7 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #=============================================================================
 
-install(FILES
-      autoplace.tour
-      inspector.tour
-      mmrest.tour
-      navigate.tour
-      noteinput.tour
-      palette.tour
-      select.tour
-      timeline.tour
-      welcome.tour
-      DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}tours
-      )
+install(DIRECTORY ./
+    DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}tours
+    FILES_MATCHING
+    REGEX ".*\\.tour")

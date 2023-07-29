@@ -51,6 +51,8 @@ bool ScoreView::editKeyLyrics()
                         bool kl = editData.key == Qt::Key_Left;
                         lyricsTab(kl, kl, true);      // go to previous/next lyrics
                         }
+                  if (editData.modifiers & Qt::ShiftModifier)
+                        _score->update(); // draw updated selection
                   break;
 
             case Qt::Key_Up:
@@ -64,6 +66,10 @@ bool ScoreView::editKeyLyrics()
 
             case Qt::Key_Minus:
                   if (editData.control(textEditing)) {
+                        if ((editData.modifiers & Qt::AltModifier) && editData.element->edit(editData)) {
+                              _score->update();
+                              break;
+                              }
                         // change into normal minus
                         editData.modifiers &= ~CONTROL_MODIFIER;
                         return false;
@@ -75,7 +81,7 @@ bool ScoreView::editKeyLyrics()
             case Qt::Key_Underscore:
                   if (editData.control(textEditing)) {
                         // change into normal underscore
-                        editData.modifiers = 0; // &= ~CONTROL_MODIFIER;
+                        editData.modifiers = {}; // &= ~CONTROL_MODIFIER;
                         return false;
                         }
                   else
@@ -367,13 +373,13 @@ void ScoreView::lyricsMinus()
 
 void ScoreView::lyricsUnderscore()
       {
-      Lyrics* lyrics   = toLyrics(editData.element);
-      int track        = lyrics->track();
-      Segment* segment = lyrics->segment();
-      int verse        = lyrics->no();
-      Placement placement = lyrics->placement();
+      Lyrics* lyrics       = toLyrics(editData.element);
+      int track            = lyrics->track();
+      Segment* segment     = lyrics->segment();
+      int verse            = lyrics->no();
+      Placement placement  = lyrics->placement();
       PropertyFlags pFlags = lyrics->propertyFlags(Pid::PLACEMENT);
-      int endTick      = segment->tick(); // a previous melisma cannot extend beyond this point
+      Fraction endTick     = segment->tick(); // a previous melisma cannot extend beyond this point
 
       changeState(ViewState::NORMAL);
 
@@ -407,7 +413,7 @@ void ScoreView::lyricsUnderscore()
       // there will be no melisma anyway), set a temporary melisma duration
       if (fromLyrics == lyrics && nextSegment) {
             _score->startCmd();
-            lyrics->undoChangeProperty(Pid::LYRIC_TICKS, Lyrics::TEMP_MELISMA_TICKS);
+            lyrics->undoChangeProperty(Pid::LYRIC_TICKS, Fraction::fromTicks(Lyrics::TEMP_MELISMA_TICKS));
             _score->setLayoutAll();
             _score->endCmd();
             }
@@ -437,6 +443,7 @@ void ScoreView::lyricsUnderscore()
 
       // if a place for a new lyrics has been found, create a lyrics there
 
+      _score->startCmd();
       ChordRest* cr    = toChordRest(nextSegment->element(track));
       Lyrics* toLyrics = cr->lyrics(verse, placement);
       bool newLyrics   = (toLyrics == 0);
@@ -541,7 +548,7 @@ void ScoreView::lyricsEndEdit()
             segment = segment->prev1(SegmentType::ChordRest);
             }
       if (prevLyrics && prevLyrics->syllabic() == Lyrics::Syllabic::END) {
-            int endTick = prevSegment->tick();      // a prev. melisma should not go beyond this segment
+            Fraction endTick = prevSegment->tick();      // a prev. melisma should not go beyond this segment
             if (prevLyrics->endTick() >= endTick)
                   prevLyrics->undoChangeProperty(Pid::LYRIC_TICKS, endTick - prevLyrics->segment()->tick());
             }
