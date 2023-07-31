@@ -150,16 +150,6 @@ else(BUILD_CRASH_REPORTER)
       message("Crash reporter disabled")
 endif(BUILD_CRASH_REPORTER)
 
-# Scripting
-option(BUILD_GUILE "Build with GNU Guile SCHEME support" ON) # GNU Guile SCHEME support
-
-set (BUILD_SHARED $ENV{BUILD_SHARED}) # Build libmusescore shared library
-set (GUILE $ENV{GUILE}) # Build test environment for Scheme test script
-
-if(BUILD_SHARED)
-  set(LIBMUSESCORE_SHARED 1)
-endif(BUILD_SHARED)
-
 if (APPLE)
       set (CMAKE_CXX_COMPILER   clang++)
       set (CMAKE_CXX_COMPILER_ID "Clang")
@@ -341,12 +331,8 @@ if (DOWNLOAD_SOUNDFONT)
   endif()
 endif(DOWNLOAD_SOUNDFONT)
 
-
-if (GUILE)
-  # Guile needs libmusescore as a shared library
-  set(LIBMUSESCORE_SHARED 1)
-  find_program(GUILE_BIN "guile") # Path to Guile/Scheme interpreter
-endif (GUILE)
+set(LIBMUSESCORE_SHARED 1)
+find_program(GUILE_BIN "guile") # Path to Guile/Scheme interpreter
 
 if (USE_ZITA_REVERB)
     add_definitions(-DZITA_REVERB)
@@ -470,10 +456,8 @@ endif(APPLE)
 ##
 ## Guile scripting
 ##
-if (BUILD_GUILE)
-    include(FindGuile)
-    set(USE_GUILE 1)
-endif(BUILD_GUILE)
+include(FindGuile)
+set(USE_GUILE 1)
 
 ##
 ## QtSingleApplication

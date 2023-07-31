@@ -314,11 +314,7 @@ else (MSVC OR MINGW)
       target_link_libraries(mscoreapp vorbisfile)
 endif (MSVC OR MINGW)
 
-if (LIBMUSESCORE_SHARED)
-  set(MUSESCORE_LIBLINK musescore)
-else (LIBMUSESCORE_SHARED)
-  set(MUSESCORE_LIBLINK libmscore)
-endif (LIBMUSESCORE_SHARED)
+set(MUSESCORE_LIBLINK musescore)
 
 target_link_libraries(mscoreapp
       awl
