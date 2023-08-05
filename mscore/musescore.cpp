@@ -1032,12 +1032,15 @@ void MuseScore::seqStarted(unsigned int playFrame)
 void MuseScore::seqStopped(unsigned int playFrame)
 {
     // update play position
+    if (!cs) {
+        qWarning("BUG: cs is null");
+        return;
+    }
     int tck = cs->repeatList().utick2tick(cs->utime2utick(qreal(playFrame) / qreal(MScore::sampleRate)));
     cs->setPlayPos(Fraction::fromTicks(tck));
     cs->update();
     cv->setCursorOn(false);
 }
-
 
 //---------------------------------------------------------
 //   MuseScore
