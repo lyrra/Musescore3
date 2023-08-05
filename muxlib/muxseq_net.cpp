@@ -55,6 +55,13 @@ int muxseq_send (MuxseqMsgType type, NPlayEvent event) {
     return muxseq_query_zmq(type, msg);
 }
 
+int muxseq_send (MuxseqMsgType type, SparseEvent& event) {
+    LD("muxseq_send %s SparseEvent", muxseq_msg_type_info(type));
+    struct MuxseqMsg msg;
+    memcpy(&msg.payload.sparseEvent, (void *)&event, sizeof(SparseEvent));
+    return muxseq_query_zmq(type, msg);
+}
+
 int muxseq_send (MuxseqMsgType type, int maxMidiPorts, std::vector<struct SparseMidiEvent> sevs) {
     int slen = sevs.size();
     int len = 12 + sizeof(struct SparseMidiEvent) * sevs.size() + sizeof(struct MuxseqMsg); // need atleast large enough to hold an generic struct MuxseqMsg

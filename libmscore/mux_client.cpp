@@ -12,7 +12,7 @@ void _logstr (char *str) {
     qDebug(str);
 }
 
-int muxseq_query_zmq (MuxseqMsgType type, MuxseqMsg &msg) {
+static int muxseq_query_zmq (MuxseqMsgType type, MuxseqMsg &msg) {
     msg.type = type;
     Mux::mux_zmq_send(g_libmscore_muxseq_query_client_socket, (void*) &msg, sizeof(struct MuxseqMsg));
     return Mux::mux_zmq_recv(g_libmscore_muxseq_query_client_socket, (void*) &msg, sizeof(struct MuxseqMsg));

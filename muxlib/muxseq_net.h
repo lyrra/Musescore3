@@ -6,6 +6,7 @@ int muxseq_send (MuxseqMsgType type);
 int muxseq_send (MuxseqMsgType type, int i);
 int muxseq_send (MuxseqMsgType type, double d);
 int muxseq_send (MuxseqMsgType type, NPlayEvent event);
+int muxseq_send (MuxseqMsgType type, SparseEvent& event);
 int muxseq_send (MuxseqMsgType type, int maxMidiPorts, std::vector<struct SparseMidiEvent> sevs);
 int muxseq_query (MuxseqMsgType type);
 bool muxseq_query_bool (MuxseqMsgType type);

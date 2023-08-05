@@ -265,8 +265,13 @@ void muxseq_start_note(int channel, int pitch, int velocity, double nt) {
 }
 
 void muxseq_start_note_dur(int channel, int pitch, int velocity, int duration, double nt) {
-    //FIX: create an sparse midi event
-    muxseq_send(MsgTypeSeqStartNoteDur);
+    SparseEvent sev;
+    sev.channel = channel;
+    sev.pitch = pitch;
+    sev.velo = velocity;
+    sev.division = duration;
+    sev.playPosSeconds = nt;
+    muxseq_send(MsgTypeSeqStartNoteDur, sev);
 }
 
 void muxseq_seq_seek(int utick) {

@@ -327,7 +327,6 @@ int muxseq_handle_musescore_msg_MsgTypeSeqCanStart (Mux::MuxSocket &sock, struct
     // FIX: query muxaudio if sequencer can start
     return muxseq_handle_musescore_reply_bool(sock, msg, true);
 }
-
 int muxseq_handle_musescore_msg_MsgTypeSeqStart (Mux::MuxSocket &sock, struct MuxseqMsg msg) {
     int rc = 0;
     if (g_seq) {
@@ -350,6 +349,17 @@ int muxseq_handle_musescore_msg_MsgTypeSeqStop (Mux::MuxSocket &sock, struct Mux
     return muxseq_handle_musescore_reply_int(sock, msg, rc);
 }
 
+int muxseq_handle_musescore_msg_MsgTypeSeqStopWait (Mux::MuxSocket &sock, struct MuxseqMsg msg) {
+    LD4("handle MsgTypeSeqStopWait");
+    int rc = 0;
+    // FIX: SEQ doesn't do anything on gui-initiated-playstop ?
+    if (g_seq) {
+        g_seq->guiStop(); // FIX: really call seq from this thread?
+        g_seq->stop(); // FIX: really call seq from this thread?
+    }
+    return muxseq_handle_musescore_reply_int(sock, msg, rc);
+}
+
 int muxseq_handle_musescore_msg_MsgTypeSeqSeek (Mux::MuxSocket &sock, struct MuxseqMsg msg) {
     LD("MSCORE ==> MUXSEQ msg %s tick=%i", muxseq_msg_type_info(msg.type), msg.payload.i);
     if (g_seq) {
@@ -358,9 +368,27 @@ int muxseq_handle_musescore_msg_MsgTypeSeqSeek (Mux::MuxSocket &sock, struct Mux
     muxseq_msg_to_audio(MsgTypeTransportSeek, msg.payload.i);
     return muxseq_handle_musescore_reply_int(sock, msg, 0);
 }
+
 int muxseq_handle_musescore_msg_MsgTypeSeqPlaying (Mux::MuxSocket &sock, struct MuxseqMsg msg) {
     LD("MSCORE ==> MUXSEQ msg %s tick=%i", muxseq_msg_type_info(msg.type), msg.payload.i);
     return muxseq_handle_musescore_reply_int(sock, msg, g_state_play ? 1 : 0);
+}
+
+int muxseq_handle_musescore_msg_MsgTypeSeqStartNoteDur (Mux::MuxSocket &sock, struct MuxseqMsg msg) {
+    LD("MSCORE ==> MUXSEQ msg %s", muxseq_msg_type_info(msg.type));
+    int rc = 0;
+    if (g_seq) {
+        // g_seq->start(); // FIX: really call seq from this thread?
+        g_seq->startNote(msg.payload.sparseEvent.channel,
+                         msg.payload.sparseEvent.pitch,
+                         msg.payload.sparseEvent.velo,
+                         msg.payload.sparseEvent.division, // duration;
+                         msg.payload.sparseEvent.playPosSeconds); // note-tuning
+    } else {
+        LE("cant play sequencer: it doesnt exist!");
+        rc = -1;
+    }
+    return muxseq_handle_musescore_reply_int(sock, msg, rc);
 }
 
 int muxseq_handle_musescore_msg_MsgTypeMasterSynthInitInstruments(Mux::MuxSocket &sock, void *buf) {
@@ -414,10 +442,15 @@ int muxseq_handle_musescore_msg(Mux::MuxSocket &sock, void *buf)
             return muxseq_handle_musescore_msg_MsgTypeSeqStop(sock, msg);
         case MsgTypeSeqSeek:
             return muxseq_handle_musescore_msg_MsgTypeSeqSeek(sock, msg);
+        case MsgTypeSeqStopWait:
+            return muxseq_handle_musescore_msg_MsgTypeSeqStopWait(sock, msg);
+        case MsgTypeSeqStartNoteDur:
+            return muxseq_handle_musescore_msg_MsgTypeSeqStartNoteDur(sock, msg);
         case MsgTypeMasterSynthInitInstruments:
             return muxseq_handle_musescore_msg_MsgTypeMasterSynthInitInstruments(sock, buf);
         case MsgTypeSeqPlaying:
             return muxseq_handle_musescore_msg_MsgTypeSeqPlaying(sock, msg);
+        // MsgTypeSeqStopWait
         default:
             LD("ERROR: Unknown message: %s", muxseq_msg_type_info(msg.type));
         break;
