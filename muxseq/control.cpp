@@ -17,10 +17,13 @@
 #include "muxlib.h"
 #include "muxseq.h"
 #include "muxqueue.h"
+#include "muxtaskv.h"
 
 #define MAILBOX_SIZE 256
 
 namespace Ms {
+
+extern MuxTaskv *g_seq_taskv;
 
 void muxseq_mscoreQueryServer_mainloop(Mux::MuxSocket &sock);
 void muxseq_mscoreQueryReqServer_mainloop(Mux::MuxSocket &sock);
@@ -29,6 +32,7 @@ void mux_network_server_audio();
 int mux_mq_to_audio_visit();
 void mux_audio_process();
 
+void seq_timer_thread_mainloop ();
 void muxseq_muxaudioQueryClient_mainloop(Mux::MuxSocket &sock);
 //void muxseq_muxaudioWorker_thread_init(std::string msg);
 //void muxseq_audioWorker_thread_init(std::string msg);
@@ -41,6 +45,13 @@ struct Mux::MuxSocket g_muxsocket_muxaudioQueryClientAudio;
 struct Mux::MuxSocket g_muxsocket_muxaudioQueryClientCtrl;
 extern int g_muxseq_audio_process_run;
 extern struct MuxQueue *queue_from_mscore;
+
+void seq_timer_thread_init (std::string _notused)
+{
+    LD("seq_timer_thread_init");
+    g_seq_taskv = new MuxTaskv();
+    seq_timer_thread_mainloop();
+}
 
 /* this thread listens on message from musescore */
 void muxseq_mscoreQueryServer_thread_init(std::string _notused)
@@ -102,7 +113,6 @@ void muxseq_audio_zmq_connect()
     Mux::mux_make_connection(g_muxsocket_muxaudioQueryClientCtrl, MUX_MUXAUDIO_QUERY_CTRL_CLIENT_URL, Mux::ZmqType::QUERY, Mux::ZmqDir::REQ, Mux::ZmqServer::CONNECT);
 }
 
-
 void muxseq_threads_start()
 {
     queue_from_mscore = mux_mq_new(MAILBOX_SIZE);
@@ -113,7 +123,13 @@ void muxseq_threads_start()
     LD("start threads\n");
     std::vector<std::thread> threadv;
 
-    // phase one, connect to muxaudio
+    // starts threads in order, to avoid deadlocks
+
+    std::thread timerThread(seq_timer_thread_init, "notused");
+    threadv.push_back(std::move(timerThread));
+
+    // connect to muxaudio
+
 
     muxseq_audio_zmq_connect();
 
@@ -125,7 +141,7 @@ void muxseq_threads_start()
 
     //FIX: wait for servers to have connected to muxaudio
 
-    // phase two, start network serving musescore
+    // start network serving musescore
 
     std::thread mscoreQueryServerThread(muxseq_mscoreQueryServer_thread_init, "notused");
     threadv.push_back(std::move(mscoreQueryServerThread));
@@ -139,6 +155,7 @@ void muxseq_threads_start()
 void muxseq_threads_stop()
 {
     std::cout << "MUXSEQ stop all threads\n";
+    g_seq_taskv->stop();
     //muxThreads[0].join();
 }
 

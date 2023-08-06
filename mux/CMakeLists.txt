@@ -25,6 +25,7 @@ add_library(mux STATIC
       #${PCH}
       mux.h mux.cpp
       muxqueue.h muxqueue.cpp
+      muxtaskv.h muxtaskv.cpp
       )
 
 #target_link_libraries (${MODULE}

@@ -17,11 +17,12 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
-#include "config.h"
 #include <chrono>
 #include <thread>
+#include "config.h"
 #include "seq.h"
 #include "event.h"
+#include "muxtaskv.h"
 #include "muxlib.h"
 #include "muxseq.h"
 #include "muxseqsig.h"
@@ -40,8 +41,10 @@
 #endif
 
 namespace Ms {
+MuxTaskv *g_seq_taskv = nullptr;
 void* muxseq_mscore_query (MuxseqMsgType type, int i);
 int muxseq_mscore_tell (MuxseqMsgType type, int i);
+void f_stopNotes();
 
 double g_sampleRate = 48000; //FIX: poll muxaudio
 int g_driver_running = 0;
@@ -216,11 +219,6 @@ Seq::Seq()
       heartBeatTimer = new QTimer(this);
       connect(heartBeatTimer, SIGNAL(timeout()), this, SLOT(heartBeatTimeout()));
 
-      noteTimer = new QTimer(this);
-      noteTimer->setSingleShot(true);
-      connect(noteTimer, SIGNAL(timeout()), this, SLOT(stopNotes()));
-      noteTimer->stop();
-
       prevTimeSig.setNumerator(0);
       prevTempo = 0;
       connect(this, SIGNAL(timeSigChanged()),this,SLOT(handleTimeSigTempoChanged()));
@@ -229,15 +227,21 @@ Seq::Seq()
       initialMillisecondTimestampWithLatency = 0;
       }
 
-//---------------------------------------------------------
-//   Seq
-//---------------------------------------------------------
-
 Seq::~Seq()
       {
       qDebug("!!!! qseq destructor !!!!");
       }
 
+//---------------------------------------------------------
+//   Seq timer
+//---------------------------------------------------------
+
+void seq_timer_thread_mainloop ()
+{
+    while (g_seq_taskv->run()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
 //---------------------------------------------------------
 //   setScoreView
 //---------------------------------------------------------
@@ -1492,7 +1496,7 @@ void Seq::startNote(int channel, int pitch, int velo, int duration, double nt)
       {
       stopNotes();
       startNote(channel, pitch, velo, nt);
-      startNoteTimer(duration);
+      g_seq_taskv->schedule(duration, f_stopNotes);
       }
 
 //---------------------------------------------------------
@@ -1506,17 +1510,6 @@ void Seq::playMetronomeBeat(BeatType type)
       //FIX: no NPlayEvent type??? liveEventQueue()->enqueue(NPlayEvent(type));
       }
 
-//---------------------------------------------------------
-//   startNoteTimer
-//---------------------------------------------------------
-
-void Seq::startNoteTimer(int duration)
-      {
-      if (duration) {
-            noteTimer->setInterval(duration);
-            noteTimer->start();
-            }
-      }
 //---------------------------------------------------------
 //   stopNoteTimer
 //---------------------------------------------------------
@@ -1532,6 +1525,11 @@ void Seq::stopNoteTimer()
 //---------------------------------------------------------
 //   stopNotes
 //---------------------------------------------------------
+
+void f_stopNotes()
+{
+    g_seq->stopNotes(-1, false);
+}
 
 void Seq::stopNotes(int channel, bool realTime)
       {
@@ -1589,7 +1587,8 @@ void Seq::setController(int channel, int ctrl, int data)
 
 void Seq::sendEvent(const NPlayEvent& ev)
       {
-      guiToSeq(SeqMsg(SeqMsgId::PLAY, ev));
+      putEvent(ev);
+      //guiToSeq(SeqMsg(SeqMsgId::PLAY, ev));
       }
 
 //---------------------------------------------------------

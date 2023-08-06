@@ -123,6 +123,20 @@ int muxseq_from_mscore_reader_visit () {
                 return 1;
             }
         break;
+        case MsgTypeSeqStartNoteDur:
+            {
+                LD("MSCORE i=> MUXSEQ msg %s", muxseq_msg_type_info((MuxseqMsgType) type));
+                struct MuxseqMsg *mx = (struct MuxseqMsg*) msg;
+                if (g_seq) {
+                    g_seq->startNote(mx->payload.sparseEvent.channel,
+                                     mx->payload.sparseEvent.pitch,
+                                     mx->payload.sparseEvent.velo,
+                                     mx->payload.sparseEvent.division, // duration;
+                                     mx->payload.sparseEvent.playPosSeconds); // note-tuning
+                }
+                free(msg);
+                return 1;
+            }
         default:
             LD("MSCORE i=> MUXSEQ msg %s UNKNOWN INTERNAL MESSAGE", muxseq_msg_type_info((MuxseqMsgType) type));
     }
@@ -377,15 +391,11 @@ int muxseq_handle_musescore_msg_MsgTypeSeqPlaying (Mux::MuxSocket &sock, struct 
 int muxseq_handle_musescore_msg_MsgTypeSeqStartNoteDur (Mux::MuxSocket &sock, struct MuxseqMsg msg) {
     LD("MSCORE ==> MUXSEQ msg %s", muxseq_msg_type_info(msg.type));
     int rc = 0;
-    if (g_seq) {
-        // g_seq->start(); // FIX: really call seq from this thread?
-        g_seq->startNote(msg.payload.sparseEvent.channel,
-                         msg.payload.sparseEvent.pitch,
-                         msg.payload.sparseEvent.velo,
-                         msg.payload.sparseEvent.division, // duration;
-                         msg.payload.sparseEvent.playPosSeconds); // note-tuning
-    } else {
-        LE("cant play sequencer: it doesnt exist!");
+    int len = sizeof(struct MuxseqMsg);
+    void* data = malloc(len);
+    memcpy(data, (void *) &msg, len);
+    if (mux_mq_write(queue_from_mscore, data) < 0) {
+        LE("ERROR MSCORE ==> MUXSEQ msg %s mailbox is full", muxseq_msg_type_info(msg.type));
         rc = -1;
     }
     return muxseq_handle_musescore_reply_int(sock, msg, rc);
