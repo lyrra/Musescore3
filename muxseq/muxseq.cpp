@@ -128,11 +128,7 @@ int muxseq_from_mscore_reader_visit () {
                 LD("MSCORE i=> MUXSEQ msg %s", muxseq_msg_type_info((MuxseqMsgType) type));
                 struct MuxseqMsg *mx = (struct MuxseqMsg*) msg;
                 if (g_seq) {
-                    g_seq->startNote(mx->payload.sparseEvent.channel,
-                                     mx->payload.sparseEvent.pitch,
-                                     mx->payload.sparseEvent.velo,
-                                     mx->payload.sparseEvent.division, // duration;
-                                     mx->payload.sparseEvent.playPosSeconds); // note-tuning
+                    g_seq->startNote(mx->payload.sparseEvent);
                 }
                 free(msg);
                 return 1;

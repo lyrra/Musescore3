@@ -108,6 +108,7 @@ void init_preferences ()
 int seq_create(int sampleRate) {
     LD("seq_create -- create sequencer");
     g_seq = seq = new Seq();
+    // initialiation of MasterSynthesizer is done in muxseq_create_synti
     g_seq->setMasterSynthesizer(nullptr);
     init_preferences();
     return 0;
@@ -1482,6 +1483,19 @@ void Seq::seekRT(int utick)
 //---------------------------------------------------------
 //   startNote
 //---------------------------------------------------------
+
+
+void Seq::startNote(struct SparseEvent sev)
+      {
+      if (state != Transport::STOP && state != Transport::PLAY)
+            return;
+      NPlayEvent ev(ME_NOTEON, sev.channel, sev.pitch, sev.velo);
+      ev.setTuning(sev.playPosSeconds); // note-tuning
+      ev.syntiIdx = _synti->index(QString(sev.synthName));
+      stopNotes();
+      sendEvent(ev);
+      g_seq_taskv->schedule(sev.division /*duration*/, f_stopNotes);
+      }
 
 void Seq::startNote(int channel, int pitch, int velo, double nt)
       {

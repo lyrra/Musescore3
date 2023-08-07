@@ -1032,15 +1032,16 @@ void MuseScore::seqStarted(unsigned int playFrame)
 void MuseScore::seqStopped(unsigned int playFrame)
 {
     // update play position
-    if (!cs) {
-        qWarning("BUG: cs is null");
-        return;
+    if (cs) {
+        int tck = cs->repeatList().utick2tick(cs->utime2utick(qreal(playFrame) / qreal(MScore::sampleRate)));
+        cs->setPlayPos(Fraction::fromTicks(tck));
+        cs->update();
+        cv->setCursorOn(false);
+    } else {
+        qWarning("BUG: seq-stop requested, but no current-score.");
     }
-    int tck = cs->repeatList().utick2tick(cs->utime2utick(qreal(playFrame) / qreal(MScore::sampleRate)));
-    cs->setPlayPos(Fraction::fromTicks(tck));
-    cs->update();
-    cv->setCursorOn(false);
 }
+
 
 //---------------------------------------------------------
 //   MuseScore
@@ -4800,8 +4801,7 @@ void MuseScore::play(Element* e, int pitch) const
             int cc = muxseq_synti_get_synthesizerState().ccToUse();
             if (cc != -1)
                   muxseq_send_event(NPlayEvent(ME_CONTROLLER, channel, cc, 80));
-
-            muxseq_start_note_dur(channel, pitch, 80, MScore::defaultPlayDuration, masterNote->tuning());
+            muxseq_start_note_dur(qPrintable(cs->masterScore()->midiMapping(channel)->articulation()->synti()), channel, pitch, 80, MScore::defaultPlayDuration, masterNote->tuning());
             }
       }
 

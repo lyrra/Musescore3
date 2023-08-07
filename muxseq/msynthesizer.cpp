@@ -111,8 +111,9 @@ int MasterSynthesizer::index(const QString& name) const
       {
       int idx = 0;
       for (Synthesizer* s : _synthesizer) {
-            if (s->name() == name)
+            if (s->name() == name) {
                   return idx;
+                  }
             ++idx;
             }
       qDebug("MasterSynthesizer::index for <%s> not found", qPrintable(name));

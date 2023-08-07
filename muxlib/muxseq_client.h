@@ -17,7 +17,7 @@ void muxseq_send_event(NPlayEvent event);
 void muxseq_seq_start();
 void muxseq_seq_stop();
 void muxseq_start_note(int channel, int pitch, int velocity, double nt);
-void muxseq_start_note_dur(int channel, int pitch, int velocity, int duration, double nt);
+void muxseq_start_note_dur(const char *synthName, int channel, int pitch, int velocity, int duration, double nt);
 void muxseq_start_notetimer(int duration);
 void muxseq_stop_notes();
 void muxseq_stop_notes(int channel);

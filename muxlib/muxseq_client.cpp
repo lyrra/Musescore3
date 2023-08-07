@@ -16,6 +16,7 @@
 #include "libmscore/synthesizerstate.h"
 #include "libmscore/rendermidi.h"
 #include "libmscore/tempo.h"
+#include "libmscore/instrument.h"
 #include "synthesizer.h"
 #include "mux.h"
 #include "muxcommon.h"
@@ -264,8 +265,14 @@ void muxseq_start_note(int channel, int pitch, int velocity, double nt) {
     muxseq_send(MsgTypeSeqStartNote);
 }
 
-void muxseq_start_note_dur(int channel, int pitch, int velocity, int duration, double nt) {
+void muxseq_start_note_dur(const char *synthName, int channel, int pitch, int velocity, int duration, double nt) {
     SparseEvent sev;
+    // strcpy(sev.synthName, instr->instrumentId().toUtf8().data());
+    if (synthName) {
+        strcpy(sev.synthName, synthName);
+    } else {
+        sev.synthName[0] = 0;
+    }
     sev.channel = channel;
     sev.pitch = pitch;
     sev.velo = velocity;

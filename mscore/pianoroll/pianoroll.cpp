@@ -834,7 +834,7 @@ void PianorollEditor::velocityChanged(int val)
 
 void PianorollEditor::keyPressed(int p)
       {
-      muxseq_start_note_dur(staff->part()->instrument()->channel(0)->channel(), p, 80, 0, 0.0);
+      muxseq_start_note_dur(0, staff->part()->instrument()->channel(0)->channel(), p, 80, 0, 0.0);
       }
 
 //---------------------------------------------------------

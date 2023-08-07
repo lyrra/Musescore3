@@ -368,7 +368,7 @@ void DrumrollEditor::velocityChanged(int val)
 
 void DrumrollEditor::keyPressed(int p)
       {
-      muxseq_start_note_dur(staff->part()->instrument()->channel(0)->channel(), p, 80, 0, 0.0);  //tick?
+      muxseq_start_note_dur(0, staff->part()->instrument()->channel(0)->channel(), p, 80, 0, 0.0);  //tick?
       }
 
 //---------------------------------------------------------

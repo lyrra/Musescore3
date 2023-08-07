@@ -269,6 +269,7 @@ class Seq : public QObject, public Sequencer {
 
       void putEvent(const NPlayEvent&, unsigned framePos = 0);
       void startNoteTimer(int duration);
+      virtual void startNote(struct SparseEvent sev);
       virtual void startNote(int channel, int, int, double nt) override;
       virtual void startNote(int channel, int, int, int, double nt) override;
       virtual void playMetronomeBeat(BeatType type) override;

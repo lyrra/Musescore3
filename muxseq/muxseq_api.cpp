@@ -243,16 +243,16 @@ DEFMUXSEQVOID(setLoopSelection, SetLoopSelection);
 DEFMUXSEQVOID(recomputeMaxMidiOutPort, RecomputeMaxMidiOutPort);
 
 float muxseq_seq_metronomeGain() {
-    //FIX: return seq3->metronomeGain();
+    LD4("//FIX: return seq->metronomeGain();");
     return 1.0f;
 }
 
 void muxseq_seq_playMetronomeBeat(BeatType beatType) {
-    //FIX: muxseq_send(MsgTypeSeqplayMetronomeBeat(beatType));
+    LD4("//FIX: muxseq_send(MsgTypeSeqplayMetronomeBeat(beatType))");
 }
 
 void muxseq_seq_initInstruments() {
-    //FIX: seq3->initInstruments();
+    LD4("//FIX: seq3->initInstruments();");
 }
 
 void muxseq_preferencesChanged() {
@@ -260,17 +260,17 @@ void muxseq_preferencesChanged() {
 }
 
 void* muxseq_seq_score () {
-    //FIX: return seq3->score();
+    LD4("//FIX: return seq3->score();")
     return nullptr;
 }
 
 void muxseq_seq_set_scoreview (void* v) {
     //FIX: seq shouldn't know about the score, but instead take an eventmap
-    //FIX: seq3->setScoreView((ScoreView*)v);
+    LD4("//FIX: seq->setScoreView((ScoreView*)v);");
 }
 
 void muxseq_seq_setController(int channel, int vol, int iv) {
-    //FIX: seq3->setController(channel, vol, iv);
+    LD4("//FIX: seq3->setController(channel, vol, iv);");
 }
 
 void muxseq_seq_updateOutPortCount(int maxPorts) {
@@ -336,105 +336,106 @@ void muxseq_delete_synti() {
 }
 
 bool muxseq_synti () {
-    //FIX: return seq3->synti();
+    LD4("//FIX: return seq3->synti();");
     return true;
 }
 
 void muxseq_synti_init() {
-    //FIX: seq3->synti()->init();
+    LD4("//FIX: seq3->synti()->init();");
 }
 
 SynthesizerState muxseq_synti_get_synthesizerState() {
     //MasterSynthesizer* synti = muxseq_get_synti();
     SynthesizerState state;
     //FIX: shouln't need to check if synti is created
-    //FIX: return synti ? synti->state() : state;
+    LD4("//FIX: return synti ? synti->state() : state;");
     return state;
 }
 
 void muxseq_synti_setState(SynthesizerState state) {
-  //FIX: synti->setState(state());
+  LD4("//FIX: synti->setState(state());");
 }
         
 void muxseq_synti_storeState() {
-  // synti->storeState();
+  LD4("// synti->storeState();");
 }
 
 
 float muxseq_synti_getGain () {
-    //FIX: return synti->gain();
-    return 1.0f;
+  LD4("//FIX: return synti->gain();");
+  return 1.0f;
 }
 
 void muxseq_synti_setGain (double gain) {
-  //FIX: serverside  muxseq_get_synti()->setGain(gain);
+  LD4("//FIX: serverside  muxseq_get_synti()->setGain(gain);");
 }
 
 float muxseq_synti_getMinGainAsDecibels () {
-  //FIX: serverside synti->minGainAsDecibels;
+  LD4("//FIX: serverside synti->minGainAsDecibels;");
   return 0.0f;
 }
 float muxseq_synti_getMaxGainAsDecibels () {
-  //FIX: synti->maxGainAsDecibels;
+  LD4("//FIX: synti->maxGainAsDecibels;");
   return 0.0f;
 }
 float muxseq_synti_getGainAsDecibels () {
-  //FIX:  synti->gainAsDecibels();
+  LD4("//FIX:  synti->gainAsDecibels();");
   return 0.0f;
 }
 
 float muxseq_synti_getDefaultGainAsDecibels () {
-  //FIX: synti->defaultGainAsDecibels;
+  LD4("//FIX: synti->defaultGainAsDecibels;");
   return 0.0f;
 }
 
 void muxseq_synti_setGainAsDecibels(float gain) {
-  //FIX
+  LD4("//FIX: muxseq_synti_setGainAsDecibels not impl");
 }
 
 void muxseq_synti_setMasterTuning(float tuning) {
-  //FIX
+  LD4("//FIX: muxseq_synti_setMasterTuning not impl");
   // synti->setMasterTuning(tuning);
 }
 
 float muxseq_synti_getMasterTuning() {
+  LD4("//FIX: muxseq_synti_getMasterTuning not impl");
   // FIX: synti->masterTuning();
   return 0.0f;
 }
 
 void muxseq_synti_setSampleRate (float sampleRate) {
-    //FIX: seq3->synti()->setSampleRate(sampleRate);
+  LD4("//FIX: seq->synti()->setSampleRate(sampleRate);");
 }
 
 void muxseq_synti_setEffect(int effectIdx, int n) {
-  // FIX synti->setEffect(effectIdx, n);
+  LD4("//FIX synti->setEffect(effectIdx, n);");
 }
 
 int muxseq_synti_getDynamicsMethod() {
-  // synti->dynamicsMethod();
+  LD4("// synti->dynamicsMethod();");
   return 0;
 }
 void muxseq_synti_setDynamicsMethod(int n) {
-  // FIX synti->setDynamicsMethod(val);
+  LD4("// FIX synti->setDynamicsMethod(val);");
 }
 
 int muxseq_synti_getCcToUseIndex() {
-  //FIX: synti->ccToUseIndex();
-        return 0;
+  LD4("//FIX: synti->ccToUseIndex();");
+  return 0;
 }
 
 int muxseq_synti_getIndexOfEffect(int n) {
-  //FIX: synti->indexOfEffect(n);
+  LD4("//FIX: synti->indexOfEffect(n);");
   return 0;
 }
 
 void muxseq_synti_setCcToUseIndex(int n) {
-  //FIX
+  LD4("//FIX: muxseq_synti_setCcToUseIndex not impl");
 }
 
 QList<MidiPatch*> muxseq_synti_getPatchInfo () {
   QList<MidiPatch*> pl;
-  // FIX: populate list
+  LD4("// FIX: muxseq_synti_getPatchInfo; populate list");
   return pl;
 }
 
@@ -465,7 +466,7 @@ void muxseq_synth_load_soundfonts (Synthesizer* s, QStringList sfList) {
     if (!sfList.isEmpty()) {
         synti->storeState();
     }
-    //FIX: send to muxseq-client s->gui()->synthesizerChanged();
+    LD4("//FIX: send to muxseq-client s->gui()->synthesizerChanged();");
 }
 
 void muxseq_synth_fluid_load_soundfonts (QStringList sfList) {
@@ -485,7 +486,7 @@ void muxseq_synth_unload_soundfonts (Synthesizer* s, QStringList sfList) {
     if (!sfList.isEmpty()) {
         synti->storeState();
     }
-    //FIX: send to muxseq-client: s->gui()->synthesizerChanged();
+    LD4("//FIX: send to muxseq-client: s->gui()->synthesizerChanged();");
 }
 
 void muxseq_synth_fluid_unload_soundfonts (QStringList sfList) {
