@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "ottava.h"
 #include "style.h"
 #include "system.h"

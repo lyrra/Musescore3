@@ -11,6 +11,8 @@
 //=============================================================================
 
 #include <limits>
+#include <cmath>
+#include "musescore-qt.h"
 #include "score.h"
 #include "tempotext.h"
 #include "tempo.h"

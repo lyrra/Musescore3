@@ -8,6 +8,8 @@
  *
  */
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "mux.h"
 #include "muxseqsig.h"
 #include "event.h"

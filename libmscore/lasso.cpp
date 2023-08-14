@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "lasso.h"
 #include "mscore.h"
 #include "mscoreview.h"

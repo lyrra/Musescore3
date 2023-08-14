@@ -1,8 +1,6 @@
 
 set(MODULE muxtools)
 
-include (${PROJECT_SOURCE_DIR}/build/gch.cmake)
-
 set (FLUID_DIR ${CMAKE_CURRENT_LIST_DIR}/fluid)
 set (FLUID_GUI_SRC
     ${FLUID_DIR}/fluidgui.cpp
@@ -20,12 +18,6 @@ if (APPLE)
 else (APPLE)
       set(INCS "")
 endif (APPLE)
-
-if (NOT MSVC)
-   set(_all_h_file "${PROJECT_BINARY_DIR}/all.h")
-else (NOT MSVC)
-   set(_all_h_file "${PROJECT_SOURCE_DIR}/all.h")
-endif (NOT MSVC)
 
 include_directories (
       ${QT_INCLUDES}
@@ -46,8 +38,6 @@ include_directories (
 #endif (USE_LAME)
 
 add_library (${MODULE} SHARED
-      ${_all_h_file}
-      ${PCH}
       muxseqtools.h muxseqtools.cpp
       eventutils.h eventutils.cpp
       exports/exportmidi.h exports/exportmidi.cpp
@@ -68,25 +58,7 @@ if (NOT MSVC)
    set_target_properties (
       ${MODULE}
       PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch"
-      )
-else (NOT MSVC)
-   set_target_properties (
-      ${MODULE}
-      PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE}"
+         COMPILE_FLAGS "-g -Wall -Wextra"
       )
 endif (NOT MSVC)   
-
-# xcode_pch(${MODULE} all)
-
-# # Use MSVC pre-compiled headers
-# vstudio_pch( ${MODULE} )
-
-# MSVC does not depend on mops1 & mops2 for PCH
-if (NOT MSVC)
-   ADD_DEPENDENCIES(${MODULE} mops1)
-   ADD_DEPENDENCIES(${MODULE} mops2)
-endif (NOT MSVC)   
-
 

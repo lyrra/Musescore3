@@ -24,6 +24,9 @@
 #define _STDINT_H 1
 #endif
 #include <time.h>
+#include "musescore-qt.h"
+#include <QSettings>
+
 #include "event.h"
 #include "jackaudio.h"
 #include "control.h"

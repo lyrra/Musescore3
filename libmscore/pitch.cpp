@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt-extra.h"
 #include "pitch.h"
 
 namespace Ms {

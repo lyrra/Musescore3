@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
+#include <QSettings>
+#include <cmath>
 #include "midi/midifile.h"
 #include "exportmidi.h"
 

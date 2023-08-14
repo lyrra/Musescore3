@@ -17,6 +17,9 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <cmath>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "libmscore/fret.h"
 #include "libmscore/measure.h"
 #include "libmscore/system.h"

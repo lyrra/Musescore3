@@ -21,6 +21,12 @@
  MusicXML support.
  */
 
+#include <QSettings>
+#include <QDate>
+#include <QXmlSchema>
+#include <QXmlSchemaValidator>
+#include "musescore-qt.h"
+
 #include "libmscore/accidental.h"
 #include "libmscore/articulation.h"
 #include "libmscore/chord.h"

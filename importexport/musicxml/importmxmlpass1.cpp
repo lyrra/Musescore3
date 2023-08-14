@@ -17,6 +17,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QSettings>
+#include <QDate>
+#include "musescore-qt.h"
+
 #include "libmscore/box.h"
 #include "libmscore/chordrest.h"
 #include "libmscore/instrtemplate.h"

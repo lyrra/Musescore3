@@ -13,12 +13,11 @@
 include_directories (${QT_INCLUDES})
 
 add_library(qzip STATIC
-   ${_all_h_file}
    qzip.cpp
    )
 
 set_target_properties (
    qzip
    PROPERTIES
-      COMPILE_FLAGS "-g -Wall -Wextra ${PCH_INCLUDE} -Winvalid-pch"
+      COMPILE_FLAGS "-g -Wall -Wextra"
    )

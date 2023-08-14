@@ -16,6 +16,8 @@
  parametrerable ease-In and ease-Out.
 */
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "easeInOut.h"
 
 namespace Ms {

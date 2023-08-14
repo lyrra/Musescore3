@@ -40,6 +40,7 @@
 
 #ifndef QT_NO_TEXTODFWRITER
 
+#include "musescore-qt.h"
 #include "qzipreader_p.h"
 #include "qzipwriter_p.h"
 

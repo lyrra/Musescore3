@@ -1,3 +1,6 @@
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importmidi_tuplet_tonotes.h"
 #include "importmidi_tuplet.h"
 #include "importmidi_fraction.h"

@@ -19,6 +19,8 @@ NICE-TO-HAVE TODO:
       and SlurSegment::changeAnchor() in slur.cpp as models)
 */
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "global/log.h"
 
 #include "arpeggio.h"

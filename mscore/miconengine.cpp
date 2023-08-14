@@ -12,6 +12,9 @@
 
 // this is a modified version of qt QSvgIconEngine
 
+#include <QPixmapCache>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "miconengine.h"
 #include "preferences.h"
 

@@ -10,6 +10,8 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QPushButton>
+#include "musescore-gui-qt.h"
 #include "inspectorLasso.h"
 #include "libmscore/lasso.h"
 

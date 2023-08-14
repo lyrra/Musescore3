@@ -13,6 +13,11 @@
 #ifndef __HELP_H__
 #define __HELP_H__
 
+#include <QSignalMapper>
+#include <QWidgetAction>
+#include <QEventTransition>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 class HelpEngine;

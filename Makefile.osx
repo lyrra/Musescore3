@@ -116,7 +116,6 @@ release-cl:
           -DCMAKE_BUILD_NUMBER="${BUILD_NUMBER}" \
           -DMUSESCORE_BUILD_CONFIG="${MUSESCORE_BUILD_CONFIG}" \
           -DMUSESCORE_REVISION="${MUSESCORE_REVISION}" \
-          -DBUILD_PCH="ON"  \
           .. -G "Unix Makefiles"; \
     make lrelease; \
     $(FORMATTER_START) make -j ${CPUS} $(FORMATTER_END); \
@@ -129,7 +128,6 @@ debug-cl:
           -DCMAKE_BUILD_NUMBER="${BUILD_NUMBER}" \
           -DMUSESCORE_BUILD_CONFIG="${MUSESCORE_BUILD_CONFIG}" \
           -DMUSESCORE_REVISION="${MUSESCORE_REVISION}" \
-          -DBUILD_PCH="ON" \
           .. -G "Unix Makefiles"; \
     make lrelease; \
     $(FORMATTER_START) make -j ${CPUS} $(FORMATTER_END); \

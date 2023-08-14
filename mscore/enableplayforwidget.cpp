@@ -1,3 +1,5 @@
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "enableplayforwidget.h"
 #include "musescore.h"
 

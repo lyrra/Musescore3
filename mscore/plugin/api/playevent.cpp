@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QCoreApplication>
+#include <QQmlEngine>
+#include "musescore-gui-qt.h"
 #include "libmscore/score.h"
 #include "libmscore/note.h"
 #include "libmscore/undo.h"

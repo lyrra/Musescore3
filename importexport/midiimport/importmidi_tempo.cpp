@@ -1,3 +1,6 @@
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importmidi_tempo.h"
 
 #include "importmidi_inner.h"

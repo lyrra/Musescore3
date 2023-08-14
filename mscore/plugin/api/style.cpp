@@ -17,6 +17,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QCoreApplication>
+#include <QQmlEngine>
+#include "musescore-gui-qt.h"
+
 #include "style.h"
 
 #include "libmscore/score.h"

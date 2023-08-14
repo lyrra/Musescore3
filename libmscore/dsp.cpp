@@ -10,6 +10,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
+#include <cmath>
 #include "dsp.h"
 
 Dsp* dsp;

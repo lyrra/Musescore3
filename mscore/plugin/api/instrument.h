@@ -20,6 +20,8 @@
 #ifndef __PLUGIN_API_INSTRUMENT_H__
 #define __PLUGIN_API_INSTRUMENT_H__
 
+#include <QQmlListProperty>
+#include "musescore-qt.h"
 #include "scoreelement.h"
 #include "libmscore/instrument.h"
 

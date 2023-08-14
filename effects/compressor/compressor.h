@@ -13,6 +13,8 @@
 #ifndef __COMPRESSOR_H__
 #define __COMPRESSOR_H__
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "effects/effect.h"
 
 namespace Ms {

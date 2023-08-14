@@ -4,6 +4,10 @@
 #include <QStatusBar>
 #include <QAccessible>
 #include <QAccessibleWidget>
+#include <QFocusFrame>
+#include <QElapsedTimer>
+#include <QTimer>
+#include "musescore-qt.h"
 #include "scoreview.h"
 
 namespace  Ms {

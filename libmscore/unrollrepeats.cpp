@@ -14,6 +14,8 @@
  File handling: loading and saving.
  */
 
+#include <QDateTime>
+#include "musescore-qt.h"
 #include "xml.h"
 #include "element.h"
 #include "note.h"

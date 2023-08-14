@@ -10,6 +10,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
+
 #include "effects/effect.h"
 #include "noeffect.h"
 

@@ -33,6 +33,8 @@
 // Olav.
 
 
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "libmscore/arpeggio.h"
 #include "libmscore/articulation.h"
 #include "libmscore/barline.h"

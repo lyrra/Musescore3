@@ -1,3 +1,7 @@
+#include <cmath>
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importmidi_beat.h"
 
 #include "importmidi_chord.h"

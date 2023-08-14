@@ -1,3 +1,6 @@
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importmidi_tuplet_voice.h"
 #include "importmidi_tuplet.h"
 #include "importmidi_chord.h"

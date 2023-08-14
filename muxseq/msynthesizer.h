@@ -13,6 +13,8 @@
 #ifndef __MSYNTHESIZER_H__
 #define __MSYNTHESIZER_H__
 
+#include "musescore-gui-qt.h"
+
 #include <atomic>
 #include "effects/effect.h"
 #include "libmscore/synthesizerstate.h"

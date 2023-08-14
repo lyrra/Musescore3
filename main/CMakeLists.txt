@@ -45,7 +45,6 @@ endif (APPLE)
 include_directories(
       ${PROJECT_SOURCE_DIR}/global
       ${PROJECT_SOURCE_DIR}/muxlib
-      ${PROJECT_BINARY_DIR}
       ${QTSINGLEAPPLICATION_INCLUDE_DIRS}
       )
 
@@ -118,13 +117,13 @@ if (MINGW)
    if(CMAKE_BUILD_TYPE MATCHES "DEBUG")
      set_target_properties( mscore
         PROPERTIES
-           COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch ${QT_DEFINITIONS} -DQT_SVG_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB"
+           COMPILE_FLAGS "-g -Wall -Wextra ${QT_DEFINITIONS} -DQT_SVG_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB"
            LINK_FLAGS "-mwindows -mconsole -L ${QT_INSTALL_LIBS}"
         )
    else(CMAKE_BUILD_TYPE MATCHES "DEBUG")
      set_target_properties( mscore
           PROPERTIES
-             COMPILE_FLAGS "${PCH_INCLUDE} -Wall -Wextra -Winvalid-pch ${QT_DEFINITIONS} -DQT_SVG_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB"
+             COMPILE_FLAGS "-Wall -Wextra ${QT_DEFINITIONS} -DQT_SVG_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB"
              LINK_FLAGS "-Wl,-S -mwindows -L ${QT_INSTALL_LIBS}"
           )
    endif(CMAKE_BUILD_TYPE MATCHES "DEBUG")
@@ -255,7 +254,7 @@ else (MINGW)
       set_target_properties (
          mscore
          PROPERTIES
-            COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wno-overloaded-virtual -Winvalid-pch"
+            COMPILE_FLAGS "-g -Wall -Wno-overloaded-virtual"
          )
 
       if (APPLE)
@@ -269,7 +268,6 @@ else (MINGW)
            PROPERTIES
               LINK_FLAGS "-stdlib=libc++"
            )
-        xcode_pch(mscore all)
         install (TARGETS mscore BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX})
         install (FILES "${PROJECT_SOURCE_DIR}/mscore/data/mscore.icns" DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME})
         install (FILES "${PROJECT_SOURCE_DIR}/mscore/data/musescoreDocument.icns" DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME})
@@ -334,14 +332,14 @@ else (MINGW)
       if(CMAKE_BUILD_TYPE MATCHES "REL*")
         set_target_properties( mscore
            PROPERTIES
-              COMPILE_FLAGS "${PCH_INCLUDE} ${QT_DEFINITIONS} -DQT_SVG_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB"
+              COMPILE_FLAGS "${QT_DEFINITIONS} -DQT_SVG_LIB -DQT_GUI_LIB -DQT_XML_LIB -DQT_CORE_LIB"
               LINK_FLAGS    "/LIBPATH:${QT_INSTALL_LIBS} ${all_library_paths}"
               LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
            )
       else(CMAKE_BUILD_TYPE MATCHES "REL*")
         set_target_properties( mscore
            PROPERTIES
-              COMPILE_FLAGS "${PCH_INCLUDE} ${QT_DEFINITIONS} /DQT_SVG_LIB /DQT_GUI_LIB /DQT_XML_LIB /DQT_CORE_LIB"
+              COMPILE_FLAGS "${QT_DEFINITIONS} /DQT_SVG_LIB /DQT_GUI_LIB /DQT_XML_LIB /DQT_CORE_LIB"
               LINK_FLAGS    "/LIBPATH:${QT_INSTALL_LIBS} ${all_library_paths}"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE"
            )

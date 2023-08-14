@@ -13,6 +13,11 @@
 #ifndef __PLUGIN_CREATOR_H__
 #define __PLUGIN_CREATOR_H__
 
+#include <QTextBlockUserData>
+#include <QSyntaxHighlighter>
+#include <QQuickView>
+#include <QQmlError>
+#include "musescore-qt.h"
 #include "ui_pluginCreator.h"
 
 namespace Ms {

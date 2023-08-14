@@ -15,6 +15,7 @@
  Implementation of classes Clef (partial) and ClefList (complete).
 */
 
+#include "musescore-qt.h"
 #include "clef.h"
 #include "measure.h"
 #include "ambitus.h"

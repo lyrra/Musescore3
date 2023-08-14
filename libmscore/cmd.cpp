@@ -16,7 +16,10 @@
 */
 
 #include <assert.h>
+#include <QMimeData>
+#include <QAction>
 
+#include "musescore-qt.h"
 #include "types.h"
 #include "musescoreCore.h"
 #include "score.h"

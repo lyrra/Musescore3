@@ -9,6 +9,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "toolbuttonmenu.h"
 
 namespace Ms {

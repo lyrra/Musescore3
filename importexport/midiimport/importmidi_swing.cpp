@@ -1,3 +1,6 @@
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importmidi_swing.h"
 #include "libmscore/score.h"
 #include "libmscore/chordrest.h"

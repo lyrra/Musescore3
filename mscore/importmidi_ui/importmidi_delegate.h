@@ -1,6 +1,8 @@
 #ifndef IMPORTMIDI_DELEGATE_H
 #define IMPORTMIDI_DELEGATE_H
 
+#include <QStyledItemDelegate>
+#include "musescore-qt.h"
 #include "importmidi_view.h"
 
 

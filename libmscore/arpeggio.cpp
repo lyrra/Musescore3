@@ -10,6 +10,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "arpeggio.h"
 #include "sym.h"
 #include "accidental.h"

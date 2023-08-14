@@ -17,19 +17,10 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #=============================================================================
 
-include (${PROJECT_SOURCE_DIR}/build/gch.cmake)
 include_directories(${QT_INCLUDES})
-
-if (NOT MSVC)
-   set(_all_h_file "${PROJECT_BINARY_DIR}/all.h")
-else (NOT MSVC)
-   set(_all_h_file "${PROJECT_SOURCE_DIR}/all.h")
-endif (NOT MSVC)
 
 add_library (
   qtsingleapp STATIC
-  ${_all_h_file}
-  ${PCH}
   qtsingleapplication.cpp
   qtlocalpeer.cpp
   )
@@ -38,27 +29,7 @@ if (NOT MSVC)
    set_target_properties (
       qtsingleapp
       PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch"
-      )
-else (NOT MSVC)
-   set_target_properties (
-      qtsingleapp
-      PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE}"
+         COMPILE_FLAGS "-g -Wall -Wextra"
       )
 endif (NOT MSVC)   
 
-if (APPLE)
-      xcode_pch(qtsingleapp all)
-endif (APPLE)
-
-# Use MSVC pre-compiled headers
-if (MSVC)
-      vstudio_pch( qtsingleapp )
-endif (MSVC)
-
-# MSVC does not depend on mops1 & mops2 for PCH
-if (NOT MSVC)
-   ADD_DEPENDENCIES(qtsingleapp mops1)
-   ADD_DEPENDENCIES(qtsingleapp mops2)
-endif (NOT MSVC)   

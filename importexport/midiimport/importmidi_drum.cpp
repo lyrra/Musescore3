@@ -1,3 +1,6 @@
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importmidi_drum.h"
 #include "importmidi_inner.h"
 #include "mscore/preferences.h"

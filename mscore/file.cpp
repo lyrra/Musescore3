@@ -14,6 +14,18 @@
  File handling: loading and saving.
  */
 
+#include <cmath>
+#include <QLineEdit>
+#include <QIconEngine>
+#include <QTemporaryFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QTemporaryDir>
+#include <QStandardPaths>
+#include <QPrintDialog>
+#include <QJsonArray>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include <QFileInfo>
 #include <QMessageBox>
 

@@ -17,6 +17,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QQuickItem>
+#include <QQmlListProperty>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "nativemenu.h"
 
 namespace Ms {

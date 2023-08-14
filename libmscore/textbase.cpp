@@ -10,6 +10,13 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include <QRawFont>
+#include <QTextLayout>
+#include <QTextDocument>
+#include <QTextBlock>
+#include "musescore-qt.h"
+#include "musescore-qt-extra.h"
 #include "text.h"
 #include "textedit.h"
 #include "jump.h"

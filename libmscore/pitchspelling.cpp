@@ -14,6 +14,7 @@
 //  algorithmus from Emilios Cambouropoulos as published in:
 //  "Automatic Pitch Spelling: From Numbers to Sharps and Flats"
 
+#include "musescore-qt.h"
 #include "note.h"
 #include "key.h"
 #include "pitchspelling.h"

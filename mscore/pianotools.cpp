@@ -17,6 +17,8 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "pianotools.h"
 #include "preferences.h"
 #include "libmscore/chord.h"

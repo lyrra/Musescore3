@@ -10,6 +10,7 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include "musescore-gui-qt.h"
 #include "offsetSelect.h"
 #include "libmscore/types.h"
 #include "icons.h"

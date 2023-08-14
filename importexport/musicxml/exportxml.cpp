@@ -35,6 +35,9 @@
 // Currently all output (both debug and error reports) are done using qDebug.
 
 #include <math.h>
+#include <QSettings>
+#include <QDate>
+#include "musescore-qt.h"
 #include "config.h"
 
 #include "thirdparty/qzip/qzipwriter_p.h"

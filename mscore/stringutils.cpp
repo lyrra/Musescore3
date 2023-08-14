@@ -16,6 +16,7 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include "musescore-gui-qt.h"
 #include "stringutils.h"
 
 namespace Ms {

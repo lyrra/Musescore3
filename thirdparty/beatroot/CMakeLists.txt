@@ -15,27 +15,7 @@ add_library (
 if (NOT MSVC)
    set_target_properties( beatroot
       PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch"
-      )
-else (NOT MSVC)
-   set_target_properties ( beatroot
-      PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} /wd4267"
+         COMPILE_FLAGS "-g -Wall -Wextra"
       )
 endif (NOT MSVC)   
-
-if (APPLE)
-      xcode_pch(beatroot all)
-endif (APPLE)
-
-# Use MSVC pre-compiled headers
-if (MSVC)
-      vstudio_pch( beatroot )
-endif (MSVC)
-
-# MSVC does not depend on mops1 & mops2 for PCH
-if (NOT MSVC)
-   ADD_DEPENDENCIES(beatroot mops1)
-   ADD_DEPENDENCIES(beatroot mops2)
-endif (NOT MSVC)
 

@@ -1,3 +1,11 @@
+#include <QQuickView>
+#include <QScreen>
+#include <QCheckBox>
+#include <QDirIterator>
+#include <QTextDocument>
+#include <QPushButton>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "tourhandler.h"
 #include "musescore.h"
 #include "preferences.h"

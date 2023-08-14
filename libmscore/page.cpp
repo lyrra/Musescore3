@@ -10,6 +10,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
+#include "musescore-qt-extra.h"
 #include "page.h"
 #include "score.h"
 #include "text.h"

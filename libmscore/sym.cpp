@@ -10,6 +10,18 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include <QDirIterator>
+#include <QCache>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonParseError>
+#include <QCborValue>
+#include <QCborParserError>
+#include <QSettings>
+#include <QFontDatabase>
+#include <QStandardPaths>
+#include "musescore-qt.h"
 #include "style.h"
 #include "sym.h"
 #include "utils.h"
@@ -18,7 +30,6 @@
 #include "mscore.h"
 #include "mscore/preferences.h"
 
-#include <QDirIterator>
 
 #include FT_GLYPH_H
 #include FT_IMAGE_H

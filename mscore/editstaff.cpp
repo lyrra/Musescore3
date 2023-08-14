@@ -17,6 +17,16 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QtMath>
+#include <QTreeView>
+#include <QTreeWidgetItem>
+#include <QTextStream>
+#include <QXmlStreamReader>
+#include <QPainter>
+#include <QFile>
+#include "editstaff.h"
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "editstaff.h"
 
 #include "editdrumset.h"

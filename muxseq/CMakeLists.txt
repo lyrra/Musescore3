@@ -3,8 +3,6 @@
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-include (${PROJECT_SOURCE_DIR}/build/gch.cmake)
-
 include_directories(
       ${QT_INCLUDES}
       ${CMAKE_CURRENT_BINARY_DIR}
@@ -94,7 +92,7 @@ if (MINGW)
    string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
    set_target_properties(muxseq
       PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch"
+         COMPILE_FLAGS "-g -Wall -Wextra"
          #LINK_FLAGS "-mconsole"
          #LINK_FLAGS "-municode"
       )
@@ -127,7 +125,7 @@ else (MINGW)
       set_target_properties (
          muxseq
          PROPERTIES
-            COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wno-overloaded-virtual -Winvalid-pch"
+            COMPILE_FLAGS "-g -Wall -Wno-overloaded-virtual"
          )
 
       if (APPLE)
@@ -135,7 +133,6 @@ else (MINGW)
            PROPERTIES
               LINK_FLAGS "-stdlib=libc++"
            )
-        xcode_pch(muxseq all)
         install (TARGETS muxseq BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX})
       else (APPLE)
         #### PACKAGING for Linux and BSD based systems (more in top-level CMakeLists.txt) ####
@@ -146,6 +143,4 @@ else (MINGW)
        message(FATAL "Unknown OS")
    endif ( NOT MSVC )
 endif (MINGW)
-
-set(_all_h_file "${PROJECT_BINARY_DIR}/all.h")
 

@@ -17,6 +17,11 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <QJsonObject>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "updatechecker.h"
 #include "musescore.h"
 #include "libmscore/mscore.h"

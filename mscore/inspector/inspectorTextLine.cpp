@@ -10,6 +10,8 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QPushButton>
+#include "musescore-gui-qt.h"
 #include "inspector.h"
 #include "inspectorTextLine.h"
 

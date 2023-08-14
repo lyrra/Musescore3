@@ -20,6 +20,8 @@
 #ifndef __EDITDRUMSET_H__
 #define __EDITDRUMSET_H__
 
+#include <QIconEngine>
+#include "musescore-qt.h"
 #include "ui_editdrumset.h"
 #include "libmscore/drumset.h"
 

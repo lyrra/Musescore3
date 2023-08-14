@@ -16,6 +16,8 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
+#include "musescore-qt.h"
+#include <QSettings>
 
 #include "pa.h"
 
@@ -26,7 +28,9 @@
 #include "alsamidi.h"
 #endif
 
+
 #include "mididriver.h"
+
 
 #include "event.h"
 #include "muxcommon.h"

@@ -34,8 +34,6 @@ add_library (aeolus STATIC
       asection.cpp division.cpp rankwave.cpp
       rngen.cpp exp2ap.cpp
       aeolusgui.cpp sparm.cpp
-      ${PROJECT_BINARY_DIR}/all.h
-      ${PCH}
       ${INCS}
       )
 
@@ -43,13 +41,7 @@ if (NOT MSVC)
    set_target_properties (
       aeolus
       PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch"
-      )
-else (NOT MSVC)
-   set_target_properties (
-      aeolus
-      PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} ${PCH_FORCE_USE}"
+         COMPILE_FLAGS "-g -Wall -Wextra"
       )
 endif (NOT MSVC)   
 
@@ -58,9 +50,4 @@ install(DIRECTORY
       DESTINATION ${Mscore_SHARE_NAME}${Mscore_INSTALL_NAME}sound/aeolus
          PATTERN .svn EXCLUDE
       )
-
-xcode_pch(aeolus all)
-
-ADD_DEPENDENCIES(aeolus mops1)
-ADD_DEPENDENCIES(aeolus mops2)
 

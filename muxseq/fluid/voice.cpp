@@ -18,6 +18,10 @@
  * 02111-1307, USA
  */
 
+#include <cmath>
+#include <QMutex>
+#include "musescore-qt.h"
+
 #include "log.h"
 
 #include "conv.h"

@@ -10,6 +10,9 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QVariant>
+#include <QPushButton>
+#include "musescore-gui-qt.h"
 #include "inspectorBend.h"
 #include "bendcanvas.h"
 #include "libmscore/bend.h"

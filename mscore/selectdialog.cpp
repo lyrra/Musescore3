@@ -22,6 +22,8 @@
  Implementation of class Selection plus other selection related functions.
 */
 
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "libmscore/select.h"
 #include "selectdialog.h"
 #include "libmscore/element.h"

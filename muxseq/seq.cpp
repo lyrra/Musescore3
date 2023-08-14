@@ -19,6 +19,7 @@
 
 #include <chrono>
 #include <thread>
+#include <QWaitCondition>
 #include "config.h"
 #include "seq.h"
 #include "event.h"

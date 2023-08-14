@@ -18,6 +18,8 @@
 #define _STDINT_H 1  
 #endif
 
+#include "musescore-qt.h"
+
 #include "config.h"
 #include "driver.h"
 

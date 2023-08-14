@@ -10,6 +10,9 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <deque>
+#include <QPushButton>
+#include "musescore-gui-qt.h"
 #include "inspectorTrill.h"
 #include "libmscore/trill.h"
 

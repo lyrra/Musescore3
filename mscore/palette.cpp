@@ -10,6 +10,15 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <cmath>
+#include <QtGlobal>
+#include <QIconEngine>
+#include <QClipboard>
+#include <QDrag>
+#include <QToolTip>
+#include <QMimeData>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "palette.h"
 #include "musescore.h"
 #include "libmscore/element.h"

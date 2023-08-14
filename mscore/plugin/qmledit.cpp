@@ -13,6 +13,10 @@
 //  (git://gitorious.org/ofi-labs/x2.git BSD licensed).
 //=============================================================================
 
+#include <QTextBlock>
+#include <QPlainTextEdit>
+#include <QSyntaxHighlighter>
+#include "musescore-gui-qt.h"
 #include "qmledit.h"
 #include "musescore.h"
 

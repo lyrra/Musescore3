@@ -69,6 +69,7 @@
 #include <thread>
 #include <chrono>
 #include <zmq.h>
+#include "musescore-qt.h"
 #include "mux.h"
 #include "muxcommon.h"
 #include "event.h"

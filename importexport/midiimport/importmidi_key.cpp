@@ -1,3 +1,6 @@
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importmidi_key.h"
 #include "importmidi_fraction.h"
 #include "importmidi_chord.h"

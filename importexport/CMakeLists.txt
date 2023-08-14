@@ -19,20 +19,11 @@
 
 set(MODULE importexport)
 
-include (${PROJECT_SOURCE_DIR}/build/gch.cmake)
-
 include_directories(
       ${PROJECT_SOURCE_DIR}
       ${PROJECT_SOURCE_DIR}/muxlib
       ${PROJECT_SOURCE_DIR}/muxtools
-      ${CMAKE_CURRENT_BINARY_DIR}
       )
-
-if (NOT MSVC)
-   set(_all_h_file "${PROJECT_BINARY_DIR}/all.h")
-else (NOT MSVC)
-   set(_all_h_file "${PROJECT_SOURCE_DIR}/all.h")
-endif (NOT MSVC)
 
 include(${CMAKE_CURRENT_LIST_DIR}/musicxml/musicxml.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/midiimport/midiimport.cmake)
@@ -45,8 +36,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/bww/bww.cmake)
 
 add_library (
       ${MODULE} SHARED
-      ${_all_h_file}
-      ${PCH}
       ${MUSICXML_SRC}
       ${MIDIIMPORT_SRC}
       ${OVE_SRC}
@@ -72,28 +61,7 @@ if (NOT MSVC)
    set_target_properties (
       ${MODULE}
       PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch"
+         COMPILE_FLAGS "-g -Wall -Wextra"
       )
-else (NOT MSVC)
-   set_target_properties (
-      ${MODULE}
-      PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE}"
-      )
-endif (NOT MSVC)   
-
-if (APPLE)
-      xcode_pch(${MODULE} all)
-endif (APPLE)
-
-# Use MSVC pre-compiled headers
-if (MSVC)
-      vstudio_pch( ${MODULE} )
-endif (MSVC)
-
-# MSVC does not depend on mops1 & mops2 for PCH
-if (NOT MSVC)
-   ADD_DEPENDENCIES(${MODULE} mops1)
-   ADD_DEPENDENCIES(${MODULE} mops2)
 endif (NOT MSVC)   
 

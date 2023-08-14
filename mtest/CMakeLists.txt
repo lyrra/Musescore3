@@ -21,7 +21,6 @@ endif (MSVC)
 
 include_directories(
       ${QT_INCLUDES}
-      ${PROJECT_BINARY_DIR}
       ${PROJECT_SOURCE_DIR}
       ${PROJECT_SOURCE_DIR}/thirdparty
       ${PROJECT_SOURCE_DIR}/muxlib
@@ -37,10 +36,6 @@ link_directories(${CMAKE_SOURCE_DIR}/lib)
 if (OMR)
 set(OMR_SRC ${PROJECT_SOURCE_DIR}/omr/importpdf.cpp)
 endif (OMR)
-
-if (MSVC)
-   set(_all_h_file "${PROJECT_SOURCE_DIR}/all.h")
-endif (MSVC)
 
 QT5_ADD_RESOURCES(qrc_files ${PROJECT_SOURCE_DIR}/mtest/mtest.qrc
             ${PROJECT_SOURCE_DIR}/mscore/musescorefonts-Campania.qrc
@@ -80,8 +75,6 @@ set (SOURCE_LIB
 if (MSVC)
     add_library(
       testutils SHARED
-	  ${_all_h_file}
-	  ${PCH}
 	  ${SOURCE_LIB}
 	  )
 else (MSVC)
@@ -134,7 +127,7 @@ set_target_properties (
       mtest
       PROPERTIES
       AUTOMOC true
-      COMPILE_FLAGS "-include all.h -D QT_GUI_LIB -D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\" -g -Wall -Wextra"
+      COMPILE_FLAGS "-D QT_GUI_LIB -D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\" -g -Wall -Wextra"
       LINK_FLAGS    "-g"
       )
 
@@ -150,7 +143,6 @@ message("--------- mtest is using guile ! --------")
 
       add_executable(
             mtest-guile
-            ${_all_h_file}
             ${ui_headers}
             mtest-guile.cpp
             )
@@ -182,12 +174,12 @@ set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_
 string(REPLACE ";" ";-I" INC "${QT_INCLUDES}")
 
 if (APPLE AND (CMAKE_VERSION VERSION_LESS "3.5.0"))
-      set(TESTUTILS_COMPILE_FLAGS "-include all.h -D TESTROOT=\\\\\"${PROJECT_SOURCE_DIR}\\\\\" -g -Wall -Wextra")
+      set(TESTUTILS_COMPILE_FLAGS "-D TESTROOT=\\\\\"${PROJECT_SOURCE_DIR}\\\\\" -g -Wall -Wextra")
 else (APPLE AND (CMAKE_VERSION VERSION_LESS "3.5.0"))
       if (MSVC)
-            set(TESTUTILS_COMPILE_FLAGS "${PCH_INCLUDE}  /D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\"")
+            set(TESTUTILS_COMPILE_FLAGS "/D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\"")
       else (MSVC)
-            set(TESTUTILS_COMPILE_FLAGS "-include all.h -D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\" -g -Wall -Wextra")
+            set(TESTUTILS_COMPILE_FLAGS "-D TESTROOT=\\\"${PROJECT_SOURCE_DIR}\\\" -g -Wall -Wextra")
       endif (MSVC)
 endif (APPLE AND (CMAKE_VERSION VERSION_LESS "3.5.0"))
 

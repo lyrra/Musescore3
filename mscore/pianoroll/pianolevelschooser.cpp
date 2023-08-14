@@ -1,3 +1,7 @@
+#include <cmath>
+#include <QScrollBar>
+#include <QApplication>
+#include "musescore-gui-qt.h"
 #include "pianolevelschooser.h"
 #include "pianolevelsfilter.h"
 #include "pianoview.h"

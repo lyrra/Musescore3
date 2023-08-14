@@ -1,14 +1,6 @@
 
 set(MODULE muxlib)
 
-include (${PROJECT_SOURCE_DIR}/build/gch.cmake)
-
-if (NOT MSVC)
-   set(_all_h_file "${PROJECT_BINARY_DIR}/all.h")
-else (NOT MSVC)
-   set(_all_h_file "${PROJECT_SOURCE_DIR}/all.h")
-endif (NOT MSVC)
-
 include_directories (
       ${QT_INCLUDES}
       ${PROJECT_SOURCE_DIR}
@@ -21,8 +13,6 @@ include_directories (
       )
 
 add_library (${MODULE} SHARED
-      ${_all_h_file}
-      ${PCH}
       midi/midipatch.h
       event.h event.cpp
       muxlib.h muxlib.cpp
@@ -37,40 +27,19 @@ if (NOT MSVC)
    set_target_properties (
       ${MODULE}
       PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE} -g -Wall -Wextra -Winvalid-pch"
-      )
-else (NOT MSVC)
-   set_target_properties (
-      ${MODULE}
-      PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE}"
+         COMPILE_FLAGS "-g -Wall -Wextra"
       )
 endif (NOT MSVC)   
 
 add_library(muxseqclient STATIC
-    ${_all_h_file}
-    ${PCH}
     muxseq_client.cpp muxseq_client.h
     )
 
 set_target_properties (
     muxseqclient
     PROPERTIES
-        COMPILE_FLAGS "-g ${PCH_INCLUDE} -Wall -Wextra -Winvalid-pch"
+        COMPILE_FLAGS "-g -Wall -Wextra"
     )
 
 add_dependencies(muxseqclient generated_sources)
-
-# xcode_pch(${MODULE} all)
-
-# # Use MSVC pre-compiled headers
-# vstudio_pch( ${MODULE} )
-
-
-# MSVC does not depend on mops1 & mops2 for PCH
-if (NOT MSVC)
-   ADD_DEPENDENCIES(${MODULE} mops1)
-   ADD_DEPENDENCIES(${MODULE} mops2)
-endif (NOT MSVC)   
-
 

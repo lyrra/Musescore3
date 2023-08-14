@@ -17,6 +17,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QPushButton>
+#include <QXmlStreamReader>
+#include <QtMath>
+#include "musescore-gui-qt.h"
 #include "mixertrackchannel.h"
 
 #include "musescore.h"

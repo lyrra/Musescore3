@@ -10,6 +10,10 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QSignalMapper>
+#include <QScreen>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "libmscore/score.h"
 #include "scoreview.h"
 #include "libmscore/style.h"

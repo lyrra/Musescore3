@@ -13,6 +13,9 @@
 #ifndef __SYNTHESIZERGUI_H__
 #define __SYNTHESIZERGUI_H__
 
+#include <QObject>
+#include <QWidget>
+
 namespace Ms {
 
 class Synthesizer;

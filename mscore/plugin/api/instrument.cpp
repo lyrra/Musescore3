@@ -17,6 +17,8 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QQmlEngine>
+#include "musescore-gui-qt.h"
 #include "instrument.h"
 
 #include "midi/midipatch.h"

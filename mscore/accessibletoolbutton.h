@@ -2,6 +2,8 @@
 #ifndef __ACCESSIBLETOOLBUTTON_H__
 #define __ACCESSIBLETOOLBUTTON_H__
 
+#include <QToolButton>
+
 namespace Ms {
 
 /*

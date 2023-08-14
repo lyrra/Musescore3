@@ -10,6 +10,10 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <chrono>
+#include <thread>
+#include <cmath>
+#include "musescore-qt.h"
 #include "config.h"
 #include "synthesizer.h"
 #include "msynthesizer.h"
@@ -241,11 +245,7 @@ void MasterSynthesizer::setEffect(int ab, int idx)
             }
       lock2 = true;
       while(lock1)
-#if (!defined (_MSCVER) && !defined (_MSC_VER))
-         sleep(1);
-#else
-         Sleep(1000);      // MS-equivalent function, time in ms instead of seconds.
-#endif
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       _effect[ab] = _effectList[ab][idx];
       lock2 = false;
       }

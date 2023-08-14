@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "chordview.h"
 #include "piano.h"
 #include "libmscore/chord.h"

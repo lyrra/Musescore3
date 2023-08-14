@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QInputDialog>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "workspacedialog.h"
 #include "workspace.h"
 #include "preferences.h"

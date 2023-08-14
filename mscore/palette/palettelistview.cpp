@@ -9,6 +9,12 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QIconEngine>
+#include <QModelIndex>
+#include <QKeyEvent>
+#include <QListView>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "palettelistview.h"
 
 #include "palettemodel.h"

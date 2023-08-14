@@ -20,6 +20,11 @@
 #ifndef __QMLICONVIEW_H__
 #define __QMLICONVIEW_H__
 
+#include <QQuickPaintedItem>
+#include <QQuickItem>
+#include <QPainter>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 //---------------------------------------------------------

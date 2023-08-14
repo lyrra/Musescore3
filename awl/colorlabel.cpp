@@ -17,6 +17,11 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QPaintEvent>
+#include <QPixmap>
+#include <QWidget>
+#include <QPushButton>
+#include "musescore-qt.h"
 #include "colorlabel.h"
 
 namespace Awl {

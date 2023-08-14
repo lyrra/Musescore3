@@ -13,6 +13,14 @@
 #ifndef __LOGINMANAGER_H__
 #define __LOGINMANAGER_H__
 
+#include <QNetworkReply>
+#include <QProgressDialog>
+#include <QUrl>
+#include <QUrlQuery>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
+#include <QHttpMultiPart>
+#include "musescore-qt.h"
 #include "config.h"
 
 namespace Ms {

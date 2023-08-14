@@ -1,5 +1,5 @@
-
 #include <thread>
+#include "mux-qt.h"
 #include "event.h"
 #include "mux.h"
 #include "muxlib.h"

@@ -10,6 +10,9 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QIconEngine>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "noteGroups.h"
 #include "libmscore/chord.h"
 #include "libmscore/mcursor.h"

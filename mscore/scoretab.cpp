@@ -18,6 +18,8 @@
 //=============================================================================
 
 #include <QAction>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 
 #include "log.h"
 

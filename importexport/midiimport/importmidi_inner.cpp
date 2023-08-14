@@ -1,3 +1,7 @@
+#include <QSettings>
+#include <QTextCodec>
+#include "musescore-qt.h"
+
 #include "importmidi_inner.h"
 #include "importmidi_operations.h"
 #include "importmidi_chord.h"

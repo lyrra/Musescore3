@@ -17,6 +17,7 @@
 
 #include <assert.h>
 
+#include "musescore-qt.h"
 #include "global/log.h"
 
 #include "note.h"

@@ -20,6 +20,8 @@
 //
 //    Capella 2000 import filter
 //
+#include <QtMath>
+#include "musescore-qt.h"
 #include <assert.h>
 #include "libmscore/mscore.h"
 #include "capella.h"

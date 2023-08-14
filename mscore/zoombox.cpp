@@ -17,6 +17,13 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <cmath>
+#include <QLineEdit>
+#include <QValidator>
+#include <QComboBox>
+#include "zoombox.h"
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "preferences.h"
 #include "zoombox.h"
 #include "scoreview.h"

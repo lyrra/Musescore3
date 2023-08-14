@@ -50,6 +50,7 @@
   then adjusted (in generate_tpc/npc_profiles) to line-of-fifths
   order, with the tonic as 5. */
 
+#include "musescore-qt.h"
 #include <string.h>
 #include <math.h>
 #include "keyfinder.h"

@@ -20,6 +20,9 @@
 #ifndef __DRUMTOOLS_H__
 #define __DRUMTOOLS_H__
 
+#include <QDockWidget>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 class Score;

@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QTemporaryFile>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "scorecmp.h"
 
 #include "ui_scorecmp_tool.h"

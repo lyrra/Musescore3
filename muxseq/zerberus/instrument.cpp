@@ -12,7 +12,11 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <QFile>
+#include "musescore-gui-qt.h"
+#include <QtMath>
+//#include <QTextStream>
+#include <QXmlStreamReader>
+#include <QApplication>
 #include <QFileInfo>
 #include <QStringList>
 

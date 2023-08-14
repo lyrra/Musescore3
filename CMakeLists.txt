@@ -42,11 +42,6 @@ if (APPLE)
     if(POLICY CMP0045)
         cmake_policy(SET CMP0045 OLD)
     endif(POLICY CMP0045)
-
-    # Silently ignore non-existent dependencies (mops1, mops2)
-    if(POLICY CMP0046)
-        cmake_policy(SET CMP0046 OLD)
-    endif(POLICY CMP0046)
 endif (APPLE)
 
 # RPATH settings on macOS do not affect install_name
@@ -76,7 +71,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build" ${CMAKE_MODULE_PATH})
 include (FindQt5)
 include (UsePkgConfig1) # Defines MACRO(PKGCONFIG1 _package _minVersion _include_DIR _link_DIR _link_FLAGS _cflags)
 include (GetCompilerVersion)
-include (CreatePrecompiledHeader)
 
 # For debugging the make system uncomment next line:
 # set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -135,7 +129,6 @@ option(DOWNLOAD_SOUNDFONT "Download the latest soundfont version as part of the 
 # licence incompatibility, must never be distributed
 set(OCR OFF)
 
-option(BUILD_PCH "Build using precompiled headers." ON)
 option(COVERAGE "Build with instrumentation to record code coverage." OFF)
 option(BUILD_64 "Build 64 bit version of editor" ON)
 option(BUILD_AUTOUPDATE "Build with autoupdate support" OFF)
@@ -579,33 +572,11 @@ if (NOT MINGW AND NOT MSVC AND NOT APPLE)
     # Note: Must now run "update-mime-database" to apply changes. This is done in the Makefile.
 endif (NOT MINGW AND NOT MSVC AND NOT APPLE)
 
-#
-#  Create precompiled header file
-#
-
-# all.h is expected in PROJECT_BINARY_DIR by subdirs, except for MSVC
-if (NOT MSVC)
-   execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/all.h ${PROJECT_BINARY_DIR}/all.h
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      )
-endif (NOT MSVC)
-
-precompiled_header(QT_INCLUDES all ${BUILD_PCH})
-
-# MSVC does not require these targets, as all.h is not copied and the
-#   PCH generation is done per-project
-if (NOT MSVC)
-   ADD_CUSTOM_TARGET(mops1 DEPENDS ${PROJECT_BINARY_DIR}/all.h)
-   ADD_CUSTOM_TARGET(mops2 DEPENDS ${PCH})
-endif (NOT MSVC)
-
-##
-
 ## Includes
 ##
 include_directories(
    ${PROJECT_SOURCE_DIR}
+   ${PROJECT_SOURCE_DIR}/include
    ${PROJECT_BINARY_DIR}
    ${PROJECT_BINARY_DIR}/libmscore
    ${OGG_INCDIR}

@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QDesktopServices>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "openfilelocation.h"
 
 namespace Ms {

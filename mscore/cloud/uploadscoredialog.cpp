@@ -11,6 +11,7 @@
 //=============================================================================
 
 #include <QMessageBox>
+#include "musescore-gui-qt.h"
 
 #include "musescore.h"
 //#include "muxseq.h"

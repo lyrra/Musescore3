@@ -11,6 +11,12 @@
 //=============================================================================
 
 
+#include <cmath>
+#include <QScrollBar>
+#include <QMimeData>
+#include <QClipboard>
+#include <QApplication>
+#include "musescore-gui-qt.h"
 #include "pianoview.h"
 #include "pianoruler.h"
 #include "pianokeyboard.h"

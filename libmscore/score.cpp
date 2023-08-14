@@ -15,7 +15,10 @@
  Implementation of class Score (partial).
 */
 
+#include <cmath>
 #include <assert.h>
+#include "musescore-qt.h"
+#include "musescore-qt-extra.h"
 #include "score.h"
 #include "fermata.h"
 #include "imageStore.h"

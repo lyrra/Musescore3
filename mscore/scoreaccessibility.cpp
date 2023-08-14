@@ -1,5 +1,10 @@
 #include <QMainWindow>
 #include <QWidget>
+#include <QPushButton>
+#include <QFocusEvent>
+#include <QListWidget>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "scoreaccessibility.h"
 #include "musescore.h"
 #include "libmscore/segment.h"

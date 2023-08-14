@@ -17,6 +17,9 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QKeyEvent>
+#include <QSpinBox>
+#include "musescore-qt.h"
 #include "pitchedit.h"
 #include "utils.h"
 

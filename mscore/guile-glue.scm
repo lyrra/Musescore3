@@ -25,6 +25,8 @@
        (f "#include ~a~%" file))
      '("<iostream>"
        "<libguile.h>"
+       "\"musescore-qt.h\""
+       "\"musescore-gui-qt.h\""
        "\"libmscore/mscore.h\"" "\"libmscore/part.h\""
        "\"libmscore/system.h\""
        "\"libmscore/staff.h\"" "\"libmscore/measurebase.h\""

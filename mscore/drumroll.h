@@ -20,6 +20,9 @@
 #ifndef __DRUMROLL_H__
 #define __DRUMROLL_H__
 
+#include <QMainWindow>
+#include "musescore-qt.h"
+
 namespace Awl {
       class PitchEdit;
       class PosLabel;

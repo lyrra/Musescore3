@@ -10,6 +10,11 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QLabel>
+#include <QLineEdit>
+#include <QDesktopServices>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "help.h"
 #include "helpBrowser.h"
 #include "musescore.h"

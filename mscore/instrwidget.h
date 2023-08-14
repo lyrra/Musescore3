@@ -13,6 +13,8 @@
 #ifndef __INSTRWIDGET_H__
 #define __INSTRWIDGET_H__
 
+#include <QSortFilterProxyModel>
+#include "musescore-qt.h"
 #include "ui_instrwidget.h"
 #include "libmscore/clef.h"
 #include "libmscore/instrtemplate.h"

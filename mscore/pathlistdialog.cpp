@@ -17,6 +17,9 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QStandardPaths>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "pathlistdialog.h"
 #include "preferences.h"
 #include "musescore.h"

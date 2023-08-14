@@ -10,6 +10,10 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include <QScrollBar>
+#include <QApplication>
+#include "musescore-gui-qt.h"
 #include "pianoroll.h"
 #include "shortcut.h"
 #include "config.h"

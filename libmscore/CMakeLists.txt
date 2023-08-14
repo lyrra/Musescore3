@@ -10,28 +10,11 @@
 #  the file LICENSE.GPL
 #=============================================================================
 
-# MSVC does not depend on copying all.h to the binary directory
-if (NOT MSVC)
-   add_custom_command(
-      OUTPUT ${PROJECT_BINARY_DIR}/all.h
-      COMMAND ${CMAKE_COMMAND}
-      ARGS -E copy ${PROJECT_SOURCE_DIR}/all.h ${PROJECT_BINARY_DIR}/all.h
-      DEPENDS ${PROJECT_SOURCE_DIR}/all.h
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      )
-endif (NOT MSVC)
-
 if (APPLE)
         file(GLOB_RECURSE INCS "*.h")
 else (APPLE)
         set(INCS "")
 endif (APPLE)
-
-if (NOT MSVC)
-   set(_all_h_file "${PROJECT_BINARY_DIR}/all.h")
-else (NOT MSVC)
-   set(_all_h_file "${PROJECT_SOURCE_DIR}/all.h")
-endif (NOT MSVC)
 
 include_directories(
       ${QT_INCLUDES}
@@ -108,7 +91,6 @@ set (SOURCE_FILES
 
 add_library (
       musescore SHARED
-      ${_all_h_file}
       ${INCS}
       ${LIB_SCRIPT_FILES}
       ${SOURCE_FILES}
@@ -147,30 +129,9 @@ if (NOT MSVC)
 
     set_target_properties (musescore
          PROPERTIES
-            COMPILE_FLAGS "-g ${PCH_INCLUDE} -Wall -Wextra -Winvalid-pch -Woverloaded-virtual ${COVERAGE_OPTIONS}"
+            COMPILE_FLAGS "-g -Wall -Wextra -Woverloaded-virtual ${COVERAGE_OPTIONS}"
          )
 
-else (NOT MSVC)
-   set_target_properties (
-      libmscore
-      PROPERTIES
-         COMPILE_FLAGS "${PCH_INCLUDE}"
-      )
-endif (NOT MSVC)
-
-if (APPLE)
-   xcode_pch(libmscore all)
-endif (APPLE)
-
-# Use MSVC pre-compiled headers
-if (MSVC)
-   vstudio_pch( libmscore )
-endif (MSVC)
-
-# MSVC does not depend on mops1 & mops2 for PCH
-if (NOT MSVC)
-      ADD_DEPENDENCIES(musescore mops1)
-      ADD_DEPENDENCIES(musescore mops2)
 endif (NOT MSVC)
 
 add_dependencies(musescore generated_sources)

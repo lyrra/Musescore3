@@ -10,6 +10,10 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QScrollBar>
+#include <QTextDocument>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "timeline.h"
 #include "navigator.h"
 #include "musescore.h"

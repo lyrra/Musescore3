@@ -17,6 +17,8 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QMetaEnum>
+#include "musescore-gui-qt.h"
 #include "enums.h"
 
 namespace Ms {

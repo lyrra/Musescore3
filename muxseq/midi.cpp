@@ -1,3 +1,4 @@
+#include "musescore-qt.h"
 #include "libmscore/types.h"
 #include "libmscore/musescoreCore.h"
 #include "libmscore/score.h"

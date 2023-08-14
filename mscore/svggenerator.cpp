@@ -39,6 +39,10 @@
 **
 ****************************************************************************/
 
+#include <QMimeType>
+#include <QMimeDatabase>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "svggenerator.h"
 #include "libmscore/element.h"
 #include "libmscore/image.h"

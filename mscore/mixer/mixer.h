@@ -24,6 +24,8 @@
 #include <QDockWidget>
 #include <QScrollArea>
 #include <QList>
+#include <QScrollBar>
+#include "musescore-gui-qt.h"
 
 #include "ui_parteditbase.h"
 #include "ui_mixer.h"

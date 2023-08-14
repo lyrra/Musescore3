@@ -10,6 +10,10 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QListWidget>
+#include <QPushButton>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "globals.h"
 #include "scoreview.h"
 #include "preferences.h"

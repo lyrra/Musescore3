@@ -20,6 +20,9 @@
 #ifndef __PALETTEWORKSPACE_H__
 #define __PALETTEWORKSPACE_H__
 
+#include <cmath>
+#include <QSettings>
+#include "musescore-qt.h"
 #include "palettemodel.h"
 #include "../preferences.h"
 

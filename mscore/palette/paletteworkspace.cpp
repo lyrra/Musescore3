@@ -17,6 +17,12 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QIconEngine>
+#include <QMimeData>
+#include <QQmlEngine>
+#include <QStandardItemModel>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "paletteworkspace.h"
 
 #include "libmscore/keysig.h"

@@ -7,6 +7,7 @@
  *
  */
 
+#include "musescore-qt.h"
 #include "config.h"
 #include <thread>
 #include <chrono>

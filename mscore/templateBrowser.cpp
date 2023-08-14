@@ -10,6 +10,12 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QListWidget>
+#include <QTreeWidgetItem>
+#include <QPixmapCache>
+#include <QLineEdit>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "templateBrowser.h"
 #include "libmscore/score.h"
 

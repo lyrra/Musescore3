@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-gui-qt.h"
 #include "musescore.h"
 #include "logindialog.h"
 #include "loginmanager.h"

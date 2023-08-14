@@ -10,6 +10,16 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include <QApplication>
+#include <QFontComboBox>
+#include <QErrorMessage>
+#include <QListWidget>
+#include <QTextCursor>
+#include <QClipboard>
+#include <QMimeData>
+#include <QDrag>
+#include "musescore-gui-qt.h"
 #include "log.h"
 
 #include "scoreview.h"

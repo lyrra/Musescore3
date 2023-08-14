@@ -20,7 +20,7 @@ add_executable(
 target_link_libraries(genft ${QT_LIBRARIES} -lfreetype)
 
 if (NOT MSVC)
-   set_target_properties(genft PROPERTIES COMPILE_FLAGS "-I/usr/include/freetype2 -g -Wall -Wextra -Winvalid-pch")
+   set_target_properties(genft PROPERTIES COMPILE_FLAGS "-I/usr/include/freetype2 -g -Wall -Wextra")
 else (NOT MSVC)
    set_target_properties (
       genft

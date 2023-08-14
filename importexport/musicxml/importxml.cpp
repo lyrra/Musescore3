@@ -21,6 +21,11 @@
  MusicXML import.
  */
 
+#include <QSettings>
+#include <QDate>
+#include <QXmlSchema>
+#include <QXmlSchemaValidator>
+#include "musescore-qt.h"
 #include "thirdparty/qzip/qzipreader_p.h"
 #include "importmxml.h"
 

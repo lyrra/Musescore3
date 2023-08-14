@@ -17,6 +17,7 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "realizedharmony.h"
 #include "pitchspelling.h"
 #include "staff.h"

@@ -17,6 +17,11 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QToolTip>
+#include <QStyleHints>
+#include <QQuickItem>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "nativetooltip.h"
 
 namespace Ms {

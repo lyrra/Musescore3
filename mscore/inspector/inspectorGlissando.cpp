@@ -10,6 +10,10 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <deque>
+#include <QVariant>
+#include <QPushButton>
+#include "musescore-gui-qt.h"
 #include "inspectorGlissando.h"
 #include "libmscore/glissando.h"
 #include "libmscore/note.h"

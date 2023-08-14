@@ -1,3 +1,5 @@
+#include <QApplication>
+#include "musescore-gui-qt.h"
 #include "lelandstylehandler.h"
 
 #include "libmscore/excerpt.h"

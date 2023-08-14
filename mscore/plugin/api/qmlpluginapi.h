@@ -13,6 +13,8 @@
 #ifndef __QMLPLUGINAPI_H__
 #define __QMLPLUGINAPI_H__
 
+#include <QQuickItem>
+#include "musescore-qt.h"
 #include "config.h"
 #include "../qmlplugin.h"
 #include "enums.h"

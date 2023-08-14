@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include <QtCore/QCryptographicHash>
 #include "imageStore.h"
 #include "score.h"

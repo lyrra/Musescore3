@@ -11,6 +11,11 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include <QSettings>
+#include <QTextCodec>
+#include <QDomNode>
+#include "musescore-qt.h"
 #include "importgtp.h"
 
 #include <libmscore/score.h>

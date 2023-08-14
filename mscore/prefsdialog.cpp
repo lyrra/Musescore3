@@ -17,6 +17,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QPrintDialog>
+#include "musescore-gui-qt.h"
 #include "musescore.h"
 #include "timeline.h"
 #include "preferences.h"

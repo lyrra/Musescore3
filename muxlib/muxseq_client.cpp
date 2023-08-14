@@ -11,6 +11,8 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "event.h"
 #include "libmscore/repeatlist.h"
 #include "libmscore/synthesizerstate.h"

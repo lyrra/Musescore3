@@ -17,6 +17,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QTreeView>
+#include <QTreeWidget>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "selinstrument.h"
 #include "instrdialog.h"
 #include "musescore.h"

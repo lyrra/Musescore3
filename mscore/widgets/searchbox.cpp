@@ -9,6 +9,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QLineEdit>
+#include "musescore-gui-qt.h"
 #include "searchbox.h"
 #include "filterableview.h"
 

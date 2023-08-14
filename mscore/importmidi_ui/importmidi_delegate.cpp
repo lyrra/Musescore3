@@ -1,3 +1,8 @@
+#include <QLabel>
+#include <QPushButton>
+#include <QHeaderView>
+#include <QListWidgetItem>
+#include "musescore-gui-qt.h"
 #include "importmidi_delegate.h"
 
 namespace Ms {

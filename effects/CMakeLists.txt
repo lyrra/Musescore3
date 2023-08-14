@@ -17,7 +17,6 @@ QT5_ADD_RESOURCES (qrc_effects_files
 include_directories (${QT_INCLUDES})
 
 add_library (effects STATIC
-      ${_all_h_file}
       ${qrc_effects_files}
       effect.cpp
       noeffect/noeffect.cpp
@@ -28,5 +27,5 @@ add_library (effects STATIC
 set_target_properties (
       effects
       PROPERTIES
-         COMPILE_FLAGS "-g -Wall -Wextra ${PCH_INCLUDE} -Winvalid-pch"
+         COMPILE_FLAGS "-g -Wall -Wextra"
       )

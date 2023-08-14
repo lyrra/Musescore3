@@ -10,6 +10,12 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QPushButton>
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <QJsonObject>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "resourceManager.h"
 #include "musescore.h"
 #include "extension.h"

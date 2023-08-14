@@ -1,3 +1,4 @@
+#include <QList>
 #include "event.h"
 #include "mux.h"
 #include "muxcommon.h"

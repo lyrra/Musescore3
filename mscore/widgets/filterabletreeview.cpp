@@ -9,6 +9,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QTreeWidget>
+#include "musescore-gui-qt.h"
+
 #include "filterabletreeview.h"
 
 namespace Ms {

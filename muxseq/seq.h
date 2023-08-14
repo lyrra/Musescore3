@@ -20,6 +20,11 @@
 #ifndef __SEQ_H__
 #define __SEQ_H__
 
+#include <QMutex>
+#include <QFuture>
+#include <QQueue>
+#include <QApplication>
+#include "musescore-gui-qt.h"
 #include "libmscore/rendermidi.h"
 #include "libmscore/sequencer.h"
 #include "libmscore/fraction.h"

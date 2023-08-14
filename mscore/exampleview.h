@@ -13,6 +13,9 @@
 #ifndef __EXAMPLEVIEW_H__
 #define __EXAMPLEVIEW_H__
 
+#include <QEventTransition>
+#include <QStateMachine>
+#include "musescore-qt.h"
 #include "libmscore/mscoreview.h"
 
 namespace Ms {

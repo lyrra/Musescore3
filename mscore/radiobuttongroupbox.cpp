@@ -17,6 +17,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QStylePainter>
+#include <QGroupBox>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "radiobuttongroupbox.h"
 
 namespace Ms {

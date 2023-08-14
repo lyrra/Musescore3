@@ -17,6 +17,8 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QLabel>
+#include "musescore-qt.h"
 #include "poslabel.h"
 #include "libmscore/pos.h"
 

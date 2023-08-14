@@ -22,6 +22,7 @@
  between startUndo() and endUndo().
 */
 
+#include "musescore-qt.h"
 #include "global/log.h"
 #include "undo.h"
 #include "element.h"

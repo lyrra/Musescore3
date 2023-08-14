@@ -20,6 +20,9 @@
 #ifndef __AWLASLIDER_H__
 #define __AWLASLIDER_H__
 
+#include <QWidget>
+#include <QPushButton>
+#include "musescore-qt.h"
 // #include "synthesizer/sparm.h"
 #include <QAccessibleWidget>
 

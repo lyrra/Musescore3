@@ -1,3 +1,8 @@
+#include <QStyledItemDelegate>
+#include <QHeaderView>
+#include <QScrollBar>
+#include <QToolTip>
+#include "musescore-gui-qt.h"
 #include "importmidi_view.h"
 
 

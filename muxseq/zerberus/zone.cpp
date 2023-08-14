@@ -11,6 +11,10 @@
 //=============================================================================
 
 #include <stdio.h>
+#include <cmath>
+#include "musescore-gui-qt.h"
+#include <QXmlStreamReader>
+#include <QApplication>
 #include "zone.h"
 #include "channel.h"
 #include "sample.h"

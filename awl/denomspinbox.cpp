@@ -17,6 +17,8 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "denomspinbox.h"
 
 namespace Awl {

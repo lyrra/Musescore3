@@ -10,6 +10,9 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QQmlEngine>
+#include <QDirIterator>
+#include "musescore-gui-qt.h"
 #include "pluginManager.h"
 #include "qmlpluginengine.h"
 #include "shortcutcapturedialog.h"

@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "tremolo.h"
 #include "score.h"
 #include "staff.h"

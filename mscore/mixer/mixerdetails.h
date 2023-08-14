@@ -20,12 +20,16 @@
 #ifndef __MIXERDETAILS_H__
 #define __MIXERDETAILS_H__
 
+#include <QPushButton>
+#include <QXmlStreamReader>
+#include <QtMath>
+#include "musescore-gui-qt.h"
+
 #include "ui_mixerdetails.h"
 #include "libmscore/instrument.h"
 #include "mixertrackitem.h"
 
 #include <functional>
-#include <QPushButton>
 
 namespace Ms {
 

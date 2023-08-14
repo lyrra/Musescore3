@@ -17,6 +17,15 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QPushButton>
+#include <QGroupBox>
+#include <QRadioButton>
+#include <QTreeWidget>
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QHeaderView>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "preferenceslistwidget.h"
 #include <cfloat>
 

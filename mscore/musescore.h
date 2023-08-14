@@ -20,6 +20,11 @@
 #ifndef __MUSESCORE_H__
 #define __MUSESCORE_H__
 
+#include <QSettings>
+#include <QFileDialog>
+#include <QPrinter>
+#include "musescore-qt.h"
+
 #include "config.h"
 #include "globals.h"
 #include "singleapp/src/QtSingleApplication"

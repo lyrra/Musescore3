@@ -1,3 +1,6 @@
+#include <QStyledItemDelegate>
+#include <QListWidgetItem>
+#include "musescore-gui-qt.h"
 #include "importmidi_panel.h"
 
 #include "ui_importmidi_panel.h"

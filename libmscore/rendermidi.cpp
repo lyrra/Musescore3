@@ -15,8 +15,9 @@
  render score into event list
 */
 
-#include <set>
-
+#include <cmath>
+#include "musescore-qt.h"
+#include "musescore-qt-extra.h"
 #include "rendermidi.h"
 #include "score.h"
 #include "volta.h"

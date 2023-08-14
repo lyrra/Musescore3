@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QJsonObject>
+#include <QJsonDocument>
+#include "musescore-qt.h"
 #include "score.h"
 #include "slur.h"
 #include "measure.h"

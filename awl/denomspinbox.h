@@ -20,6 +20,9 @@
 #ifndef __AWLDENOMSPINBOX_H__
 #define __AWLDENOMSPINBOX_H__
 
+#include <QSpinBox>
+#include "musescore-qt.h"
+
 namespace Awl {
 
 //---------------------------------------------------------

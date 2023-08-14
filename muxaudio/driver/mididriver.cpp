@@ -24,6 +24,7 @@
 #include <time.h>
 
 #include "config.h"
+#include "musescore-qt.h"
 #include "mididriver.h"
 
 #include "midi/midifile.h"

@@ -16,6 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
+#include <QUdpSocket>
+#include <QHostAddress>
+#include "musescore-qt.h"
 #ifndef QOSCTYPES_H
 #define QOSCTYPES_H
 

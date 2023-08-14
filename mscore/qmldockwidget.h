@@ -20,6 +20,10 @@
 #ifndef __QMLDOCKWIDGET_H__
 #define __QMLDOCKWIDGET_H__
 
+#include <QQuickItem>
+#include <QDockWidget>
+#include <QQmlContext>
+#include "musescore-qt.h"
 #include "libmscore/mscore.h"
 
 namespace Ms {

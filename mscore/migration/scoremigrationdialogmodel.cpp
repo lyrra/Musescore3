@@ -1,7 +1,11 @@
+#include <QQuickItem>
+#include <QLocale>
+#include <QDesktopServices>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
+
 #include "scoremigrationdialogmodel.h"
 
-#include <QDesktopServices>
-#include <QLocale>
 
 #include "handlers/resetallelementspositionshandler.h"
 #include "handlers/lelandstylehandler.h"

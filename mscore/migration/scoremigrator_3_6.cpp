@@ -1,3 +1,6 @@
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
+
 #include "scoremigrator_3_6.h"
 
 #include "libmscore/mscore.h"

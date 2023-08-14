@@ -10,6 +10,12 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QSettings>
+#include <QDate>
+#include <QXmlSchema>
+#include <QXmlSchemaValidator>
+#include "musescore-qt.h"
+
 #include "importxmlfirstpass.h"
 
 namespace Ms {

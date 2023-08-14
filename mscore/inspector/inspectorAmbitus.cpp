@@ -10,6 +10,9 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QPushButton>
+#include <QStandardItemModel>
+#include "musescore-gui-qt.h"
 #include "inspector.h"
 #include "inspectorAmbitus.h"
 #include "libmscore/ambitus.h"

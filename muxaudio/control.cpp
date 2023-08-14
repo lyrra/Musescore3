@@ -11,6 +11,7 @@
 #include <thread> // FIX: should be imported by config.h
 #include <chrono>
 #include <iostream>
+#include "musescore-qt.h"
 #include "mux.h"
 #include "muxcommon.h"
 

@@ -11,6 +11,7 @@
 //=============================================================================
 
 
+#include "musescore-qt.h"
 #include "score.h"
 #include "excerpt.h"
 #include "instrument.h"

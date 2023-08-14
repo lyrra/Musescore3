@@ -1,3 +1,5 @@
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "styledefaultshandler.h"
 
 #include <QFile>

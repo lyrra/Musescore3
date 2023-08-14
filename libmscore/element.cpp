@@ -15,6 +15,8 @@
  Implementation of Element, ElementList
 */
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "element.h"
 #include "accidental.h"
 #include "ambitus.h"

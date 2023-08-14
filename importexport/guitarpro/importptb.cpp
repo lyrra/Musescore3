@@ -1,3 +1,7 @@
+#include <cmath>
+#include <QSettings>
+#include "musescore-qt.h"
+
 #include "importptb.h"
 #include "assert.h"
 

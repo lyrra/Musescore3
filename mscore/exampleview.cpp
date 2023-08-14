@@ -10,6 +10,10 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <cmath>
+#include <QMimeData>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "exampleview.h"
 #include "preferences.h"
 #include "libmscore/score.h"

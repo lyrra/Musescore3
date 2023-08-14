@@ -10,6 +10,10 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QDesktopServices>
+#include "musescore-gui-qt.h"
 #include "loginmanager.h"
 #include "loginmanager_p.h"
 #include "musescore.h"

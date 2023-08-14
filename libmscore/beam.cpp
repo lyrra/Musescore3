@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
 #include "beam.h"
 #include "segment.h"
 #include "score.h"

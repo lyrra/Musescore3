@@ -13,6 +13,11 @@
 #ifndef __PLUGIN_API_UTIL_H__
 #define __PLUGIN_API_UTIL_H__
 
+#include <QQuickItem>
+#include <QProcess>
+#include <QPainter>
+#include <QQuickPaintedItem>
+#include "musescore-qt.h"
 #include "config.h"
 
 #include "libmscore/element.h"

@@ -10,6 +10,10 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QTextDocument>
+#include <QTextFragment>
+#include <cmath>
+#include "musescore-qt.h"
 #include "score.h"
 #include "slur.h"
 #include "staff.h"

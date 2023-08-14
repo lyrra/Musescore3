@@ -11,6 +11,11 @@
 //=============================================================================
 
 
+#include <QQmlEngine>
+#include <QQuickItem>
+#include <QDesktopServices>
+#include "musescore-gui-qt.h"
+
 #include "pluginCreator.h"
 #include "qmlpluginengine.h"
 #include "musescore.h"

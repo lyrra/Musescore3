@@ -15,6 +15,8 @@
  Implementation of class ChangeMap.
 */
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "changeMap.h"
 
 namespace Ms {

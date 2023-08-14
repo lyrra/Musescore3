@@ -20,6 +20,8 @@
 #ifndef __PIANOTOOLS_H__
 #define __PIANOTOOLS_H__
 
+#include <QGestureEvent>
+#include "musescore-qt.h"
 #include "libmscore/note.h"
 #include "libmscore/select.h"
 

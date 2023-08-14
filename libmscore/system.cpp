@@ -15,6 +15,7 @@
  Implementation of classes SysStaff and System.
 */
 
+#include "musescore-qt.h"
 #include "system.h"
 #include "measure.h"
 #include "segment.h"

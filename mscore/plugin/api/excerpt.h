@@ -13,6 +13,8 @@
 #ifndef __PLUGIN_API_EXCERPT_H__
 #define __PLUGIN_API_EXCERPT_H__
 
+#include <QQmlEngine>
+#include "musescore-qt.h"
 #include "libmscore/excerpt.h"
 
 namespace Ms {

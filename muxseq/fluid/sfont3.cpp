@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+//#include <cmath>
+#include <QMutex>
+#include "musescore-qt.h"
+
 #include "sfont.h"
 #include "audiofile/audiofile.h"
 

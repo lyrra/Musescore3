@@ -16,6 +16,10 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <QLabel>
+#include <QRadioButton>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "startupWizard.h"
 #include "musescore.h"
 #include "libmscore/mscore.h"

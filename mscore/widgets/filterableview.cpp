@@ -9,6 +9,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-gui-qt.h"
 #include "filterableview.h"
 #include "../stringutils.h"
 

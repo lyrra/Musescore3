@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "instrtemplate.h"
 #include "bracket.h"
 #include "drumset.h"

@@ -10,6 +10,8 @@
 //  the file LICENSE.GPL
 //=============================================================================
 
+#include <QPushButton>
+#include "musescore-gui-qt.h"
 #include "inspectorTremoloBar.h"
 #include "tremolobarcanvas.h"
 #include "musescore.h"

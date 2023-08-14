@@ -19,8 +19,15 @@
 
 // For menus in the menu bar, like File, Edit, and View, see mscore/musescore.cpp
 
-#include "menus.h"
 #include <tuple>
+#include <QIconEngine>
+#include <QQmlEngine>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonParseError>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
+#include "menus.h"
 #include "libmscore/score.h"
 #include "palette.h"
 #include "libmscore/note.h"

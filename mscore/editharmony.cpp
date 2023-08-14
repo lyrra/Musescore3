@@ -11,6 +11,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "scoreview.h"
 #include "texttools.h"
 #include "libmscore/chordrest.h"

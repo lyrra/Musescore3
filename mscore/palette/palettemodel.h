@@ -20,6 +20,9 @@
 #ifndef __PALETTEMODEL_H__
 #define __PALETTEMODEL_H__
 
+#include <QSortFilterProxyModel>
+#include <QModelIndex>
+#include "musescore-qt.h"
 #include "palettetree.h"
 
 namespace Ms {

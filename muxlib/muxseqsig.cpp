@@ -1,3 +1,4 @@
+#include "musescore-gui-qt.h"
 
 #include "musescore.h"
 #include "scoreview.h"

@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "cleflist.h"
 #include "clef.h"
 #include "score.h"

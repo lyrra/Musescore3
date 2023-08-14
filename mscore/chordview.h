@@ -13,6 +13,11 @@
 #ifndef __CHORDVIEW_H__
 #define __CHORDVIEW_H__
 
+#include <QGraphicsView>
+#include <QGraphicsItem>
+#include <QGraphicsLineItem>
+#include <QGraphicsSceneMouseEvent>
+#include "musescore-qt.h"
 #include "libmscore/pos.h"
 
 namespace Ms {

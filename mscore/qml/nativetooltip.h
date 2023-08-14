@@ -20,6 +20,9 @@
 #ifndef __QML_NATIVETOOLTIP_H__
 #define __QML_NATIVETOOLTIP_H__
 
+#include <QTimer>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 //---------------------------------------------------------

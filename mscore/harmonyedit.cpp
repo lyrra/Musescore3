@@ -17,6 +17,11 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //=============================================================================
 
+#include <cmath>
+#include <QIconEngine>
+#include <QMimeData>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "musescore.h"
 #include "harmonyedit.h"
 #include "harmonycanvas.h"

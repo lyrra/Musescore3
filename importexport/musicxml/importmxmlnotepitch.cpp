@@ -10,6 +10,10 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QSettings>
+#include <QDate>
+#include "musescore-qt.h"
+
 #include "importmxmllogger.h"
 #include "importmxmlnotepitch.h"
 #include "musicxmlsupport.h"

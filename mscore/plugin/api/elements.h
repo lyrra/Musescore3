@@ -13,6 +13,7 @@
 #ifndef __PLUGIN_API_ELEMENTS_H__
 #define __PLUGIN_API_ELEMENTS_H__
 
+#include "musescore-qt.h"
 #include "scoreelement.h"
 #include "libmscore/element.h"
 #include "libmscore/chord.h"

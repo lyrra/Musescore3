@@ -20,6 +20,9 @@
 #ifndef __NAVIGATOR_H__
 #define __NAVIGATOR_H__
 
+#include <QPointer>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 class Score;

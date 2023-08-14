@@ -1,5 +1,16 @@
 //FIX: USE_LAME isn't set (though is set in musescore.cpp)
 //#ifdef USE_LAME
+#include <cmath>
+#include <QString>
+#include <QtGlobal> // qreal
+#include <QLibrary> // exportmp3
+#include <QPainter>
+#include <QMap>
+#include <QSet>
+#include <QVariant>
+#include <QFile>
+#include <QCoreApplication>
+#include <QComboBox>
 #include "exportmp3.h"
 //#endif
 #include "libmscore/score.h"

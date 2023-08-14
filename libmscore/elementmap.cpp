@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "elementmap.h"
 #include "tupletmap.h"
 #include "tiemap.h"

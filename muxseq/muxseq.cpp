@@ -19,6 +19,7 @@
 
 */
 
+#include "musescore-qt.h"
 #include "config.h"
 #include <iostream>
 #include <thread>

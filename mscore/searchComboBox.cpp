@@ -1,3 +1,5 @@
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "searchComboBox.h"
 #include "musescore.h"
 #include "scoreview.h"

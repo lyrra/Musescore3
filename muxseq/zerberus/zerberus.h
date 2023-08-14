@@ -19,6 +19,9 @@
 #include <list>
 #include <memory>
 #include <queue>
+#include <cmath>
+#include <QMutex>
+#include "musescore-qt.h"
 
 #include "voice.h"
 

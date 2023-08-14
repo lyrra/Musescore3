@@ -1,3 +1,6 @@
+#include <QApplication>
+#include "musescore-gui-qt.h"
+
 #include "edwinstylehandler.h"
 
 #include "libmscore/excerpt.h"

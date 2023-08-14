@@ -1,6 +1,10 @@
 #ifndef SCOREMIGRATIONDIALOG_H
 #define SCOREMIGRATIONDIALOG_H
 
+#include <QQmlEngine>
+#include <QFocusEvent>
+#include <QQuickView>
+#include "musescore-qt.h"
 #include "scoremigrationdialogmodel.h"
 
 class ScoreMigrationDialog : public QQuickView

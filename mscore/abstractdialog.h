@@ -20,6 +20,12 @@
 #ifndef __QABSTRACTDIALOG_H__
 #define __QABSTRACTDIALOG_H__
 
+#include <QObject>
+#include <QScopedPointer>
+#include <QObjectData>
+#include <QMetaObject>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 //---------------------------------------------------------

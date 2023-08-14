@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-qt.h"
 #include "instrument.h"
 #include "xml.h"
 #include "drumset.h"

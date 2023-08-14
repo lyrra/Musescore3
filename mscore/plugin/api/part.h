@@ -13,6 +13,8 @@
 #ifndef __PLUGIN_API_PART_H__
 #define __PLUGIN_API_PART_H__
 
+#include <QQmlListProperty>
+#include "musescore-qt.h"
 #include "scoreelement.h"
 #include "libmscore/part.h"
 

@@ -10,12 +10,39 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
-#include "musescore.h"
-
 #include <fenv.h>
+
 #include <QStyleFactory>
 #include <QStandardPaths>
 #include <QDir>
+#include <QClipboard>
+#include <QLineEdit>
+#include <QIconEngine>
+#include <QStorageInfo>
+#include <QErrorMessage>
+#include <QFutureWatcher>
+#include <QFuture>
+#include <QDirIterator>
+#include <QScreen>
+#include <QDesktopServices>
+#include <QProcess>
+#include <QMimeData>
+#include <QTranslator>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QCommandLineParser>
+#include <QLibrary>
+#include <QLibraryInfo>
+#include <QtConcurrent>
+#include <QMetaObject>
+#include <QTemporaryFile>
+#include <QNetworkProxyFactory>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
+#include "musescore.h"
+
 
 #include "config.h"
 

@@ -10,6 +10,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QDateTime>
+#include "musescore-qt.h"
 #include "revisions.h"
 #include "xml.h"
 

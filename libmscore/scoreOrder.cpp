@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include "musescore-qt.h"
 #include "scoreOrder.h"
 #include "score.h"
 #include "part.h"

@@ -10,6 +10,13 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QMimeDatabase>
+#include <QMimeData>
+#include <QImageReader>
+#include <QMutex>
+#include <QWaitCondition>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "libmscore/score.h"
 #include "libmscore/element.h"
 #include "libmscore/note.h"

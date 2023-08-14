@@ -14,6 +14,7 @@
 #define __EVENT_H__
 
 #include <map>
+#include <QtGlobal> // uchar
 
 namespace Ms {
 

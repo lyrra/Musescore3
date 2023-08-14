@@ -20,6 +20,13 @@
 #ifndef __MUSICXMLSUPPORT_H__
 #define __MUSICXMLSUPPORT_H__
 
+#include "musescore-qt.h"
+#include <QDomElement>
+#include <QSourceLocation>
+#include <QObjectData>
+#include <QScopedPointer>
+#include <QtGlobal>
+#include <QAbstractMessageHandler>
 #include "libmscore/fraction.h"
 #include "libmscore/mscore.h"
 #include "libmscore/note.h"

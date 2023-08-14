@@ -17,6 +17,7 @@
 
 #include "global/log.h"
 
+#include "musescore-qt.h"
 #include "mscore.h"
 #include "arpeggio.h"
 #include "barline.h"

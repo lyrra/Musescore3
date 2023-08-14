@@ -20,6 +20,8 @@
 #ifndef __PALETTEWIDGET_H__
 #define __PALETTEWIDGET_H__
 
+#include <QQuickView>
+#include "musescore-qt.h"
 #include "qmldockwidget.h"
 
 namespace Ms {

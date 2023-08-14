@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QIconEngine>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "musescore.h"
 #include "masterpalette.h"
 #include "menus.h"

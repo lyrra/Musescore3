@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "zerberus.h"
+#include <QSettings>
 //#include "zerberusgui.h"
 #include "voice.h"
 #include "channel.h"

@@ -13,6 +13,9 @@
 #ifndef __INSPECTOR_BASE_H__
 #define __INSPECTOR_BASE_H__
 
+#include <deque>
+#include <QPushButton>
+#include "musescore-gui-qt.h"
 #include "libmscore/property.h"
 #include "libmscore/style.h"
 

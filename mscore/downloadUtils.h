@@ -13,6 +13,11 @@
 #ifndef __DOWNLOAD_UTILS_H__
 #define __DOWNLOAD_UTILS_H__
 
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QProgressDialog>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 class DownloadUtils : public QObject

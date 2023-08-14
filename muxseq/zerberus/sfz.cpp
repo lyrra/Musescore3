@@ -15,6 +15,10 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QStringList>
+#include "musescore-gui-qt.h"
+#include <QXmlStreamReader>
+#include <QApplication>
+
 #include <sndfile.h>
 
 #include "libmscore/xml.h"

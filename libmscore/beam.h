@@ -13,6 +13,7 @@
 #ifndef __BEAM_H__
 #define __BEAM_H__
 
+#include "musescore-qt.h"
 #include "element.h"
 #include "durationtype.h"
 #include "property.h"

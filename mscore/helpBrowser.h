@@ -13,6 +13,10 @@
 #ifndef __HELP_BROWSER_H
 #define __HELP_BROWSER_H
 
+#include <QTextBrowser>
+#include <QHelpEngine>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 //---------------------------------------------------------

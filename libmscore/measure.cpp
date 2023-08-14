@@ -15,6 +15,8 @@
  Implementation of most part of class Measure.
 */
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "global/log.h"
 
 #include "measure.h"

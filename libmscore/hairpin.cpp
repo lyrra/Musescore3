@@ -10,6 +10,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <cmath>
+#include "musescore-qt.h"
 #include "hairpin.h"
 #include "dynamichairpingroup.h"
 #include "style.h"

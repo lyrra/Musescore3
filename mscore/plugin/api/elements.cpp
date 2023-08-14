@@ -10,6 +10,8 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QQmlEngine>
+#include "musescore-gui-qt.h"
 #include "elements.h"
 #include "fraction.h"
 #include "part.h"

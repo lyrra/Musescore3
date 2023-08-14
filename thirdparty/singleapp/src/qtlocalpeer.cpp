@@ -38,7 +38,7 @@
 **
 ****************************************************************************/
 
-
+#include "musescore-qt.h"
 #include "qtlocalpeer.h"
 #include <QCoreApplication>
 #include <QTime>

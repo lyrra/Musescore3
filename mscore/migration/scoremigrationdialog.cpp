@@ -1,3 +1,6 @@
+#include <QQuickItem>
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include "scoremigrationdialog.h"
 
 ScoreMigrationDialog::ScoreMigrationDialog(QQmlEngine* engine, Ms::Score* score)

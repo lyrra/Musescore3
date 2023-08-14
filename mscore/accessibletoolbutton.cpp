@@ -1,4 +1,6 @@
 
+#include "musescore-qt.h"
+#include "musescore-gui-qt.h"
 #include <QGraphicsColorizeEffect>
 #include <QToolButton>
 #include "accessibletoolbutton.h"

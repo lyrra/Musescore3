@@ -21,6 +21,12 @@
  MusicXML font handling support.
  */
 
+#include <QSettings>
+#include <QDate>
+#include <QXmlSchema>
+#include <QXmlSchemaValidator>
+#include "musescore-qt.h"
+
 #include "libmscore/sym.h"
 #include "libmscore/xml.h"
 #include "musicxmlfonthandler.h"

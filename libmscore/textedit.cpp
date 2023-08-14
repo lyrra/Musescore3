@@ -10,6 +10,9 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include <QInputMethodEvent>
+#include "musescore-qt.h"
+#include "musescore-qt-extra.h"
 #include "global/log.h"
 #include "textedit.h"
 #include "score.h"

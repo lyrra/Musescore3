@@ -20,6 +20,9 @@
 #ifndef __SCORETAB_H__
 #define __SCORETAB_H__
 
+#include <QStackedLayout>
+#include "musescore-qt.h"
+
 namespace Ms {
 
 class MuseScore;
