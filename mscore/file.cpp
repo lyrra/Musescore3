@@ -15,6 +15,7 @@
  */
 
 #include <cmath>
+#include <QOperatingSystemVersion>
 #include <QLineEdit>
 #include <QIconEngine>
 #include <QTemporaryFile>

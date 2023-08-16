@@ -11,6 +11,7 @@
 //=============================================================================
 
 #include <QDesktopServices>
+#include <QProcess>
 #include "musescore-qt.h"
 #include "musescore-gui-qt.h"
 #include "openfilelocation.h"
