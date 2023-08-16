@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#define _USE_MATH_DEFINES // needed for M_PI
 #include <cmath>
 #include "beam.h"
 #include "segment.h"

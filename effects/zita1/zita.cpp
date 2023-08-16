@@ -16,6 +16,7 @@
 //  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // -----------------------------------------------------------------------
 
+#define _USE_MATH_DEFINES // needed for M_PI
 #include <cmath>
 #include "musescore-qt.h"
 

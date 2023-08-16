@@ -19,6 +19,7 @@ NICE-TO-HAVE TODO:
       and SlurSegment::changeAnchor() in slur.cpp as models)
 */
 
+#define _USE_MATH_DEFINES // needed for M_PI
 #include <cmath>
 #include "musescore-qt.h"
 #include "global/log.h"

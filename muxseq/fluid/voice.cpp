@@ -18,6 +18,7 @@
  * 02111-1307, USA
  */
 
+#define _USE_MATH_DEFINES // needed for M_PI
 #include <cmath>
 #include <QMutex>
 #include "musescore-qt.h"

@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#define _USE_MATH_DEFINES // needed for M_PI
 #include "filter.h"
 #include "zerberus.h"
 #include "zone.h"

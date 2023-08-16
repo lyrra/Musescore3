@@ -15,6 +15,7 @@
  Implementation of class ChangeMap.
 */
 
+#define _USE_MATH_DEFINES // needed for M_PI
 #include <cmath>
 #include "musescore-qt.h"
 #include "changeMap.h"
