@@ -307,7 +307,7 @@ unsigned int g_writerCycle = 0;
 unsigned int g_readerPause = 0;
 unsigned int g_writerPause = 0;
 
-bool g_buffer_initial_full = false;
+int g_buffer_priming = 0;
 
 // the muxaudio-buffer number of floats might not
 // sum up to the number of floats requested by jack/audio
@@ -346,8 +346,9 @@ int mux_process_bufferStereo(unsigned int numFrames, float* bufferStereo){
     LD8("mux_process_bufferStereo %i.%i/%i numFrames=%i", g_ringBufferReaderStart, g_buffer_chunk_pos, g_ringBufferWriterStart, numFrames);
     int numFloats = numFrames * MUX_CHAN;
     // if buffer is not yet primed, return without moving ringbuffer-reader-position
-    if ((! g_buffer_initial_full) || g_state_play == false) {
-        memset(bufferStereo, 0, sizeof(float) * numFloats);
+    if (g_buffer_priming > 0) {
+        LW("BUFFER-PRIMING: %i", g_buffer_priming);
+        g_buffer_priming--;
         return -1;
     }
 
@@ -357,7 +358,9 @@ int mux_process_bufferStereo(unsigned int numFrames, float* bufferStereo){
                (g_ringBufferReaderStart - g_ringBufferWriterStart) + MAILBOX_SIZE;
     diff = diff * MUX_CHUNK_NUMFLOATS - g_buffer_chunk_pos;
     if (diff < 2048 && diff > -2048) {
-        LW("BUFFER-LOW-WATER-MARK: %i (%i/%i)", diff, g_ringBufferReaderStart, g_ringBufferWriterStart);
+        LW("BUFFER-LOW-WATER-MARK: %i (%i/%i) priming network buffer.", diff, g_ringBufferReaderStart, g_ringBufferWriterStart);
+        g_buffer_priming = MAILBOX_SIZE / (MUX_CHUNK_NUMFLOATS * 2);
+        return -1;
     }
 
     int slept = 0;
@@ -411,20 +414,20 @@ int muxaudio_fill_audio_buffers () {
     unsigned int newWriterPos = (g_ringBufferWriterStart + 1) % MUX_RINGSIZE;
     // ensure we dont overwrite part of buffer that is being read by reader
     // if writer wraps around and goes beyond reader
+    // |--R--W-------w--|
     if (g_ringBufferReaderStart < g_ringBufferWriterStart &&
         g_ringBufferWriterStart > newWriterPos &&
         newWriterPos >= g_ringBufferReaderStart) {
-        if(g_state_play) g_buffer_initial_full = true;
         return 0;
     // wraps around, but goes beyond reader
+    // |--W-------w--R--|
     } else if (g_ringBufferWriterStart < g_ringBufferReaderStart &&
                newWriterPos < g_ringBufferWriterStart) {
-        if(g_state_play) g_buffer_initial_full = true;
         return 0;
     // no wrap, reader is at right side of writer, but new writer goes beyond reader
+    // |--w---R---W-----|
     } else if (g_ringBufferWriterStart < g_ringBufferReaderStart &&
                newWriterPos >= g_ringBufferReaderStart) {
-        if(g_state_play) g_buffer_initial_full = true;
         return 0;
     }
 

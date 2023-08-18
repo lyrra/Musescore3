@@ -35,9 +35,9 @@
 #include "seq.h"
 #include "muxqueue.h"
 
-#define SLEEP_USEC 1000
-#define MUX_READER_USLEEP 1000
-#define MUX_WRITER_USLEEP 1000
+// Avoid sleeping less than 1000 microseconds
+#define MUX_READER_MSLEEP 1
+#define MUX_WRITER_MSLEEP 1
 
 namespace Ms {
 
@@ -174,8 +174,6 @@ void msgToAudioSeekTransport(int utick) {
  */
 #define MUX_CHAN 2
 #define MUX_RINGSIZE  (128*MUX_CHAN)
-#define MUX_READER_USLEEP 100
-#define MUX_WRITER_USLEEP 100
 
 unsigned int g_ringBufferWriterStart = 0;
 unsigned int g_ringBufferReaderStart = 0;
@@ -188,22 +186,39 @@ unsigned int g_writerPause = 0;
 
 // this function is called by the zmq-network audio connection towards muxaudio
 struct MuxaudioBuffer* mux_process_bufferStereo () {
+    int slept = 0;
     for (int r = 0;; r++) {
         unsigned int newReaderPos = (g_ringBufferReaderStart + 1) % MUX_RINGSIZE;
+        /*
+        // FIX: What about: |--R---------r---W--|
+        if ((g_ringBufferReaderStart > newReaderPos &&
+             g_ringBufferReaderStart < g_ringBufferWriterStart &&
+             newReaderPos < g_ringBufferReaderStart)) {
+            LE("ERROR");
+        }
+        */
         // ensure we dont read into writers buffer part
         if (// ringbuffer is empty
             g_ringBufferReaderStart == g_ringBufferWriterStart ||
             // if reader wraps around and goes beyond writer
+            // |--W----R--------r--|
+            // -------->        ---,
             (g_ringBufferReaderStart > newReaderPos &&
              newReaderPos > g_ringBufferWriterStart) ||
+            // FIX: What about: |--R---------r---W--|
             // no wrap, writer is at right side of reader, but new reader goes beyond writer
+            // |--r----W----R------|
+            //    ---------->
             (g_ringBufferWriterStart > g_ringBufferReaderStart &&
              newReaderPos > g_ringBufferWriterStart)) {
             g_readerPause++;
-            std::this_thread::sleep_for(std::chrono::microseconds(MUX_READER_USLEEP));
+            slept += MUX_READER_MSLEEP;
+            std::this_thread::sleep_for(std::chrono::milliseconds(MUX_READER_MSLEEP));
         } else { // there is enough room in reader-part of ring-buffer to use
-            if (r) {
-                LD("WARNING had to wait %i * %i, due to no available audio buffer", r, MUX_READER_USLEEP);
+            if (r || slept) {
+                LD("WARNING had to wait %ims (%i, %i * %i), due to no available audio buffer",
+                   r * MUX_READER_MSLEEP ,
+                   slept, r, MUX_READER_MSLEEP);
             }
             return g_ringBufferStereo + newReaderPos;
         }
@@ -223,15 +238,21 @@ int muxseq_audio_process_work () {
 
     // ensure we dont overwrite part of buffer that is being read by reader
     // if writer wraps around and goes beyond reader
+    // |--W----R--------w--|  (w,W: old,new writer  R: reader)
+    // --->             ---,
     if (g_ringBufferReaderStart < g_ringBufferWriterStart &&
         g_ringBufferWriterStart > newWriterPos &&
         newWriterPos >= g_ringBufferReaderStart) {
         return 0;
     // wraps around, but goes beyond reader
+    // |--R----W--------w--|
+    // -------->        ---,
     } else if (g_ringBufferWriterStart < g_ringBufferReaderStart &&
                newWriterPos < g_ringBufferWriterStart) {
         return 0;
     // no wrap, reader is at right side of writer, but new writer goes beyond reader
+    // |--w----R---W-------|
+    //    --------->
     } else if (g_ringBufferWriterStart < g_ringBufferReaderStart &&
                newWriterPos >= g_ringBufferReaderStart) {
         return 0;
@@ -241,9 +262,7 @@ int muxseq_audio_process_work () {
     // process a chunk of frames, ie fill the chunk with audio content
     mabuf = g_ringBufferStereo + newWriterPos;
     memset(mabuf, 0, sizeof(struct MuxaudioBuffer));
-    if (g_state_play) {
-        g_seq->process(mabuf);
-    }
+    g_seq->process(mabuf);
 
     if (newWriterPos < g_ringBufferWriterStart) {
         g_writerCycle++;
@@ -253,7 +272,7 @@ int muxseq_audio_process_work () {
 }
 
 void muxseq_muxaudioWorker_process() {
-    int slept = MUX_WRITER_USLEEP;
+    int slept = MUX_WRITER_MSLEEP;
     while (true) {
         bool workDone = false;
         if (g_muxseq_audio_process_run) {
@@ -265,7 +284,7 @@ void muxseq_muxaudioWorker_process() {
         }
         if (! workDone) {
             g_writerPause++;
-            std::this_thread::sleep_for(std::chrono::microseconds(slept));
+            std::this_thread::sleep_for(std::chrono::milliseconds(slept));
         }
     }
     LD("MUXSEQ audio-process terminated.");
@@ -467,7 +486,6 @@ int muxseq_handle_musescore_msg(Mux::MuxSocket &sock, void *buf)
 
 int muxseq_handle_muxaudioQueryClient_msg_AudioBufferFeed (Mux::MuxSocket &sock, struct MuxaudioMsg msg)
 {
-    (void) msg;
     struct MuxaudioBuffer* mabuf = mux_process_bufferStereo();
     zmq_send(sock.socket, mabuf, sizeof(struct MuxaudioBuffer), 0);
 
@@ -476,6 +494,7 @@ int muxseq_handle_muxaudioQueryClient_msg_AudioBufferFeed (Mux::MuxSocket &sock,
         g_utick = utick;
         muxseq_mscore_tell(MsgTypeSeqUTick, utick);
     }
+
     mux_advance_bufferStereo();
     return 0;
 }
@@ -544,7 +563,7 @@ void muxseq_mscoreQueryServer_mainloop(Mux::MuxSocket &sock) {
         LD("MSCORE ==> MUXSEQ -- got message %i bytes", rc);
         muxseq_handle_musescore_msg(sock, zmq_msg_data(&msg));
         zmq_msg_close (&msg);
-        std::this_thread::sleep_for(std::chrono::microseconds(SLEEP_USEC));
+        std::this_thread::sleep_for(std::chrono::milliseconds(MUX_READER_MSLEEP));
     }
 }
 
@@ -557,7 +576,7 @@ void muxseq_mscoreQueryReqServer_mainloop(Mux::MuxSocket &sock) {
         // the other threads (who wants to send requests towards musescore)
         // will use the socket directly, but we could instead consider
         // going through an ringbuffer, and this thread would then be the single reader
-        std::this_thread::sleep_for(std::chrono::microseconds(SLEEP_USEC));
+        std::this_thread::sleep_for(std::chrono::milliseconds(MUX_WRITER_MSLEEP));
     }
 }
 

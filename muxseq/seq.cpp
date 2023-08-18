@@ -1792,6 +1792,8 @@ SeqMsg SeqMsgFifo::dequeue()
 
 void Seq::putEvent(const NPlayEvent& event, unsigned framePos)
       {
+      LD4("-- event.tcab:[%i,%i,%i,%i], framepos=%i", event.type(), event.channel(), event.dataA(), event.dataB(), framePos);
+
       //FIX: if (!cs)
       //      return;
       int channel = event.channel();

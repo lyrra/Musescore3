@@ -476,7 +476,7 @@ int JackAudio::processAudio(jack_nframes_t frames, void* p)
           clock_gettime(CLOCK_MONOTONIC, &tp1);
           int r = mux_process_bufferStereo((unsigned int)frames, buffer);
           if (r < 0) {
-            memset(buffer, 0, frames);
+              memset(buffer, 0, frames * 2 * sizeof(float));
           }
           clock_gettime(CLOCK_MONOTONIC, &tp2);
           unsigned int usec = (tp2.tv_sec - tp1.tv_sec) * 1000000;
