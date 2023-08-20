@@ -3,6 +3,8 @@
 #include "s7/s7.h"
 #include "s7/utils.h"
 
+#include "musescore-qt.h"
+#include <QComboBox>
 #include <QtTest/QtTest>
 #include "libmscore/score.h"
 #include "libmscore/element.h"

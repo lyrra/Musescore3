@@ -20,6 +20,7 @@
 #include \"s7/utils.h\"
 
 #include <QtTest/QtTest>
+#include \"musescore-qt.h\"
 #include \"libmscore/score.h\"
 #include \"libmscore/undo.h\"
 #include \"libmscore/measure.h\"

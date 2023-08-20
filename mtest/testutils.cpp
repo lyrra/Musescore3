@@ -10,6 +10,7 @@
 //  the file LICENCE.GPL2
 //=============================================================================
 
+#include "musescore-gui-qt.h"
 #include <QtTest/QtTest>
 #include <QTextStream>
 #include "config.h"
@@ -48,6 +49,13 @@ static void initMyResources() {
       }
 
 namespace Ms {
+
+extern void (*g_logstr) (char *str);
+
+void g_test_logstr_func (char *str) {
+    qDebug(str);
+}
+
 
 //---------------------------------------------------------
 //   writeReadElement
@@ -336,6 +344,7 @@ QString MTest::rootPath()
 
 void MTest::initMTest()
       {
+      g_logstr = g_test_logstr_func;
       qputenv("QML_DISABLE_DISK_CACHE", "true");
       qSetMessagePattern("%{function}: %{message}");
       initMuseScoreResources();

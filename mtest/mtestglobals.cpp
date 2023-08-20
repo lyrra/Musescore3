@@ -22,6 +22,19 @@
  * Definitions of global variables used in mtests not linked to mscoreapp target
  */
 
+
+#include "musescore-gui-qt.h"
+#include <QIcon>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QVBoxLayout>
+#include <QSplitter>
+#include <QMenu>
+#include <QDockWidget>
+#include <QActionGroup>
+#include <QHelpEngine>
+#include <QToolButton>
+#include <QProgressBar>
 #include "config.h"
 #include "mscore/icons.h"
 #include "mscore/musescore.h"

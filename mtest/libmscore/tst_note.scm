@@ -37,15 +37,17 @@
   (for-each (lambda (dir)
     (set! (ms-note-usermirror note) dir)
     (check-write-read-elm note ms-note-usermirror dir))
-    '(DirectionH-LEFT
-      DirectionH-RIGHT
-      DirectionH-AUTO))
+    '(DirectionH-DirectionH-LEFT
+      DirectionH-DirectionH-RIGHT
+      DirectionH-DirectionH-AUTO))
 
 
   (for-each (lambda (dir)
     (set! (ms-note-userDotPosition note) dir)
     (check-write-read-elm note ms-note-userDotPosition dir))
-    '(Direction-UP Direction-DOWN Direction-AUTO))
+    '(Direction-Direction-UP
+      Direction-Direction-DOWN
+      Direction-Direction-AUTO))
 
   ; headGroup
   (let ((done #f))
@@ -54,7 +56,7 @@
        ((eq? 'HEAD_GROUPS sym)
         (set! done #t))
        ((not done)
-        (let ((grp (string->symbol (format #f "~a-~a" 'NoteHead_Group sym))))
+        (let ((grp (string->symbol (format #f "~a-~a-~a" 'NoteHead_Group 'NoteHead_Group sym))))
           (set! (ms-note-headGroup note) grp)
           (check-write-read-elm note ms-note-headGroup grp)))))
       (assq-ref %note-head-group 'types)))
@@ -62,7 +64,7 @@
   ; headType
   (for-each (lambda (sym)
     (when (not (eq? 'HEAD_TYPES sym))
-      (let ((typ (string->symbol (format #f "~a-~a" 'NoteHead_Type sym))))
+      (let ((typ (string->symbol (format #f "~a-~a-~a" 'NoteHead_Type 'NoteHead_Type sym))))
         (set! (ms-note-headType note) typ)
         (check-write-read-elm note ms-note-headType typ))))
     (assq-ref %note-head-type 'types))
@@ -93,46 +95,48 @@
 
 
   ; velo type
-  (set! (ms-note-veloType note) 'note_ValueType-USER_VAL)
-  (check-write-read-elm note ms-note-veloType 'note_ValueType-USER_VAL)
+  (let ((sym 'note_ValueType-note_ValueType-USER_VAL))
+    (set! (ms-note-veloType note) sym)
+    (check-write-read-elm note ms-note-veloType sym))
 
-  (set! (ms-note-veloType note) 'note_ValueType-OFFSET_VAL)
-  (check-write-read-elm note ms-note-veloType 'note_ValueType-OFFSET_VAL)
+  (let ((sym 'note_ValueType-note_ValueType-OFFSET_VAL))
+    (set! (ms-note-veloType note) sym)
+    (check-write-read-elm note ms-note-veloType sym))
 
 
   ; ================================================
   ;   test setProperty(int, QVariant)
   ; ================================================
 
-  (ms-note-set-property note 'PITCH 32)
+  (ms-note-set-property note 'Pid::PITCH 32)
   (check-write-read-elm note ms-note-pitch 32)
 
-  (ms-note-set-property note 'TPC1 21)
+  (ms-note-set-property note 'Pid::TPC1 21)
   (check-write-read-elm note ms-note-tpc1 21)
 
-  (ms-note-set-property note 'TPC1 22)
-  (ms-note-set-property note 'TPC2 22)
+  (ms-note-set-property note 'Pid::TPC1 22)
+  (ms-note-set-property note 'Pid::TPC2 22)
   (check-write-read-elm note ms-note-tpc2 22)
 
-  (ms-note-set-property note 'SMALL #f)
+  (ms-note-set-property note 'Pid::SMALL #f)
   (check-write-read-elm note ms-note-small #f)
 
-  (ms-note-set-property note 'SMALL #t)
+  (ms-note-set-property note 'Pid::SMALL #t)
   (check-write-read-elm note ms-note-small #t)
 
   (for-each (lambda (dir)
-    (ms-note-set-property note 'MIRROR_HEAD dir)
+    (ms-note-set-property note 'Pid::MIRROR_HEAD dir)
     (check-write-read-elm note ms-note-usermirror dir))
-    '(DirectionH-LEFT
-      DirectionH-RIGHT
-      DirectionH-AUTO))
+    '(DirectionH-DirectionH-RIGHT
+      DirectionH-DirectionH-LEFT
+      DirectionH-DirectionH-AUTO))
 
   (for-each (lambda (pos)
-    (ms-note-set-property note 'DOT_POSITION pos)
+    (ms-note-set-property note 'Pid::DOT_POSITION pos)
     (check-write-read-elm note ms-note-userDotPosition pos))
-    '(Direction-UP
-      Direction-DOWN
-      Direction-AUTO))
+    '(Direction-Direction-UP
+      Direction-Direction-DOWN
+      Direction-Direction-AUTO))
 
   ; headGroup
   (let ((done #f))
@@ -141,42 +145,44 @@
        ((eq? 'HEAD_GROUPS sym)
         (set! done #t))
        ((not done)
-        (let ((grp (string->symbol (format #f "~a-~a" 'NoteHead_Group sym))))
-          (ms-note-set-property note 'HEAD_GROUP grp)
+        (let ((grp (string->symbol (format #f "~a-~a" 'NoteHead_Group-NoteHead_Group sym))))
+          (ms-note-set-property note 'Pid::HEAD_GROUP grp)
           (check-write-read-elm note ms-note-headGroup grp)))))
       (assq-ref %note-head-group 'types)))
 
   ; headType
   (for-each (lambda (sym)
-    (let ((typ (string->symbol (format #f "~a-~a" 'NoteHead_Type sym))))
-    (when (and (not (eq? 'NoteHead_Type-HEAD_AUTO  typ))
-               (not (eq? 'NoteHead_Type-HEAD_TYPES typ)))
-      (ms-note-set-property note 'HEAD_TYPE typ)
-      (check-write-read-elm note ms-note-headType typ))))
+    (let ((typ (string->symbol (format #f "~a-~a" 'NoteHead_Type-NoteHead_Type sym))))
+      (when (and (not (eq? 'NoteHead_Type-NoteHead_Type-HEAD_AUTO  typ))
+                 (not (eq? 'NoteHead_Type-NoteHead_Type-HEAD_TYPES typ)))
+        (ms-note-set-property note 'Pid::HEAD_TYPE typ)
+        (check-write-read-elm note ms-note-headType typ))))
     (assq-ref %note-head-type 'types))
 
-  (ms-note-set-property note 'VELO_OFFSET 38)
+
+
+  (ms-note-set-property note 'Pid::VELO_OFFSET 38)
   (check-write-read-elm note ms-note-veloOffset 38)
 
-  (ms-note-set-property note 'TUNING 2.4)
+  (ms-note-set-property note 'Pid::TUNING 2.4)
   (check-write-read-elm note ms-note-tuning 2.4)
 
-  (ms-note-set-property note 'FRET 7)
+  (ms-note-set-property note 'Pid::FRET 7)
   (check-write-read-elm note ms-note-fret 7)
 
-  (ms-note-set-property note 'STRING 4)
+  (ms-note-set-property note 'Pid::STRING 4)
   (check-write-read-elm note ms-note-string 4)
 
-  (ms-note-set-property note 'GHOST #f)
+  (ms-note-set-property note 'Pid::GHOST #f)
   (check-write-read-elm note ms-note-ghost #f)
-  (ms-note-set-property note 'GHOST #t)
+  (ms-note-set-property note 'Pid::GHOST #t)
   (check-write-read-elm note ms-note-ghost #t)
 
   (for-each (lambda (val)
-    (ms-note-set-property note 'VELO_TYPE val)
+    (ms-note-set-property note 'Pid::VELO_TYPE val)
     (check-write-read-elm note ms-note-veloType val))
-    '(note_ValueType-USER_VAL
-      note_ValueType-OFFSET_VAL))
+    '(note_ValueType-note_ValueType-USER_VAL
+      note_ValueType-note_ValueType-OFFSET_VAL))
   ; FIX: delete chord, s7 will take care of this
   ))
 
@@ -187,7 +193,7 @@
   (let* ((chord (ms-measure-findChord (ms-score-firstMeasure score) (ms-make-fraction 0 1) 0))
          (note (ms-chord-upNote chord))) ; Note* note = chord->upNote();
     ; score->setGraceNote(chord, note->pitch(), NoteType::APPOGGIATURA, MScore::division/2);
-    (ms-score-setGraceNote score chord (ms-note-pitch note) 'NoteType-APPOGGIATURA (/ (ms-division) 2))
+    (ms-score-setGraceNote score chord (ms-note-pitch note) 'NoteType-NoteType-APPOGGIATURA (/ (ms-division) 2))
     (let* ((gracenotes (ms-chord-graceNotes chord))
            (gc (ms-chords-first gracenotes))  ;  Ms::Chord* gc = chord->graceNotes().first();
            (notes (ms-chord-notes gc))
@@ -204,7 +210,7 @@
       ; tremolo
       (ms-score-startCmd score)
       (let ((tr (ms-make-tremolo score))) ; Tremolo* tr = new Tremolo(score);
-        (set! (ms-tremolo-tremoloType tr) 'TremoloType-R16)
+        (set! (ms-tremolo-tremoloType tr) 'TremoloType-TremoloType-R16)
         (set! (ms-element-parent tr) gc)
         (set! (ms-element-track tr) (ms-element-track gc))
         (ms-score-undoAddElement score tr)
@@ -213,11 +219,10 @@
                (tr (ms-chord-tremolo chord))
                (trType (ms-tremolo-tremoloType tr)))
           ; NOTE: tst_note.cpp has this test disabled
-          (ms-test-check (eq? 'TremoloType-R16 trType))))
-
+          (ms-test-check (eq? 'TremoloType-TremoloType-R16 trType))))
       ; // articulation
       (ms-score-startCmd score)
-      (let ((ar (ms-make-articulation score 'SymId-articAccentAbove)))
+      (let ((ar (ms-make-articulation score 'SymId-SymId-articAccentAbove)))
         ; Articulation* ar = new Articulation(SymId::articAccentAbove, score);
         (set! (ms-element-parent ar) gc) ; ar->setParent(gc);
         (set! (ms-element-track ar) (ms-element-track gc)) ; ar->setTrack(gc->track());
@@ -237,10 +242,10 @@
   (let ((is (ms-score-inputState score)))
     (set! (ms-inputstate-track is) 0)
     (set! (ms-inputstate-segment is)
-          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-ChordRest))
+          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-SegmentType-ChordRest))
 
     ; score->inputState().setDuration(TDuration::DurationType::V_QUARTER);
-    (set! (ms-inputstate-duration is) 'DurationType-V_QUARTER)
+    (set! (ms-inputstate-duration is) 'DurationType-DurationType-V_QUARTER)
     ; score->inputState().setNoteEntryMode(true);
     (set! (ms-inputstate-noteEntryMode is) #t)
 
@@ -264,15 +269,15 @@
   (ms-score-startCmd score)
   (let* ((m (ms-score-firstMeasure score))) ; Measure* m = score->firstMeasure();
       ; score->select(m, SelectType::SINGLE, 0);
-      (ms-score-select score m 'SelectType-SINGLE 0)
-      (ms-score-changeAccidental score 'AccidentalType-FLAT)
+      (ms-score-select score m 'SelectType-SelectType-SINGLE 0)
+      (ms-score-changeAccidental score 'AccidentalType-AccidentalType-FLAT)
       (ms-score-endCmd score)
 
       (ms-score-startCmd score)
       (set! m (ms-measure-nextMeasure m)) ; m = m->nextMeasure();
-      (ms-score-select score m 'SelectType-SINGLE  0)
+      (ms-score-select score m 'SelectType-SelectType-SINGLE 0)
 
-      (ms-score-upDown score #f 'UpDownMode-CHROMATIC)
+      (ms-score-upDown score #f 'UpDownMode-UpDownMode-CHROMATIC)
       (ms-score-endCmd score)
 
       (ms-score-startCmd score)
@@ -288,8 +293,8 @@
   (let ((is (ms-score-inputState score)))
     (set! (ms-inputstate-track is) 0) ; score->inputState().setTrack(0)
     (set! (ms-inputstate-segment is)
-          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-ChordRest))
-    (set! (ms-inputstate-duration is) 'DurationType-V_QUARTER)
+          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-SegmentType-ChordRest))
+    (set! (ms-inputstate-duration is) 'DurationType-DurationType-V_QUARTER)
     (set! (ms-inputstate-noteEntryMode is) #t)
     (let ((octave (* 5 7)))
       (ms-score-cmdAddPitch score (+ octave 3) #f #f))
@@ -306,8 +311,8 @@
   (let ((is (ms-score-inputState score)))
     (set! (ms-inputstate-track is) 0) ; score->inputState().setTrack(0)
     (set! (ms-inputstate-segment is)
-          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-ChordRest))
-    (set! (ms-inputstate-duration is) 'DurationType-V_QUARTER)
+          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-SegmentType-ChordRest))
+    (set! (ms-inputstate-duration is) 'DurationType-DurationType-V_QUARTER)
     (set! (ms-inputstate-noteEntryMode is) #t)
 
     ; over 127 shouldn't crash
@@ -350,29 +355,29 @@
                                      0)))
     (let ((note (ms-chord-downNote chord)))
       (ms-test-check note)
-      (if note (check-acc note 'AccidentalType-FLAT)))
+      (if note (check-acc note 'AccidentalType-AccidentalType-FLAT)))
     (let ((note (ms-chord-upNote chord)))
       (ms-test-check note)
-      (if note (check-acc note 'AccidentalType-NATURAL))))
+      (if note (check-acc note 'AccidentalType-AccidentalType-NATURAL))))
   (let ((chord (ms-measure-findChord (ms-score-firstMeasure score)
                                      (ms-make-fraction 1 4)
                                      0)))
      (let ((note (ms-chord-downNote chord)))
       (ms-test-check note)
-      (if note (check-acc note 'AccidentalType-NATURAL)))
+      (if note (check-acc note 'AccidentalType-AccidentalType-NATURAL)))
     (let ((note (ms-chord-upNote chord)))
       (ms-test-check note)
-      (if note (check-acc note 'AccidentalType-SHARP))))))
+      (if note (check-acc note 'AccidentalType-AccidentalType-SHARP))))))
 
 (emit '
  (begin
-   (ms-test-check (= (ms-tpc2degree 'Tpc-TPC_C   'Key-C) 0))
-   ; (ms-test-check (= (ms-tpc2degree 'Tpc-TPC_E_S 'Key-C)  3))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-TPC_B    'Key-C)   6))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-TPC_F_S  'Key-C_S) 3))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-TPC_B    'Key-C_S) 6))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-TPC_B_B  'Key-C_S) 6))
-   ; (ms-test-check (= (ms-tpc2degree 'Tpc-TPC_B_S  'Key-C_S) 7))
+   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_C   'Key-C) 0))
+   ; (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_E_S 'Key-C)  3))
+   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B    'Key-C)   6))
+   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_F_S  'Key-C_S) 3))
+   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B    'Key-C_S) 6))
+   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B_B  'Key-C_S) 6))
+   ; (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B_S  'Key-C_S) 7))
     ))
 
 ;;; LongNoteAfterShort_183746
@@ -388,16 +393,16 @@
   (let ((is (ms-score-inputState score)))
     (set! (ms-inputstate-track is) 0)
     (set! (ms-inputstate-segment is)
-          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-ChordRest))
-    (set! (ms-inputstate-duration is) 'DurationType-V_128TH)
+          (ms-score-tick2segment score (ms-make-fraction 0 1) #f 'SegmentType-SegmentType-ChordRest))
+    (set! (ms-inputstate-duration is) 'DurationType-DurationType-V_128TH)
     (set! (ms-inputstate-noteEntryMode is) #t)
-    (ms-score-cmdEnterRest score 'DurationType-V_128TH)
-    (set! (ms-inputstate-duration is) 'DurationType-V_BREVE)
+    (ms-score-cmdEnterRest score 'DurationType-DurationType-V_128TH)
+    (set! (ms-inputstate-duration is) 'DurationType-DurationType-V_BREVE)
     (ms-score-cmdAddPitch score 47 #f #f) ; score->cmdAddPitch(47, 0, 0);
 
-    (let* ((dur (ms-make-tduration 'DurationType-V_128TH))
+    (let* ((dur (ms-make-tduration 'DurationType-DurationType-V_128TH))
            (seg (ms-score-tick2segment-1 score (ms-tduration-ticks dur))))
-      (ms-test-check (and seg (eq? (ms-segment-segmentType seg) 'SegmentType-ChordRest)))
+      (ms-test-check (and seg (eq? (ms-segment-segmentType seg) 'SegmentType-SegmentType-ChordRest)))
       (and (ms-segment-tick seg) (ms-make-fraction 1 128))
       (format #t "segment tick: ~s~%" (ms-fraction-toString (ms-segment-tick seg)))
       (ms-test-check (ms-fraction-equal (ms-segment-tick seg) (ms-make-fraction 1 128)))
@@ -415,5 +420,5 @@
               (let* ((note (ms-notes-ref nl i))
                      (chord (ms-note-chord note)))
                 (ms-fraction-add totalTicks (ms-chord-durationTypeTicks chord))))
-            (let ((breveTicks (ms-tduration-ticks (ms-make-tduration 'DurationType-V_BREVE))))
+            (let ((breveTicks (ms-tduration-ticks (ms-make-tduration 'DurationType-DurationType-V_BREVE))))
               (ms-test-check (ms-fraction-equal totalTicks breveTicks))))))))))
