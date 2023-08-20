@@ -57,8 +57,6 @@
 #include "libmscore/articulation.h"
 #include "libmscore/harmony.h"
 
-extern QString rtf2html(const QString &);
-
 namespace Ms {
 
 //---------------------------------------------------------
@@ -1018,7 +1016,11 @@ static Fraction readCapVoice(Score* score, CapVoice* cvoice, int staffIdx, const
 
                               TextObj* to = static_cast<TextObj*>(o);
                               Text* s = new Text(score, Tid::TITLE);
-                              QString ss = ::rtf2html(QString(to->text));
+                              /* FIX-20230820: re-add rtf2html support
+                               * removed rtf2html support so this
+                               * is raw RTF text that will look garbled
+                               */
+                              QString ss = QString(to->text);
 
                               // qDebug("string %f:%f w %d ratio %d <%s>",
                               //    to->relPos.x(), to->relPos.y(), to->width, to->yxRatio, qPrintable(ss));

@@ -60,10 +60,6 @@ set (SOURCE_LIB
 
       ${PROJECT_SOURCE_DIR}/muxtools/exports/exportmidi.cpp
       ${PROJECT_SOURCE_DIR}/muxtools/exports/exportmidi.h
-      ${PROJECT_SOURCE_DIR}/thirdparty/rtf2html/fmt_opts.cpp        # Required by capella.cpp and capxml.cpp
-      ${PROJECT_SOURCE_DIR}/thirdparty/rtf2html/rtf2html.cpp        # Required by capella.cpp and capxml.cpp
-      ${PROJECT_SOURCE_DIR}/thirdparty/rtf2html/rtf_keyword.cpp     # Required by capella.cpp and capxml.cpp
-      ${PROJECT_SOURCE_DIR}/thirdparty/rtf2html/rtf_table.cpp       # Required by capella.cpp and capxml.cpp
       ${PROJECT_SOURCE_DIR}/thirdparty/beatroot/Agent.cpp           # Required by importmidi.cpp
       ${PROJECT_SOURCE_DIR}/thirdparty/beatroot/AgentList.cpp       # Required by importmidi.cpp
       ${PROJECT_SOURCE_DIR}/thirdparty/beatroot/BeatTracker.cpp     # Required by importmidi.cpp

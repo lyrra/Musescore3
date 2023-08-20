@@ -63,9 +63,6 @@ MuseScore is licensed under GPL version 2.0. See [LICENSE.GPL](https://github.co
 
 - **thirdparty:** Contains projects which are included for convenience, usually to integrate them into the build system to make them available for all supported platforms.
 
-    - **thirdparty/rtf2html:**
-    Used for capella import. Clone from [rtf2html@sourceforge](https://sourceforge.net/projects/rtf2html), code now at [rtf2html@github](https://github.com/lvu/rtf2html).
-
     - **thirdparty/dtl:**
     Used for the score comparison tool. [Diff Template Library](https://github.com/cubicdaiya/dtl).
 
