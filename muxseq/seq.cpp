@@ -947,7 +947,7 @@ void Seq::process(struct MuxaudioBuffer *mabuf)
             else if (state == Transport::PLAY && driverState == Transport::STOP) {
                   state = Transport::STOP;
                   // Muting all notes
-                  stopNotes(-1, true);
+                  stopNotes(-1);
                   //initInstruments(true, -1); //FIX: disabled for-now, need score-instrument map
                   if (playPos == eventsEnd) {
 #if 0 //FIX mscore not known
@@ -1382,7 +1382,7 @@ void Seq::setPos(int utick)
       LD("Seq::setPos utick=%u ######## NOT IMPLEMENTED");
       //FIX: if (cs == 0)
       //      return;
-      stopNotes(-1, true);
+      stopNotes(-1);
 
       int ucur;
       mutex.lock();
@@ -1543,17 +1543,14 @@ void Seq::stopNoteTimer()
 
 void f_stopNotes()
 {
-    g_seq->stopNotes(-1, false);
+    g_seq->stopNotes(-1);
 }
 
-void Seq::stopNotes(int channel, bool realTime)
+void Seq::stopNotes(int channel)
       {
-      auto send = [this, realTime](const NPlayEvent& event) {
-            if (realTime)
-                  putEvent(event);
-            else
-                  sendEvent(event);
-            };
+      auto send = [this](const NPlayEvent& event) {
+          putEvent(event);
+      };
       // For VSTs/devices that do not support All Notes Off
       // CTRL_ALL_NOTES_OFF should still be evoked after calling this function, even if it seems redundant
       auto turnAllNotesOff = [send](int channel) {
@@ -1579,6 +1576,7 @@ void Seq::stopNotes(int channel, bool realTime)
             //FIX: if (cs->midiChannel(channel) != 9)
             //      send(NPlayEvent(ME_PITCHBEND,  channel, 0, 64));
             }
+      // also send note-off to midi drivers
       if (cachedPrefs.useAlsaAudio || cachedPrefs.useJackAudio || cachedPrefs.usePulseAudio || cachedPrefs.usePortAudio) {
             guiToSeq(SeqMsg(SeqMsgId::ALL_NOTE_OFF, channel));
             }

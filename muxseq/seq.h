@@ -215,7 +215,7 @@ class Seq : public QObject, public Sequencer {
       void setRelTempo(double);
       void seek(int utick);
       void seekRT(int utick);
-      void stopNotes(int channel = -1, bool realTime = false);
+      void stopNotes(int channel = -1);
       void start();
       void stop();
       void setPos(POS, unsigned);
