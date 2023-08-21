@@ -219,6 +219,7 @@ add_custom_target(mtest_files ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mtest.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/types.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/s7/lib.scm ${CMAKE_CURRENT_BINARY_DIR}
+
     COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_element.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_element.scm
 
     COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_note.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_note.scm
@@ -229,11 +230,14 @@ add_custom_target(mtest_files ALL
 
     COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_copypaste.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_copypaste.scm
 
+    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_readwriteundoreset.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_readwriteundoreset.scm
+
     DEPENDS libmscore/tst_element.scm
             libmscore/tst_note.scm
             libmscore/tst_hairpin.scm
             libmscore/tst_breath.scm
             libmscore/tst_copypaste.scm
+            libmscore/tst_readwriteundoreset.scm
 )
 
 subdirs (

@@ -50,6 +50,9 @@ extern Ms::MTest* g_mtest;
 (register-c-type %symid)
 (emit-c-type-string-maps2 'SymId)
 
+(register-c-type %style-id)
+(emit-c-type-string-maps2 'Sid)
+
 (format %h "enum class GOO_TYPE : uint64_t {~%")
 (format %h "  NIL = 0,~%")
 (for-each (lambda (name)
@@ -61,6 +64,10 @@ extern Ms::MTest* g_mtest;
     (format %h "  ~a,~%" (string-lisp->c (symbol->string name)))))
           (cdr (assoc 'ElementType %c-types)))
 (format %h "  END~%};~%")
+
+(emit-cfun '(ms-make-nullgoo) 0 (lambda () (format %c "
+    return c_make_goo(sc, 0, s7_f(sc), nullptr);
+")))
 
 ;
 ;
@@ -361,7 +368,21 @@ extern Ms::MTest* g_mtest;
     (format %c "
     return s7_make_integer(sc, tpc2degree(string_to_Tpc(tpc), string_to_Key(key)));~%"))))
 
-; emit all declaratively stated c++object functions
+(emit-cfun '(ms-make-ChangeStyleVal) 3 (list
+  '(emit-pop-arg-goo "Score*" "score")
+  '(emit-next-arg)
+  '(emit-pop-arg-sym "sym")
+  '(emit-next-arg)
+  '(emit-pop-arg-bool "variant")
+  (lambda (e) (format %c "
+    Ms::Sid sid = string_to_Sid(sym);
+    ChangeStyleVal* x = new ChangeStyleVal(score, sid, variant);~%"))
+  '(emit-return-goo "x" "static_cast<uint64_t>(0)")))
+
+
+;;;
+;;; emit all declaratively stated c++object functions
+;;;
 (emit-registered-objects)
 ; emit c-functions for simple object-methods
 (map (lambda (lst)

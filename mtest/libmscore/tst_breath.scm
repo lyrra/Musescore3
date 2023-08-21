@@ -16,7 +16,7 @@
       (do ((e (ms-elements-getnext elms) (ms-elements-getnext elms)))
           ((not e))
         (let ((b (ms-make-breath score))) ; Breath* b = new Breath(score);
-          (set! (ms-breath-symId b) 'SymId-breathMarkComma) ; b->setSymId(SymId::breathMarkComma);
+          (set! (ms-breath-symId b) 'SymId-SymId-breathMarkComma) ; b->setSymId(SymId::breathMarkComma);
           (let ((ed (ms-make-editdata)))
             (ms-editdata-dropelement ed b) ; dd.dropElement = b;
             (ms-element-drop e ed))))) ; if (e->acceptDrop(dd)) e->drop(dd);

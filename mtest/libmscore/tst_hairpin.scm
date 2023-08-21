@@ -7,5 +7,5 @@
   (for-each (lambda (type)
     (set! (ms-hairpin-hairpinType hp) type)
     (check-write-read-elm hp ms-hairpin-hairpinType type))
-    '(hairpin-DECRESC_HAIRPIN hairpin-CRESC_HAIRPIN))))
+    '(hairpin-hairpin-DECRESC_HAIRPIN hairpin-hairpin-CRESC_HAIRPIN))))
 

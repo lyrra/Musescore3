@@ -11,11 +11,14 @@
   (methods
     (apply appendMeasures ((int)))
     (apply undoAddElement (("Element*" goo)))
+    (apply undoRedo ((bool) ("EditData*" goo)))
+    (apply undo (("ChangeStyleVal*" goo)))
     (apply select (("Measure*" goo) (sym SelectType opt) (int staff opt)))
     (apply setGraceNote (("Ms::Chord*" goo)
                          (int pitch)
                          (sym NoteType)
                          (int division)))
+    (nil cmdResetAllPositions)
     ; nil -- as in zero arity, so is doing side-effects
     (nil doLayout)
     (nil startCmd)

@@ -86,6 +86,15 @@ s7_pointer ms_mtest_readScore (s7_scheme *sc, s7_pointer args)
     return c_make_goo(sc, ty, s7_nil(sc), score);
 }
 
+s7_pointer ms_mtest_readCreatedScore (s7_scheme *sc, s7_pointer args)
+{
+    const char *s = my_s7_get_car_as_string(args);
+    if (! s) return s7_f(sc);
+    MasterScore* score = g_mtest->readCreatedScore(QString(s));
+    uint64_t ty = 0;
+    return c_make_goo(sc, ty, s7_nil(sc), score);
+}
+
 s7_pointer ms_mtest_saveCompareScore (s7_scheme *sc, s7_pointer args)
 {
     if (!s7_is_pair(args)) return s7_f(sc);
@@ -129,6 +138,7 @@ void mtest_s7_define_functions(s7_scheme *sc) {
     s7_define_function(sc, "ms-mtest-writeReadElement", ms_mtest_writeReadElement, 1, 0, false, "(ms-mtest-writeReadElement Element)");
     s7_define_function(sc, "ms-mtest-saveCompareScore", ms_mtest_saveCompareScore, 3, 0, false, "(ms-mtest-saveCompareScore Score WriteFile RefFile)");
     s7_define_function(sc, "ms-mtest-readScore", ms_mtest_readScore, 1, 0, false, "(ms-mtest-readScore <score-filename>)");
+    s7_define_function(sc, "ms-mtest-readCreatedScore", ms_mtest_readCreatedScore, 1, 0, false, "(ms-mtest-readCreatedScore <score-filename>)");
 }
 
 int run_scheme_script(const char *filename)
