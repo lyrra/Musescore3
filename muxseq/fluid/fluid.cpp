@@ -157,12 +157,11 @@ void Fluid::play(const PlayEvent& event)
 
       int type    = event.type();
       Channel* cp = channel[ch];
-      LD6("Fluid::play channel=%i type=%i", ch, type);
 
       if (type == ME_NOTEON) {
             int key = event.dataA();
             int vel = event.dataB();
-            LD6("Fluid::play key=%i vel=%i", key, vel);
+            LD6("Fluid::play ME_NOTEON key=%i vel=%i", key, vel);
             if (vel == 0) {
                   //
                   // process note off

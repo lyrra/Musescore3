@@ -66,7 +66,7 @@ int mux_make_connection(struct MuxSocket &sock, const char *url, ZmqType type, Z
         rc = zmq_connect(sock.socket, url);
     }
     if (rc) {
-        LD("zmq-%s-% error: %s\n", 
+        LD("zmq-%s-%s error: %s\n",
            type == ZmqType::QUERY ? "query" : "pub/sub",
            server == ZmqServer::BIND ? "bind" : "connect",
            std::strerror(errno));

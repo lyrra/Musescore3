@@ -55,6 +55,8 @@ QPointF StaffLines::pagePos() const
             SysStaff* ss = system->staff(staffIdx());
             return QPointF(measure()->x() + system->x(), ss->y() + system->y());
             }
+      //FIX: emit warning if this happens
+      return QPointF(measure()->x(), 0);
       }
 
 //---------------------------------------------------------

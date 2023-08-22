@@ -52,7 +52,7 @@ int muxseq_send (MuxseqMsgType type, double d) {
 int muxseq_send (MuxseqMsgType type, NPlayEvent event) {
     LD("muxseq_send %s NPlayEvent", muxseq_msg_type_info(type));
     struct MuxseqMsg msg;
-    muxseq_msg_set_NPlayEvent(msg, event);
+    muxseq_msg_set_NPlayEvent(&msg, event);
     return muxseq_query_zmq(type, msg);
 }
 

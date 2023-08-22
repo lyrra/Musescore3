@@ -30,7 +30,7 @@ int muxseq_send (MuxseqMsgType type) {
 
 int muxseq_send (MuxseqMsgType type, NPlayEvent event) {
     struct MuxseqMsg msg;
-    muxseq_msg_set_NPlayEvent(msg, event);
+    muxseq_msg_set_NPlayEvent(&msg, event);
     return muxseq_query_zmq(type, msg);
 }
 #endif

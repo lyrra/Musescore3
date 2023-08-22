@@ -1,6 +1,7 @@
 #ifndef __MUXLIB_H__
 #define __MUXLIB_H__
 
+#include <chrono>
 
 #define MUX_MUSESCORE_QUERY_CLIENT_URL "tcp://localhost:7701"
 #define MUX_MUSESCORE_QUERYREQ_CLIENT_URL "tcp://localhost:7704"
@@ -149,7 +150,7 @@ struct MuxaudioBuffer {
 
 const char*   muxseq_msg_type_info (MuxseqMsgType   type);
 const char* muxaudio_msg_type_info (MuxaudioMsgType type);
-void muxseq_msg_set_NPlayEvent (MuxseqMsg msg, NPlayEvent event);
+void muxseq_msg_set_NPlayEvent (MuxseqMsg *msg, NPlayEvent event);
 int  muxseq_send (MuxseqMsgType type);
 int  muxseq_send (MuxseqMsgType type, int i);
 int  muxseq_send (MuxseqMsgType type, double d);
@@ -159,6 +160,8 @@ bool muxseq_query_bool (MuxseqMsgType type);
 double muxseq_query_float (MuxseqMsgType type);
 void muxseq_query (MuxseqMsgType type, bool b);
 void mux_musescore_client_start ();
+
+uint64_t mux_timestamp(std::chrono::high_resolution_clock::time_point start);
 
 } // namespace Ms
 #endif

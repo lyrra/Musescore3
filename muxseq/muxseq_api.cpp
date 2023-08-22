@@ -112,7 +112,7 @@ void* muxseq_mscore_query (MuxseqMsgType type, int i)
     void *m = muxseq_mscore_recv(type);
     struct MuxseqEventsHeader *meh;
     meh = (struct MuxseqEventsHeader *) m;
-    meh->sevs = (struct SparseEvent *) (m + sizeof(struct MuxseqEventsHeader));
+    meh->sevs = (struct SparseEvent *) ((unsigned char*) m + sizeof(struct MuxseqEventsHeader));
     /* Release message */
     return meh;
 }

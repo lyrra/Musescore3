@@ -1,4 +1,5 @@
 #include <thread>
+#include <chrono>
 #include "mux-qt.h"
 #include "event.h"
 #include "mux.h"
@@ -10,8 +11,8 @@ void (*g_logstr) (char *str);
 thread_local char* threadname = nullptr;
 thread_local char _logbuf[256];
 
-void _set_threadname(char *name) {
-    threadname = name;
+void _set_threadname(const char *name) {
+    threadname = strdup(name);
 }
 
 int overlap_strcat(char* dst, char* src) {
@@ -35,7 +36,7 @@ int overlap_strcat(char* dst, char* src) {
     return i;
 }
 
-int get_timestamp (char *buf) {
+void get_timestamp (char *buf) {
     struct timespec tp;
     buf[0] = 0;
     uint64_t d = 0;
@@ -89,6 +90,14 @@ void _logstr (char *str) {
         fwrite(nl, 1, 1, g_logfp);
         fflush(g_logfp);
     }
+}
+
+
+uint64_t mux_timestamp (std::chrono::high_resolution_clock::time_point start) {
+    auto end = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    //std::chrono::duration<double,std::milli> diff = end - start;
+    //return diff.count();
 }
 
 const char* muxseq_msg_type_info (MuxseqMsgType type) {
@@ -156,11 +165,11 @@ const char* muxaudio_msg_type_info(MuxaudioMsgType type) {
     }
 }
 
-void muxseq_msg_set_NPlayEvent (MuxseqMsg msg, NPlayEvent event) {
-    msg.payload.sparseEvent.type    = event.type();
-    msg.payload.sparseEvent.channel = event.channel();
-    msg.payload.sparseEvent.pitch   = event.pitch();
-    msg.payload.sparseEvent.velo    = event.velo();
+void muxseq_msg_set_NPlayEvent (MuxseqMsg *msg, NPlayEvent event) {
+    msg->payload.sparseEvent.type    = event.type();
+    msg->payload.sparseEvent.channel = event.channel();
+    msg->payload.sparseEvent.pitch   = event.pitch();
+    msg->payload.sparseEvent.velo    = event.velo();
 }
 
 

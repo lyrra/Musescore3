@@ -25,6 +25,7 @@ extern bool g_state_play;
 
 void muxseq_threads_start();
 
+std::chrono::high_resolution_clock::time_point g_now;
 
 } // end of namespace Ms
 
@@ -35,6 +36,7 @@ void g_logstr_func (char *str) {
 int main(int argc, char **argv)
 {
     fprintf(stderr, "muxseq initializing\n"); std::fflush(stderr);
+    Ms::g_now = std::chrono::high_resolution_clock::now();
     Ms::g_logstr = g_logstr_func;
     Ms::muxseq_threads_start();
     while(1){

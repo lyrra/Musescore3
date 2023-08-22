@@ -5020,7 +5020,7 @@ void MuseScore::setPos(const Fraction& t)
       }
 
 void MuseScore::handleUTick(unsigned int utick) {
-    LD("MuseScore::handleUTick utick: %ld", utick);
+    LD("MuseScore::handleUTick utick: %i", utick);
     if (cs) {
         int t = cs->repeatList().utick2tick(utick);
         currentScoreView()->moveCursor(Fraction::fromTicks(t));

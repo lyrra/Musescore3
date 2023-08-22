@@ -107,14 +107,14 @@ unsigned char* eventMap_to_muxbuffer(MuxseqMsgType type, EventMap evm,
         sevs[i].beatsPerSecond = (int) beatsPerSecond;
         sevs[i].division       = (int) MScore::division;
         strcpy(sevs[i].synthName, qPrintable(g_cs->midiMapping(nev.channel())->articulation()->synti()));
-        LD4("%i: storing event framepos=%i pitch=%i/%i channel=%i/%i playPosSeconds=%f",
+        LD4("%lu: storing event framepos=%i pitch=%i/%i channel=%i/%i playPosSeconds=%f",
             i, sevs[i].framepos,
             sevs[i].pitch, nev.pitch(),
             sevs[i].channel, nev.channel(),
             sevs[i].playPosSeconds);
         i++;
     }
-    LD4("Done computing the payload, numEvents=%i bufLen=%i", numEvents, len);
+    LD4("Done computing the payload, numEvents=%lu bufLen=%i", numEvents, len);
     *rlen = len;
     return buf;
 }
@@ -157,7 +157,7 @@ int handle_mscore_msg_SeqRenderEvents(Mux::MuxSocket &sock, struct MuxseqMsg msg
     renderEventsStatus.clear();
     int unrenderedUtick = renderEventsStatus.occupiedRangeEnd(utick);
     EventMap events;
-    LD4("SeqRenderEvents -- utick=%i unrenderedUtick=%i (num events before render: %i)\n", utick, unrenderedUtick, events.size());
+    LD4("SeqRenderEvents -- utick=%i unrenderedUtick=%i (num events before render: %lu)\n", utick, unrenderedUtick, events.size());
     while (unrenderedUtick - utick < minUtickBufferSize) {
         const MidiRenderer::Chunk chunk = g_midi.getChunkAt(unrenderedUtick);
         if (!chunk)

@@ -980,9 +980,8 @@ void Seq::process(struct MuxaudioBuffer *mabuf)
 
       processMessages();
 
-      LD6("Seq::process state=%i (play=%i)", (int) state, (int) Transport::PLAY);
       mabuf->utick = 0;
-      LD4("Seq::process frames=%i driverState=%i state=%i playFrame=%i rt_tick=%i", framesPerPeriod, (int) driverState, (int) state, playFrame, g_utick);
+      LD6("Seq::process frames=%i driverState=%i state=%i playFrame=%i rt_tick=%i", framesPerPeriod, (int) driverState, (int) state, playFrame, g_utick);
       if (state == Transport::PLAY) {
             // FIX: if (!cs)
             //      return;
@@ -1034,7 +1033,7 @@ void Seq::process(struct MuxaudioBuffer *mabuf)
                         if (playPosFrame >= periodEndFrame)
                               break;
                         n = playPosFrame - *pPlayFrame;
-                        if (n > framesRemain) {
+                        if (n > (unsigned int) framesRemain) {
                               LD6("Seq::process WARNING requested %i frames, only %i frames in buffer", n, framesRemain);
                               }
                         if (n < 0) {
@@ -1287,10 +1286,13 @@ void Seq::collectEvents(int utick)
             renderEvents.clear();
             }
 
+      auto tstart = std::chrono::high_resolution_clock::now();
       struct MuxseqEventsHeader *meh = (struct MuxseqEventsHeader *) muxseq_mscore_query(MsgTypeSeqRenderEvents, utick);
       if (meh) {
           //FIX: make a helperfunction and put in muxlib (muxbuffer_to_eventMap)
           struct SparseEvent *sevs = meh->sevs;
+          LD("Seq::collectEvents get %i score-events from GUI, took %lums", meh->numEvents,
+              mux_timestamp(tstart));
           for (int i = 0; i < meh->numEvents; i++) {
               struct SparseEvent *sev = &sevs[i];
               int framepos = sev->framepos;
@@ -1308,7 +1310,7 @@ void Seq::collectEvents(int utick)
           }
           free(meh);
       }
-      LD4("Seq::collectEvents collected %i events", events.size());
+      LD4("Seq::collectEvents collected %lu events", events.size());
       updateEventsEnd();
       //FIX: cant handle loops, need loop-tick from mscore: playPos = mscore->loop() ? events.find(cs->loopInTick().ticks()) : events.cbegin();
       playPos = events.cbegin();
@@ -1379,7 +1381,7 @@ void Seq::setRelTempo(double relTempo)
 
 void Seq::setPos(int utick)
       {
-      LD("Seq::setPos utick=%u ######## NOT IMPLEMENTED");
+      LD("Seq::setPos utick=%u ######## NOT IMPLEMENTED", utick);
       //FIX: if (cs == 0)
       //      return;
       stopNotes(-1);
@@ -1429,7 +1431,7 @@ void Seq::seekCommon(int utick)
       {
       //FIX: if (cs == 0)
       //      return;
-      LD("Seq::seekCommon utick=%i calling collectEvents");
+      LD("Seq::seekCommon utick=%i calling collectEvents", utick);
       collectEvents(utick);
 #if 0 // FIX
       if (cs->playMode() == PlayMode::AUDIO) {
