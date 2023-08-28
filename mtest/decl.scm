@@ -50,7 +50,6 @@ extern Ms::MTest* g_mtest;
 (register-c-type %symid)
 (emit-c-type-string-maps2 'SymId)
 
-(register-c-type %style-id)
 (emit-c-type-string-maps2 'Sid)
 
 (format %h "enum class GOO_TYPE : uint64_t {~%")

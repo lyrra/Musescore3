@@ -128,41 +128,36 @@ set_target_properties (
       )
 
 
-message("--------- mtest is using guile ? --------")
-if (GUILE)
-message("--------- mtest is using guile ! --------")
-      target_link_libraries(testutils ${GUILE_LIBRARIES})
-      target_link_directories(testutils PRIVATE ${GUILE_LIBRARY_DIRS})
+target_link_libraries(testutils ${GUILE_LIBRARIES})
+target_link_directories(testutils PRIVATE ${GUILE_LIBRARY_DIRS})
 
-      target_link_libraries(mtest ${GUILE_LIBRARIES})
-      target_link_directories(mtest PRIVATE ${GUILE_LIBRARY_DIRS})
+target_link_libraries(mtest ${GUILE_LIBRARIES})
+target_link_directories(mtest PRIVATE ${GUILE_LIBRARY_DIRS})
 
-      add_executable(
-            mtest-guile
-            ${ui_headers}
-            mtest-guile.cpp
-            )
-      target_link_libraries(
-            mtest-guile
-            testutils
-            mscoreapp
-            testutils
-            ofqf
-            qzip
-            freetype
-            z
-            ${QT_QTTEST_LIBRARY}
-            ${QT_LIBRARIES}
-            )
+add_executable(
+    mtest-guile
+    ${ui_headers}
+    mtest-guile.cpp
+    )
+target_link_libraries(
+    mtest-guile
+    testutils
+    mscoreapp
+    testutils
+    ofqf
+    qzip
+    freetype
+    z
+    ${QT_QTTEST_LIBRARY}
+    ${QT_LIBRARIES}
+    )
 
-      target_include_directories(mtest-guile PRIVATE
-            ${QT_INCLUDES}
-            ${GUILE_INCLUDE_DIRS})
+target_include_directories(mtest-guile PRIVATE
+    ${QT_INCLUDES}
+    ${GUILE_INCLUDE_DIRS})
 
-      target_link_libraries(mtest-guile ${GUILE_LIBRARIES})
-      target_link_directories(mtest-guile PRIVATE ${GUILE_LIBRARY_DIRS})
-
-endif (GUILE)
+target_link_libraries(mtest-guile ${GUILE_LIBRARIES})
+target_link_directories(mtest-guile PRIVATE ${GUILE_LIBRARY_DIRS})
 
 
 set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
@@ -199,46 +194,60 @@ add_custom_target(mtest_build_and_install
       )
 endif (NOT MSVC)
 
-add_custom_command (OUTPUT s7gen.h s7gen.cpp
-                    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testgen.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${CMAKE_CURRENT_SOURCE_DIR} ../s7/lib.scm gen.scm types.scm ../libmscore/types-gen.h.scm ../libmscore/tremolo-gen.h.scm ../libmscore/property-gen.h.scm ms-objects.scm ms.scm decl.scm -o ${CMAKE_CURRENT_BINARY_DIR}/s7gen
+set (generate_sources
+  ${PROJECT_SOURCE_DIR}/libmscore/types-gen.h.scm
+  ${PROJECT_SOURCE_DIR}/libmscore/tremolo-gen.h.scm
+  ${PROJECT_SOURCE_DIR}/libmscore/property-gen.h.scm
+  ${PROJECT_SOURCE_DIR}/libmscore/style-gen.h.scm
+  )
+
+add_custom_command (OUTPUT s7gen.h s7gen.cpp types-code-gen.scm
+                    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testgen.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${CMAKE_CURRENT_SOURCE_DIR} -o ${CMAKE_CURRENT_BINARY_DIR}/s7gen
                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/testgen.scm
                             ${CMAKE_CURRENT_SOURCE_DIR}/gen.scm
                             ${CMAKE_CURRENT_SOURCE_DIR}/types.scm
-                            ${PROJECT_SOURCE_DIR}/libmscore/types-gen.h.scm
                             types-code.scm
                             ${CMAKE_CURRENT_SOURCE_DIR}/ms.scm
                             ${CMAKE_CURRENT_SOURCE_DIR}/ms-objects.scm
                             ${CMAKE_CURRENT_SOURCE_DIR}/decl.scm
                             ${PROJECT_SOURCE_DIR}/s7/lib.scm
+                            ${generate_sources}
                     VERBATIM
                     )
 
-add_custom_target(mtest_files ALL
+set(GEN_SOURCES
+    ms.scm mtest.scm types.scm ../s7/lib.scm
+    )
+
+set(TEST_SOURCES
+    libmscore/tst_element.scm
+    libmscore/tst_note.scm
+    libmscore/tst_hairpin.scm
+    libmscore/tst_breath.scm
+    libmscore/tst_copypaste.scm
+    libmscore/tst_readwriteundoreset.scm
+    )
+
+add_custom_command(TARGET mtest POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/ms.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mtest.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/types.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/s7/lib.scm ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${GEN_SOURCES})
 
-    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_element.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_element.scm
+foreach(srcfile ${TEST_SOURCES})
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${srcfile}
+        COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${srcfile} -o ${CMAKE_CURRENT_BINARY_DIR}/${srcfile}
+        #DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${srcfile}
+        DEPENDS ${srcfile}
+        )
+    list(APPEND built_scheme_tests ${CMAKE_CURRENT_BINARY_DIR}/${srcfile})
+endforeach()
 
-    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_note.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_note.scm
+add_custom_target(make_scheme_sources ALL DEPENDS ${built_scheme_tests})
 
-    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_hairpin.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_hairpin.scm
-
-    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_breath.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_breath.scm
-
-    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_copypaste.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_copypaste.scm
-
-    COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libmscore/tst_readwriteundoreset.scm -o ${CMAKE_CURRENT_BINARY_DIR}/libmscore/tst_readwriteundoreset.scm
-
-    DEPENDS libmscore/tst_element.scm
-            libmscore/tst_note.scm
-            libmscore/tst_hairpin.scm
-            libmscore/tst_breath.scm
-            libmscore/tst_copypaste.scm
-            libmscore/tst_readwriteundoreset.scm
-)
 
 subdirs (
         libmscore/compat114

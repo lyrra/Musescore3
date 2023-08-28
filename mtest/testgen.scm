@@ -5,6 +5,17 @@
 (define %libdir-mtest #f)
 (define %output-file #f)
 (define %source-files '())
+(define %generate-headers '(
+  "../libmscore/types-gen.h.scm"
+  "../libmscore/tremolo-gen.h.scm"
+  "../libmscore/property-gen.h.scm"
+  "../libmscore/style-gen.h.scm"
+  ))
+
+(define (load-source-file filename)
+  (let ((file (format #f "~a/~a" %sourcedir filename)))
+    (format #t "-- loading source file ~s~%" file)
+    (psyntax-load file)))
 
 (let ((sarg #f))
   (do ((pair %command-line (cdr pair)))
@@ -76,15 +87,28 @@
     (write form %emit-port))))
 
 (format #t "-- loading source files~%")
-
 (do ((pair %source-files (cdr pair)))
     ((null? pair))
     (let ((file (format #f "~a/~a" %sourcedir (car pair))))
       (format #t "-- loading source file ~s~%" file)
       (psyntax-load file)))
 
+(load-source-file "../s7/lib.scm")
+(load-source-file "gen.scm")
+(load-source-file "types.scm")
+(load-source-file "ms-objects.scm")
+(load-source-file "ms.scm")
+
+(do ((pair %generate-headers (cdr pair)))
+    ((null? pair))
+    (let ((file (format #f "~a/~a" %sourcedir (car pair))))
+      (format #t "-- loading generate headers source file ~s~%" file)
+      (psyntax-load file)))
+
+(load-source-file "decl.scm")
+
 ; generate runtime S7/Guile scheme code
-(psyntax-load (format #f "~a/types-code.scm" %sourcedir))
+(load-source-file "types-code.scm")
 (write-types-code-file "types-code-gen.scm")
 
 (format #t "---- scheme generate code done ----~%")
