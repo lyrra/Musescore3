@@ -1,5 +1,5 @@
 
-(emit '(load "./ms.scm"))
+(load "./ms.scm")
 
 ;#include <QtTest/QtTest>
 ;#include "mtest/testutils.h"
@@ -53,7 +53,6 @@
 
 ;  copypaste
 ;  copy measure 2, paste into measure 4
-(emit '
 (let ((filenums '(
       "01"          ;  start slur
       "02"          ;  end slur
@@ -110,7 +109,7 @@
          ;    DIR + QString("copypaste%1-ref.mscx").arg(idx)));
          ; delete score;
 
-         ))) filenums)))
+         ))) filenums))
 
 #|
 //---------------------------------------------------------

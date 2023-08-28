@@ -10,10 +10,7 @@
 ; alteredUnison
 ; LongNoteAfterShort_183746
 
-(emit '(load "./mtest.scm"))
-
 ; ///   note ///   read/write test of note
-(emit '
 (let ((chord (ms-make-chord))       ; Ms::Chord* chord = new Ms::Chord(score);
       (note  (ms-make-note)))       ; Note* note = new Note(score);
   (ms-chord-add-note chord note)    ; chord->add(note);
@@ -184,9 +181,8 @@
     '(note_ValueType-note_ValueType-USER_VAL
       note_ValueType-note_ValueType-OFFSET_VAL))
   ; FIX: delete chord, s7 will take care of this
-  ))
+  )
 
-(emit '
 (let ((score (ms-mtest-readScore "libmscore/note/grace.mscx")))
   (ms-score-doLayout score)
   ; Ms::Chord* chord = score->firstMeasure()->findChord(Fraction(0,1), 0);
@@ -233,11 +229,10 @@
         ;  (ms-test-check (> (length ars) 0)))
         )))
   (ms-test-check
-   (ms-mtest-saveCompareScore score "grace-test.mscx", "libmscore/note/grace-ref.mscx"))))
+   (ms-mtest-saveCompareScore score "grace-test.mscx", "libmscore/note/grace-ref.mscx")))
 
 ; tpc
 ; test of note tpc values
-(emit '
 (let ((score (ms-mtest-readScore "libmscore/note/tpc.mscx")))
   (let ((is (ms-score-inputState score)))
     (set! (ms-inputstate-track is) 0)
@@ -260,11 +255,10 @@
       (ms-score-cmdAddPitch score (+ octave 8) #f #f)
       (ms-score-cmdConcertPitchChanged score #t #t))
     (ms-test-check
-     (ms-mtest-saveCompareScore score  "tpc-test.mscx", "libmscore/note/tpc-ref.mscx")))))
+     (ms-mtest-saveCompareScore score  "tpc-test.mscx", "libmscore/note/tpc-ref.mscx"))))
 
 ; tpcTranspose
 ; test of note tpc values & transposition
-(emit '
 (let ((score (ms-mtest-readScore "libmscore/note/tpc-transpose.mscx")))
   (ms-score-startCmd score)
   (let* ((m (ms-score-firstMeasure score))) ; Measure* m = score->firstMeasure();
@@ -284,11 +278,10 @@
       (ms-score-cmdConcertPitchChanged score #t #t)
       (ms-score-endCmd score))
   (ms-test-check
-   (ms-mtest-saveCompareScore score  "tpc-transpose-test.mscx", "libmscore/note/tpc-transpose-ref.mscx"))))
+   (ms-mtest-saveCompareScore score  "tpc-transpose-test.mscx", "libmscore/note/tpc-transpose-ref.mscx")))
 
 ; tpcTranspose2
 ; more tests of note tpc values & transposition
-(emit '
 (let ((score (ms-mtest-readScore "libmscore/note/tpc-transpose2.mscx")))
   (let ((is (ms-score-inputState score)))
     (set! (ms-inputstate-track is) 0) ; score->inputState().setTrack(0)
@@ -302,11 +295,10 @@
     (ms-score-cmdConcertPitchChanged score #t #t)
     (ms-score-endCmd score))
   (ms-test-check
-   (ms-mtest-saveCompareScore score  "tpc-transpose2-test.mscx", "libmscore/note/tpc-transpose2-ref.mscx"))))
+   (ms-mtest-saveCompareScore score  "tpc-transpose2-test.mscx", "libmscore/note/tpc-transpose2-ref.mscx")))
 
 
 ;; noteLimits
-(emit '
 (let ((score (ms-mtest-readScore "libmscore/note/empty.mscx")))
   (let ((is (ms-score-inputState score)))
     (set! (ms-inputstate-track is) 0) ; score->inputState().setTrack(0)
@@ -341,9 +333,8 @@
                (nl (ms-selection-noteList sl)))
           (ms-score-cmdAddInterval score 8 nl)))
   (ms-test-check
-   (ms-mtest-saveCompareScore score  "notelimits-test.mscx", "libmscore/note/notelimits-ref.mscx")))))
+   (ms-mtest-saveCompareScore score  "notelimits-test.mscx", "libmscore/note/notelimits-ref.mscx"))))
 
-(emit '
 (let ((score (ms-mtest-readScore "libmscore/note/altered-unison.mscx"))
       (check-acc (lambda (note acc-type)
                    (let ((acc (ms-note-accidental note)))
@@ -367,18 +358,17 @@
       (if note (check-acc note 'AccidentalType-AccidentalType-NATURAL)))
     (let ((note (ms-chord-upNote chord)))
       (ms-test-check note)
-      (if note (check-acc note 'AccidentalType-AccidentalType-SHARP))))))
+      (if note (check-acc note 'AccidentalType-AccidentalType-SHARP)))))
 
-(emit '
- (begin
-   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_C   'Key-C) 0))
-   ; (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_E_S 'Key-C)  3))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B    'Key-C)   6))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_F_S  'Key-C_S) 3))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B    'Key-C_S) 6))
-   (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B_B  'Key-C_S) 6))
-   ; (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B_S  'Key-C_S) 7))
-    ))
+(begin
+  (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_C   'Key-C) 0))
+  ; (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_E_S 'Key-C)  3))
+  (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B    'Key-C)   6))
+  (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_F_S  'Key-C_S) 3))
+  (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B    'Key-C_S) 6))
+  (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B_B  'Key-C_S) 6))
+  ; (ms-test-check (= (ms-tpc2degree 'Tpc-Tpc-TPC_B_S  'Key-C_S) 7))
+  )
 
 ;;; LongNoteAfterShort_183746
 ;;; Put a small 128th rest
@@ -387,7 +377,6 @@
 ;;; Verifies that the resulting notes are tied over at least 3 times (to span 3 measures) and have total duration the same as a breve,
 ;;; regardless of how the breve was divided up.
 
-(emit '
 (let ((score (ms-mtest-readScore "libmscore/note/empty.mscx")))
   (ms-score-doLayout score)
   (let ((is (ms-score-inputState score)))
@@ -421,4 +410,4 @@
                      (chord (ms-note-chord note)))
                 (ms-fraction-add totalTicks (ms-chord-durationTypeTicks chord))))
             (let ((breveTicks (ms-tduration-ticks (ms-make-tduration 'DurationType-DurationType-V_BREVE))))
-              (ms-test-check (ms-fraction-equal totalTicks breveTicks))))))))))
+              (ms-test-check (ms-fraction-equal totalTicks breveTicks)))))))))

@@ -1,6 +1,5 @@
 
 
-(emit '
 (let ((readFile   "libmscore/breath/breath.mscx")
       (writeFile1 "breath01-test.mscx")
       (reference1 "libmscore/breath/breath01-ref.mscx")
@@ -32,4 +31,3 @@
      (ms-mtest-saveCompareScore score writeFile2 reference2))
     (format #t "--- tst_breath DONE ---~%")
     ))
-)

@@ -220,34 +220,20 @@ set(GEN_SOURCES
     ms.scm mtest.scm types.scm ../s7/lib.scm
     )
 
-set(TEST_SOURCES
-    libmscore/tst_element.scm
-    libmscore/tst_note.scm
-    libmscore/tst_hairpin.scm
-    libmscore/tst_breath.scm
-    libmscore/tst_copypaste.scm
-    libmscore/tst_readwriteundoreset.scm
-    )
-
 add_custom_command(TARGET mtest POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/ms.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mtest.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/types.scm ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/s7/lib.scm ${CMAKE_CURRENT_BINARY_DIR}
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_element.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_readwriteundoreset.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_breath.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_copypaste.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_note.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_hairpin.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
+
     DEPENDS ${GEN_SOURCES})
-
-foreach(srcfile ${TEST_SOURCES})
-    add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${srcfile}
-        COMMAND ${PROJECT_BINARY_DIR}/s7/s7 -f ${CMAKE_CURRENT_SOURCE_DIR}/testrun.scm -- -l ${PROJECT_SOURCE_DIR}/s7 -s ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${srcfile} -o ${CMAKE_CURRENT_BINARY_DIR}/${srcfile}
-        #DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${srcfile}
-        DEPENDS ${srcfile}
-        )
-    list(APPEND built_scheme_tests ${CMAKE_CURRENT_BINARY_DIR}/${srcfile})
-endforeach()
-
-add_custom_target(make_scheme_sources ALL DEPENDS ${built_scheme_tests})
-
 
 subdirs (
         libmscore/compat114

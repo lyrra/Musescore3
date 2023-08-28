@@ -16,9 +16,9 @@
 ;;;; corresponding enum are listed in mtest/ms.scm in %style-id 
 ;;;; (in this example Sid-Sid-createMultiMeasureRests)
 
-(emit '(load "./mtest.scm"))
+(load "./mtest.scm")
 
-(emit ' ; testReadWriteResetPositions
+; testReadWriteResetPositions
 (let ((DIR "libmscore/readwriteundoreset/"))
   (for-each (lambda (file)
     (let* ((read-filename (string-append DIR file ".mscx"))
@@ -30,7 +30,7 @@
        (ms-mtest-saveCompareScore score write-filename read-filename))
       ; delete score
       ))
-    '("barlines" "slurs" "mmrestBarlineTextLinks"))))
+    '("barlines" "slurs" "mmrestBarlineTextLinks")))
 
 ;;---------------------------------------------------------
 ;;   testMMRestLinksRecreateMMRest
@@ -41,7 +41,7 @@
 ;;   link and prevented text elements from linking as well.
 ;;---------------------------------------------------------
 
-(emit ' ; testMMRestLinksRecreateMMRest
+; testMMRestLinksRecreateMMRest
 (let* ((DIR "libmscore/readwriteundoreset/")
        (file "mmrestBarlineTextLinks")
        (readFile (string-append DIR file ".mscx"))
@@ -71,4 +71,4 @@
        (ms-mtest-saveCompareScore score writeFile recreateMMRestRefFile))
 
       ;delete score;
-      ))
+      )

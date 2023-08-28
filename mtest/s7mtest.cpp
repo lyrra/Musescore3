@@ -126,10 +126,19 @@ s7_pointer ms_mtest_writeReadElement(s7_scheme *sc, s7_pointer args)
     return c_make_goo(sc, g->ty, g->data, g_mtest->writeReadElement(e));
 }
 
+void args_s7_list (s7_scheme *sc, int rargc, char **rargv) {
+    s7_pointer head = s7_nil(sc);
+    for (int i = 0; i < rargc; i++) {
+        s7_pointer str = s7_make_string(sc, rargv[i]);
+        head = s7_cons(sc, str, head);
+    }
+    s7_define_variable(sc, "%command-line", head);
+}
 
 void mtest_s7_define_functions(s7_scheme *sc) {
     init_goo(sc);
     init_gen_s7(sc);
+
     s7_define_function(sc, "ms-test-check", ms_test_check, 1, 0, false, "(ms-test-check cond)");
     s7_define_function(sc, "ms-test-check-pass", ms_test_check_pass, 0, 0, false, "(ms-test-check-pass)");
     s7_define_function(sc, "ms-test-check-fail", ms_test_check_fail, 0, 0, false, "(ms-test-check-fail)");
@@ -141,14 +150,20 @@ void mtest_s7_define_functions(s7_scheme *sc) {
     s7_define_function(sc, "ms-mtest-readCreatedScore", ms_mtest_readCreatedScore, 1, 0, false, "(ms-mtest-readCreatedScore <score-filename>)");
 }
 
-int run_scheme_script(const char *filename)
+int run_scheme_script(const char *filename, int rargc, char **rargv)
 {
     s7_scheme *s7;
     s7 = s7_init();
+    args_s7_list(s7, rargc, rargv);
     mtest_s7_define_functions(s7);
+    // load test framework
+    s7_eval_c_string(s7, "(load \"mtest.scm\")");
     if (!s7_load(s7, filename)) {
+        fprintf(stderr, "Failed to load and evaluate S7-Scheme script: %s\n", filename);
         return -1;
     }
+    printf("Test script %s has finished, %i/%i passed/failed tests.\n", filename,
+           g_test_check_pass, g_test_check_fail);
     free(s7);
     return 0;
 }

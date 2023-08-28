@@ -14,7 +14,10 @@
 #include "all.h"
 #include "mtest/testutils.h"
 
-int run_scheme_script(const char *filename);
+int g_argc;
+char** g_argv;
+
+int run_scheme_script(const char *filename, int rargc, char **rargv);
 
 static QFile logFile;
 static int processed = 0;
@@ -112,7 +115,7 @@ static void run_script (const char* testname)
       printf("\n======== running script %s ========\n", testname);
       g_test_check_pass = 0;
       g_test_check_fail = 0;
-      run_scheme_script(testname);
+      run_scheme_script(testname, g_argc, g_argv);
       fprintf(stderr, "\n======== DONE running script %s ========\n", testname);
       if(g_test_check_fail > 0 || g_test_check_pass == 0) {
             printf("========mtest script <%s> checks: passed=%i failed=%i\n", testname, g_test_check_pass, g_test_check_fail);
@@ -172,6 +175,9 @@ int main(int argc, char* argv[])
       QScopedPointer<QCoreApplication> app(createApplication(argc, argv));
       g_mtest = new Ms::MTest();
       g_mtest->initMTest();
+      // these are passed to scheme during script load/run
+      g_argc = argc;
+      g_argv = argv;
 #if 0
       logFile.setFileName("mtest.log");
       if (!logFile.open(QIODevice::WriteOnly)) {

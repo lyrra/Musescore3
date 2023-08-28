@@ -1,5 +1,15 @@
-(load "./lib.scm")
-(load "./ms.scm")
+(define %source-dir #f)
+
+(do ((pair %command-line (cdr pair)))
+    ((null? pair))
+  (let ((arg (car pair)))
+    (let ((n (string-position "--srcdir=" arg)))
+      (if n
+        (set! %source-dir (substring arg (+ 9 n)))))))
+
+(load "lib.scm")
+(load "ms.scm")
+(load "types-code-gen.scm")
 
 (define (check-write-read-elm elm fun val)
   (let ((e (ms-mtest-writeReadElement elm))) ; Elm e = static_cast<Elm*>(writeReadElement(elm))
@@ -7,4 +17,3 @@
       ; QCOMPARE(e->pitch(), val) where fun: getter for note->pitch
       (ms-test-check (= val (fun e)))
       (ms-test-check (eq? val (fun e)))))) ; QCOMPARE(e->pitch(), val) where fun: getter for note->pitch
-
