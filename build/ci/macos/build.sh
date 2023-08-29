@@ -2,12 +2,14 @@
 
 echo "Build MacOS MuseScore"
 
-echo "---- QT:"
-ls /usr/local/opt/qt/bin
+echo "---- opt:"
+ls /usr/local/opt
 
 echo "---- Applications:"
 ls /Applications
-export PATH=$PATH:/usr/local/opt/qt/bin
+export PATH=$PATH:/usr/local/opt/qt5/bin
+
+command -v qmake
 
 export DEVELOPER_DIR=/Applications/Xcode_12.4.app/Contents/Developer
 unset DEVELOPER_DIR
