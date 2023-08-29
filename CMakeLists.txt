@@ -18,7 +18,7 @@
 #=============================================================================
 
 # Minimum tested, report if it works with older
-CMAKE_MINIMUM_REQUIRED(VERSION 3.3.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
 
 project(mscore)
 
