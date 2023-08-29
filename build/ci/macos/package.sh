@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+cd build.debug/install
+
+tar cvf $C/musescore3.tar.xz .
+
+exit
+
 echo "Package MuseScore"
 trap 'echo Package failed; exit 1' ERR
 
