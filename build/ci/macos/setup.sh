@@ -41,11 +41,13 @@ brew install libvorbis
 brew install flac
 brew install libsndfile
 brew install portaudio
+brew install qt5
+brew link qt5 --force
 
 brew install gcc
 echo "-- done install packages --"
-which g++
-command -v g++
+which qmake
+command -v qmake
 
 #BREW_CELLAR=$(brew --cellar)
 #BREW_PREFIX=$(brew --prefix)
