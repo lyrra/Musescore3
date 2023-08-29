@@ -17,10 +17,10 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #=============================================================================
 
-project(mscore)
-
 # Minimum tested, report if it works with older
 CMAKE_MINIMUM_REQUIRED(VERSION 3.3.0)
+
+project(mscore)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
