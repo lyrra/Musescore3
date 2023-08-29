@@ -2,14 +2,18 @@
 
 echo "Build MacOS MuseScore"
 
+ls /Applications
+
+export DEVELOPER_DIR=/Applications/Xcode_12.4.app/Contents/Developer
+unset DEVELOPER_DIR
+
 ARTIFACTS_DIR=build.artifacts
 BUILD_AUTOUPDATE=OFF
 
 mkdir build.debug 2> /dev/null
 cd build.debug || exit 1
 
-#cmake -G Xcode 
-cmake -G "Unix Makefiles" \
+cmake -G Xcode \
       -DCMAKE_INSTALL_PREFIX=install \
       -DCMAKE_BUILD_TYPE=DEBUG \
       -DVERBOSE=1 \
