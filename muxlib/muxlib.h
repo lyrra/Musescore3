@@ -60,6 +60,7 @@ enum MuxseqMsgType {
 
 enum MuxaudioMsgType {
     MsgTypeAudioNoop = 0,
+    MsgTypeHeartbeat,
     MsgTypeInit,
     MsgTypeAudioInit,
     MsgTypeAudioStart,

@@ -149,6 +149,7 @@ const char* muxseq_msg_type_info (MuxseqMsgType type) {
 
 const char* muxaudio_msg_type_info(MuxaudioMsgType type) {
     switch (type) {
+        case MsgTypeHeartbeat: return "MsgTypeHeartbeat";
         case MsgTypeAudioInit: return "MsgTypeAudioInit";
         case MsgTypeAudioStart: return "MsgTypeAudioStart";
         case MsgTypeAudioStop: return "MsgTypeAudioStop";

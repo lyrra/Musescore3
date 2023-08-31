@@ -41,6 +41,7 @@
 
 namespace Ms {
 
+extern bool g_send_heartbeat;
 int muxseq_mscore_tell (MuxseqMsgType type, int i);
 
 void mux_send_event_to_gui(struct SparseEvent se);
@@ -282,6 +283,13 @@ void muxseq_muxaudioWorker_process() {
                 workDone = true;
             }
         }
+
+        if (g_send_heartbeat) {
+            muxseq_msg_to_audio(MsgTypeHeartbeat, 0);
+            g_send_heartbeat = false;
+            workDone = true;
+        }
+
         if (! workDone) {
             g_writerPause++;
             std::this_thread::sleep_for(std::chrono::milliseconds(slept));

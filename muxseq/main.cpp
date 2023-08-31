@@ -22,6 +22,7 @@ namespace Ms {
 #define MUX_SYNC_MSLEEP 100
 
 extern bool g_state_play;
+bool g_send_heartbeat = false;
 
 void muxseq_threads_start();
 
@@ -40,7 +41,8 @@ int main(int argc, char **argv)
     Ms::g_logstr = g_logstr_func;
     Ms::muxseq_threads_start();
     while(1){
-        std::this_thread::sleep_for(std::chrono::microseconds(100000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        Ms::g_send_heartbeat = true;
     }
     return 0;
 }

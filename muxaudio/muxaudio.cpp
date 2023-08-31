@@ -93,6 +93,7 @@ void mux_audio_send_event_to_midi(struct MuxaudioMsg msg);
 //extern int g_driver_running;
 
 static std::vector<std::thread> seqThreads;
+extern int g_heartbeat;
 int g_utick_rt = 0;
 int g_mux_audio_process_run = 0;
 bool g_state_play = false;
@@ -232,6 +233,9 @@ int muxaudio_mq_from_audio_reader_visit () {
 int muxaudio_mq_to_audio_handle_message(struct MuxaudioMsg msg) {
     LD("MUX ctrl message, type: %i(%s)", msg.type, muxaudio_msg_type_info(msg.type));
     switch (msg.type) {
+        case MsgTypeHeartbeat:
+            g_heartbeat++;
+        break;
         case MsgTypeAudioInit:
             mux_audio_init(msg.payload.i);
         break;

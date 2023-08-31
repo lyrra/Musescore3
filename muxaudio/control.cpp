@@ -30,6 +30,9 @@ extern struct Mux::MuxSocket g_socket_audio;
 
 static std::vector<std::thread> muxThreads;
 
+int g_heartbeat = 0;
+int g_heartbeat_timeout = 0;
+
 void mux_thread_process_init(std::string msg)
 {
     std::cout << "MUX audio-process thread initialized:" << msg << "\n";
@@ -84,6 +87,19 @@ void muxaudio_threads_stop()
 
 } // end of Ms namespace
 
+bool check_heartbeat (int old_heartbeat) {
+    if (Ms::g_heartbeat != old_heartbeat) {
+        Ms::g_heartbeat_timeout = 0;
+        return true;
+    }
+    Ms::g_heartbeat_timeout++;
+    std::cerr  << "MUXAUDIO Heartbeat missed: " << Ms::g_heartbeat_timeout << "\n";
+    if (Ms::g_heartbeat_timeout > 10) {
+        return false;
+    }
+    return true;
+}
+
 void g_logstr_func (char *str) {
     qDebug(str);
 }
@@ -92,9 +108,16 @@ int main(int argc, char **argv)
 {
     Ms::g_logstr = g_logstr_func;
     Ms::muxaudio_threads_start();
-    while(1){
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    int rc = 0;
+    while (true) {
+        int old_heartbeat = Ms::g_heartbeat;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        if (! check_heartbeat(old_heartbeat)) {
+            std::cerr  << "MUXAUDIO Heartbeat timeout.\n";
+            rc = 1;
+            break;
+        }
     }
-    return 0;
+    return rc;
 }
 
