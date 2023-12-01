@@ -7,6 +7,10 @@ ls /usr/local/opt
 
 echo "---- Applications:"
 ls /Applications
+echo "---- Qt5 Binaries:"
+ls /usr/local/opt
+ls /usr/local/opt/qt5/bin
+echo "------------------"
 export PATH=$PATH:/usr/local/opt/qt5/bin
 
 command -v qmake
