@@ -55,7 +55,7 @@ jobs:
           mingw-w64-x86_64-lame
           mingw-w64-x86_64-jack2
     - name: Clone repo master
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: main
         path: m
