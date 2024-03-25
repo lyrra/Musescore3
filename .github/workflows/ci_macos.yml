@@ -24,7 +24,7 @@ jobs:
     - name: Clone repo main
       uses: actions/checkout@v3
       with:
-        ref: ci
+        ref: main
         path: m
     - name: Setup
       run: |
