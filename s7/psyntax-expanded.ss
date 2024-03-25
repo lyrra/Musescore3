@@ -3355,7 +3355,7 @@
                                                                            (symbol->string
                                                                              (car cls1834))
                                                                            '" in"))
-                                                                        (syntax-object->datum
+                                                                        (syntax->datum
                                                                           cls1831))
                                                                       (void))
                                                                   ((letrec ((lp21835 (lambda (ls21837
@@ -7389,7 +7389,7 @@
                                                               (lambda (x824)
                                                                 ((lambda (id825)
                                                                    (make-syntax-object63
-                                                                     (syntax-object->datum
+                                                                     (syntax->datum
                                                                        id825)
                                                                      ((lambda (marks826)
                                                                         (make-wrap315
@@ -7449,16 +7449,16 @@
                                                  (prefix-add636 (lambda (prefix-id813)
                                                                   ((lambda (prefix814)
                                                                      (lambda (id815)
-                                                                       (datum->syntax-object
+                                                                       (datum->syntax
                                                                          id815
                                                                          (string->symbol
                                                                            (string-append
                                                                              prefix814
                                                                              (symbol->string
-                                                                               (syntax-object->datum
+                                                                               (syntax->datum
                                                                                  id815)))))))
                                                                     (symbol->string
-                                                                      (syntax-object->datum
+                                                                      (syntax->datum
                                                                         prefix-id813)))))
                                                  (prefix-drop637 (lambda (prefix-id807)
                                                                    ((lambda (prefix808)
@@ -7482,7 +7482,7 @@
                                                                                         '"missing expected prefix "
                                                                                         prefix808))
                                                                                     (void))
-                                                                                (datum->syntax-object
+                                                                                (datum->syntax
                                                                                   id809
                                                                                   (string->symbol
                                                                                     (substring
@@ -7494,13 +7494,13 @@
                                                                              (string-length
                                                                                s810)))
                                                                           (symbol->string
-                                                                            (syntax-object->datum
+                                                                            (syntax->datum
                                                                               id809)))))
                                                                      (symbol->string
-                                                                       (syntax-object->datum
+                                                                       (syntax->datum
                                                                          prefix-id807)))))
                                                  (gen-mid638 (lambda (mid804)
-                                                               (datum->syntax-object
+                                                               (datum->syntax
                                                                  mid804
                                                                  (generate-id143
                                                                    ((lambda (x805)
@@ -8230,13 +8230,13 @@
          ((lambda (e619) (lambda () e619))
            ($make-environment '*top* '#t)))
        (set! identifier? (lambda (x618) (nonsymbol-id?305 x618)))
-       (set! datum->syntax-object
+       (set! datum->syntax
          (lambda (id616 datum615)
            (begin
              ((lambda (x617)
                 (if (not (nonsymbol-id?305 x617))
                     (error-hook136
-                      'datum->syntax-object
+                      'datum->syntax
                       '"invalid argument"
                       x617)
                     (void)))
@@ -8284,7 +8284,7 @@
                        tmp601)))
                 ($syntax-dispatch tmp601 '#(vector each-any))))
              v600)))
-       (set! syntax-object->datum
+       (set! syntax->datum
          (lambda (x599) (strip522 x599 '(()))))
        (set! generate-temporaries
          ((lambda (n595)
@@ -8848,7 +8848,7 @@
                                (list
                                  tmp2568
                                  (list
-                                   '#(syntax-object datum->syntax-object ((top) #(ribcage #(dummy tid id e1 e2) #(("m" top) (top) (top) (top) (top)) #("i" "i" "i" "i" "i")) #(ribcage () () ()) #(ribcage #(x) #(("m" top)) #("i")) #(top-ribcage *top* #t)))
+                                   '#(syntax-object datum->syntax ((top) #(ribcage #(dummy tid id e1 e2) #(("m" top) (top) (top) (top) (top)) #("i" "i" "i" "i" "i")) #(ribcage () () ()) #(ribcage #(x) #(("m" top)) #("i")) #(top-ribcage *top* #t)))
                                    (list
                                      '#(syntax-object syntax ((top) #(ribcage #(dummy tid id e1 e2) #(("m" top) (top) (top) (top) (top)) #("i" "i" "i" "i" "i")) #(ribcage () () ()) #(ribcage #(x) #(("m" top)) #("i")) #(top-ribcage *top* #t)))
                                      tid2566)
@@ -8873,7 +8873,7 @@
               (apply
                 (lambda (dummy2574 x2573)
                   (list
-                    '#(syntax-object syntax-object->datum ((top) #(ribcage #(dummy x) #(("m" top) (top)) #("i" "i")) #(ribcage () () ()) #(ribcage #(x) #(("m" top)) #("i")) #(top-ribcage *top* #t)))
+                    '#(syntax-object syntax->datum ((top) #(ribcage #(dummy x) #(("m" top) (top)) #("i" "i")) #(ribcage () () ()) #(ribcage #(x) #(("m" top)) #("i")) #(top-ribcage *top* #t)))
                     (list
                       '#(syntax-object syntax ((top) #(ribcage #(dummy x) #(("m" top) (top)) #("i" "i")) #(ribcage () () ()) #(ribcage #(x) #(("m" top)) #("i")) #(top-ribcage *top* #t)))
                       x2573)))
@@ -10611,7 +10611,7 @@
                                                                p3082)
                                                              '())
                                                            (cons
-                                                             (datum->syntax-object
+                                                             (datum->syntax
                                                                k3080
                                                                x3084)
                                                              (f3083))))
@@ -10636,7 +10636,7 @@
                                  (syntax-error tmp3076)))
                             ($syntax-dispatch tmp3076 'each-any)))
                          (read-file3070 fn3075 k3074)))
-                      (syntax-object->datum filename3073)))
+                      (syntax->datum filename3073)))
                   tmp3072)
                 (syntax-error tmp3071)))
            ($syntax-dispatch tmp3071 '(any any))))
