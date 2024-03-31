@@ -52,21 +52,17 @@ extern Ms::MTest* g_mtest;
 
 (emit-c-type-string-maps2 'Sid)
 
-(format %h "enum class GOO_TYPE : uint64_t {~%")
-(format %h "  NIL = 0,~%")
-(for-each (lambda (name)
-  (format %h "  ~a,~%" name))
-          %goo-types)
+(evalc
+  `(defcenum GOO_TYPE "uint64_t"
+             ,(append %goo-types
+                      (map (lambda (type)
+                             (let ((name (car type)))
+                               (string-lisp->c (symbol->string name))))
+                           (cdr (assoc 'ElementType %c-types))))))
 
-(for-each (lambda (type)
-  (let ((name (car type)))
-    (format %h "  ~a,~%" (string-lisp->c (symbol->string name)))))
-          (cdr (assoc 'ElementType %c-types)))
-(format %h "  END~%};~%")
-
-(emit-cfun '(ms-make-nullgoo) 0 (lambda () (format %c "
-    return c_make_goo(sc, 0, s7_f(sc), nullptr);
-")))
+(evalc
+  '(defcfun (ms-make-nullgoo) ()
+     (c_make_goo sc 0 (s7_f sc) nullptr)))
 
 ;
 ;
