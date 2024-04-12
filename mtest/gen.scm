@@ -656,50 +656,46 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
     (format %c "    return (~a)0;~%" basetypename)
     (format %c "}~%")))
 
-(define (emit-c-type-string-maps2 typename)
+(define (emit-c-type-string-maps3 typename)
   (let* ((types (assq-ref %c-types typename))
          (typeinfo (assq-ref %c-types-info typename))
-         (c-type (typeinfo-meta-get typename 'c-type-cons)))
+         (c-type (typeinfo-meta-get typename 'c-type-cons))
+         (sname (string->symbol (format #f "~a-to-string" typename))))
     ;(set! c-type (substring c-type 0 (string-position ":" c-type)))
     ; emit c-function that takes a object of a specific type and returns a string
-    (format %h "const char* ~a_to_string (Ms::~a x);~%" typename c-type)
-    (format %c "const char* ~a_to_string (Ms::~a x)~%" typename c-type)
-    (format %c "{~%~%")
-    (if (eq? c-type (typeinfo-meta-get typename 'c-type)) ; not an special-enum-class
-        (begin
-          (format %c "    switch (x) {~%")
-          (for-each (lambda (lst)
+    (evalc
+      `(defcfun (,sname) (,(format #f "Ms::~a x" c-type)) "const char*"
+         ,(if (eq? c-type (typeinfo-meta-get typename 'c-type)) ; not an special-enum-class
+              (append
+                '(switch (x))
+                (append
+                 (map (lambda (lst)
+                        (match lst
+                          ((sname cname idx props)
+                           (list 'case cname
+                                 (list 'return (format #f "\"~a-~a\"" typename sname))))))
+                      types)
+                 (list '(default (return "\"\"")))))
+              `,@(append
+               (map (lambda (lst)
                       (match lst
                         ((sname cname idx props)
-                         (format %c "        case ~a:~%" cname)
-                         (format %c "        return \"~a-~a\";~%" typename sname))))
+                         `(if (== x ,cname)
+                              (return ,(format #f "\"~a\"" cname))))))
                     types)
-          (format %c "        default:~%")
-          (format %c "        return \"\";~%")
-          (format %c "    }~%"))
-        (begin
-          (for-each (lambda (lst)
-                      (match lst
-                        ((sname cname idx props)
-                         (format %c "    if (x == ~a) {~%" cname)
-                         (format %c "        return \"~a\";~%" sname)
-                         (format %c "    }~%"))))
-                    types)
-          (format %c "    return \"ERROR-UNKNOWN\";~%")))
-    (format %c "}~%")
+               (list "\"ERROR-UNKNOWN\"")))))
     ; emit c-function that takes an string and returns an object of a specific type
-    (format %h "Ms::~a string_to_~a (const char *name);~%" c-type typename)
-    (format %c "Ms::~a string_to_~a (const char *name)~%" c-type typename)
-    (format %c "{~%~%")
-    (for-each (lambda (lst)
-                (match lst
-                  ((sname cname idx props)
-                   (format %c "    if (!strcmp(name, \"~a-~a\")) {~%" typename sname)
-                   (format %c "        return ~a;~%" cname)
-                   (format %c "    }~%"))))
-              types)
-    (format %c "    return (Ms::~a)0;~%" c-type)
-    (format %c "}~%")))
+    (let ((sname (string->symbol (format #f "string_to_~a" typename))))
+      (evalc
+       (append
+          `(defcfun (,sname) ("const char *name") ,(format #f "Ms::~a" c-type))
+          (map (lambda (lst)
+                   (match lst
+                     ((sname cname idx props)
+                      `(if ,(format #f "!strcmp(name, \"~a-~a\")" typename sname)
+                           (return ,cname)))))
+                 types)
+           (list (format #f "(Ms::~a)0" c-type)))))))
 
 (define (emit-exports-getset)
   (for-each (lambda (lst)

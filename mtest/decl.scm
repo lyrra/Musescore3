@@ -48,9 +48,9 @@ extern Ms::MTest* g_mtest;
 ;
 
 (register-c-type %symid)
-(emit-c-type-string-maps2 'SymId)
+(emit-c-type-string-maps3 'SymId)
 
-(emit-c-type-string-maps2 'Sid)
+(emit-c-type-string-maps3 'Sid)
 
 (evalc
   `(defcenum GOO_TYPE "uint64_t"
@@ -61,7 +61,7 @@ extern Ms::MTest* g_mtest;
                            (cdr (assoc 'ElementType %c-types))))))
 
 (evalc
-  '(defcfun (ms-make-nullgoo) ()
+  '(defcreg (ms-make-nullgoo) ()
      (c_make_goo sc 0 (s7_f sc) nullptr)))
 
 ;
@@ -72,15 +72,14 @@ extern Ms::MTest* g_mtest;
 (register-c-type %note-value-type)
 (register-c-type %note-head-type)
 (register-c-type %note-head-group)
-(emit-c-type-string-maps2 'DirectionH)
-(emit-c-type-string-maps2 'Direction)
-(emit-c-type-string-maps2 'note_ValueType)
-(emit-c-type-string-maps2 'NoteHead_Type)
-(emit-c-type-string-maps2 'NoteHead_Group)
+(emit-c-type-string-maps3 'DirectionH)
+(emit-c-type-string-maps3 'Direction)
+(emit-c-type-string-maps3 'note_ValueType)
+(emit-c-type-string-maps3 'NoteHead_Type)
+(emit-c-type-string-maps3 'NoteHead_Group)
 (emit-c-type-string-maps-simple "element_pid" (cdr (assoc 'Pid %c-types)) "Ms::Pid")
 
-(emit-c-type-string-maps2 'NoteType)
-
+(emit-c-type-string-maps3 'NoteType)
 
 (emit-cfun '(ms-make-tduration) 1 (list
   '(emit-pop-arg-sym "dur")
@@ -230,7 +229,7 @@ extern Ms::MTest* g_mtest;
 ;
 
 (register-c-type %hairpin-type)
-(emit-c-type-string-maps2 'hairpin)
+(emit-c-type-string-maps3 'hairpin)
 
 (emit-cfun '(ms-make-hairpin) 0 (list
   (lambda (e) (format %c "
@@ -240,7 +239,7 @@ extern Ms::MTest* g_mtest;
 (def-goo-setters-sym "Ms::Hairpin" "hairpin" "hairpinType" "setHairpinType" "hairpin")
 
 ; tremolo
-(emit-c-type-string-maps2 'TremoloType)
+(emit-c-type-string-maps3 'TremoloType)
 
 (emit-cfun '(ms-make-tremolo) 1 (list
   '(emit-pop-arg-goo "MasterScore*" "score")
@@ -330,7 +329,7 @@ extern Ms::MTest* g_mtest;
             (let ((global-list (car lst))
                   (scheme-type-name (cadr lst)))
               (register-c-type global-list)
-              (emit-c-type-string-maps2 scheme-type-name)))
+              (emit-c-type-string-maps3 scheme-type-name)))
   `(
     (,%duration-type DurationType)
     (,%select-type   SelectType)
@@ -339,8 +338,8 @@ extern Ms::MTest* g_mtest;
     (,%tpc-enum Tpc)))
 
 ; FIX: loop through %c-types and emit
-(emit-c-type-string-maps2 'SegmentType)
-(emit-c-type-string-maps2 'AccidentalType)
+(emit-c-type-string-maps3 'SegmentType)
+(emit-c-type-string-maps3 'AccidentalType)
 
 (emit-cfun '(ms-make-fraction) 2 (list
   '(emit-pop-arg-int "numerator")
