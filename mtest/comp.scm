@@ -44,6 +44,26 @@
       (emit-c (car e?))
       (format %c "}~%")))))
 
+(define (emit-c-cond ir)
+  (let ((n 0))
+    (for-each (lambda (clause)
+                (cond
+                 ((= n 0) (format %c "  if ("))
+                 ((eq? 'else (car clause))
+                  (format %c "  } else {~%"))
+                 (else
+                  (format %c "  } else if (")))
+                (set! n (+ 1 n))
+                (when (not (eq? 'else (car clause)))
+                  (emit-c (car clause))
+                  (format %c ") {~%"))
+                (for-each (lambda (line)
+                            (format %c "  ")
+                            (emit-c line))
+                          (cdr clause)))
+              ir)
+    (format %c "  }~%")))
+
 (define (emit-c-switch ir)
   (let ((cnd (car ir))
         (cas (cdr ir)))
@@ -65,7 +85,7 @@
          (args (cadr ir))
          (body (caddr ir)))
     (set! %export-to-scheme2
-          (cons (list (car scname) (cadr scname) 0 0)
+          (cons (list (car scname) (cadr scname) (length args) 0)
                 %export-to-scheme2))
     (format %h "s7_pointer ~a (s7_scheme *sc, s7_pointer args);~%" (cadr scname))
     (format %c "s7_pointer ~a (s7_scheme *sc, s7_pointer args)~%{~%" (cadr scname))
@@ -97,6 +117,12 @@
     (format %c " == ")
     (emit-c b)))
 
+(define (emit--emit-pop-arg-sym ir)
+  (apply emit-pop-arg-sym ir))
+
+(define (emit-raw ir)
+  (format %c "  ~a~%" (car ir)))
+
 (define (emit-c ir)
   (cond 
    ((pair? ir)
@@ -113,11 +139,17 @@
        (format %c ";~%"))
       ((if)
        (emit-c-if (cdr ir)))
+      ((cond)
+       (emit-c-cond (cdr ir)))
       ((switch)
        (emit-c-switch (cdr ir)))
       ; reserved functions
       ((==)
        (emit-== (cdr ir)))
+      ((pop-arg-sym)
+       (emit--emit-pop-arg-sym (cdr ir)))
+      ((raw)
+       (emit-raw (cdr ir)))
       (else ; c-call
        (format %c "~a(" (car ir))
        (let ((n 0))

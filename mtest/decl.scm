@@ -81,66 +81,60 @@ extern Ms::MTest* g_mtest;
 
 (emit-c-type-string-maps3 'NoteType)
 
-(emit-cfun '(ms-make-tduration) 1 (list
-  '(emit-pop-arg-sym "dur")
-  (lambda (e) (format %c "
-    return c_make_goo(sc,
-                      static_cast<uint64_t>(GOO_TYPE::CHORD),
-                      s7_nil(sc),
-                      (void*) new TDuration(string_to_DurationType(dur)));
-"))))
+(evalc
+ `(defcreg (ms-make-tduration) (1)
+    (pop-arg-sym ("dur") ())
+    (c_make_goo sc
+                "static_cast<uint64_t>(GOO_TYPE::CHORD)"
+                (s7_nil sc)
+                "(void*) new TDuration(string_to_DurationType(dur))")))
 
-(emit-cfun '(ms-make-score) 0 (lambda () (format %c "
-    return c_make_goo(sc,
-                      static_cast<uint64_t>(0 /*GOO_TYPE::CHORD*/),
-                      s7_nil(sc),
-                      new Ms::Score());
-")))
+(evalc
+ `(defcreg (ms-make-score) ()
+    (c_make_goo sc
+                "static_cast<uint64_t>(0 /*GOO_TYPE::CHORD*/)"
+                (s7_nil sc)
+                "new Ms::Score()")))
 
-(emit-cfun '(ms-make-chord) 0 (lambda () (format %c "
-    return c_make_goo(sc,
-                      static_cast<uint64_t>(GOO_TYPE::CHORD),
-                      s7_nil(sc),
-                      new Ms::Chord(g_mtest->score));
-")))
+(evalc
+ `(defcreg (ms-make-chord) ()
+    (c_make_goo sc
+                "static_cast<uint64_t>(GOO_TYPE::CHORD)"
+                (s7_nil sc)
+                "new Ms::Chord(g_mtest->score)")))
 
-(emit-cfun '(ms-make-note) 0 (lambda () (format %c "
-    return c_make_goo(sc,
-                      static_cast<uint64_t>(GOO_TYPE::NOTE),
-                      s7_nil(sc),
-                      new Ms::Note(g_mtest->score));
-")))
+(evalc
+ `(defcreg (ms-make-note) ()
+    (c_make_goo sc
+                "static_cast<uint64_t>(GOO_TYPE::NOTE)"
+                (s7_nil sc)
+                "new Ms::Note(g_mtest->score)")))
 
 ;
 ; (ms-make-element <element-name>) => element-object
 ;
-(emit-cfun '(ms-make-element) 1 (lambda () (format %c "
-    if (! s7_is_symbol(s7_car(args))) {
-        return (s7_wrong_type_arg_error(sc, \"ms_make_element\", 1, s7_car(args), \"an symbol\"));
-    }
-    const char *symname = s7_symbol_name(s7_car(args));
-    uint64_t ty;
-    Element* e = NULL;
-    if (!strcmp(symname, \"dummy\")) {
-")
-
-(for-each (lambda (type)
-  (let ((name (car type))
-        (cname (cadr type)))
-    (format %c "
-    } else if (!strcasecmp(symname, \"~a\")) {
-        e = Element::create(~a, g_mtest->score);
-        ty = static_cast<uint64_t>(GOO_TYPE::~a);
-" name cname (string-lisp->c (symbol->string name)))))
-          (cdr (assoc 'ElementType %c-types)))
-
-(format %c "
-    } else {
-        fprintf(stderr, \"ERROR: UNRECOGNIZED ELEMENT TYPE: %s\\n\", symname);
-        return s7_nil(sc);
-    }
-    return c_make_goo(sc, ty, s7_f(sc), e);
-")))
+(evalc
+ `(defcreg (ms-make-element) (1)
+    (if (! (s7_is_symbol (s7_car args)))
+        (return (s7_wrong_type_arg_error sc "\"ms_make_element\"" 1 (s7_car args) "\"an symbol\"")))
+    (raw "const char *symname = s7_symbol_name(s7_car(args));")
+    (raw "uint64_t ty;")
+    (raw "Element* e = NULL;")
+    ,(append
+      '(cond)
+      (map (lambda (type)
+             (let ((name (car type))
+                   (cname (cadr type)))
+               (list `(! (strcasecmp symname ,(format #f "\"~a\"" name)))
+                    (list 'raw (format #f "e = Element::create(~a, g_mtest->score);" cname))
+                    (list 'raw (format #f "ty = static_cast<uint64_t>(GOO_TYPE::~a);"
+                                       (string-lisp->c (symbol->string name)))))))
+           (cdr (assoc 'ElementType %c-types)))
+      (list
+      (list 'else
+            (list 'raw (format #f "fprintf(stderr, \"ERROR: UNRECOGNIZED ELEMENT TYPE: %s\\n\", symname);"))
+            '(return (s7_nil sc)))))
+    (c_make_goo sc ty (s7_f sc) e)))
 
 (emit-cfun '(ms-element-type) 1 (list
   '(emit-pop-arg-goo "Element*" "e")
