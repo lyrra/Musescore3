@@ -136,47 +136,41 @@ extern Ms::MTest* g_mtest;
             '(return (s7_nil sc)))))
     (c_make_goo sc ty (s7_f sc) e)))
 
-(emit-cfun '(ms-element-type) 1 (list
-  '(emit-pop-arg-goo "Element*" "e")
-  (lambda (e)
-    (format %c "    return s7_make_integer(sc, static_cast<uint64_t>(e->type()));~%"))))
+(evalc
+ '(defcreg (ms-element-type) (1)
+    (pop-arg-goo ("Element*" "e") ())
+    (s7_make_integer sc "static_cast<uint64_t>(e->type())")))
 
 (def-goo-setters-goo "Ms::Element*" "element" "parent" "setParent" "Element*")
 
-(emit-cfun '(ms-score-selection-elements) 1 (list
-  '(emit-pop-arg-goo "MasterScore*" "score")
-  (lambda (e)
-   (format %c "
-    const void *elms = &(score->selection().elements());~% "))
-  '(emit-return-goo "elms" 0)))
+(evalc
+ `(defcreg (ms-score-selection-elements) (1)
+    (pop-arg-goo ("MasterScore*" "score") ())
+    (raw "const void *elms = &(score->selection().elements());")
+    (return-goo ("elms" 0) ())))
 
-(emit-cfun '(ms-elements-getnext) 1 (list
-  '(emit-pop-arg-goo "QList<Element*>*" "elms")
-  (lambda (e)
-   (format %c "
-    int cnt = 0;
-    if (g->data && s7_is_integer(g->data)) {
-      cnt = s7_integer(g->data);
-      cnt++;
-    }
-    if (cnt >= elms->size()) { // no more elements
-        return s7_f(sc);
-    }
-    g->data = s7_make_integer(sc, cnt);
-    Element* elm = elms->at(cnt);~%"))
-  '(emit-return-goo "elm" 0)))
+(evalc
+ `(defcreg (ms-elements-getnext) (1)
+    (pop-arg-goo ("QList<Element*>*" "elms") ())
+    (raw "int cnt = 0;")
+    (when (&& g->data (s7_is_integer g->data))
+      (raw "cnt = s7_integer(g->data);")
+      (raw "cnt++;"))
+    (if (>= cnt (elms->size)) ; no more elements
+      (return (s7_f sc)))
+    (raw "g->data = s7_make_integer(sc, cnt);")
+    (raw "Element* elm = elms->at(cnt);")
+    (return-goo ("elm" 0) ())))
 ;
 ; breath
 ;
-(emit-cfun '(ms-make-breath) 1 (list
-  '(emit-pop-arg-goo "MasterScore*" "score")
-  (lambda (e)
-   (format %c "
-    if (! score) return s7_f(sc);
-    Breath* b = new Breath(score);
-    uint64_t ty = 0;
-    return c_make_goo(sc, ty, s7_f(sc), b);
-"))))
+(evalc 
+ `(defcreg (ms-make-breath) (1)
+    (pop-arg-goo ("MasterScore*" "score") ())
+    (if (! score) (return (s7_f sc)))
+    (raw "Breath* b = new Breath(score);")
+    (raw "uint64_t ty = 0;")
+    (c_make_goo sc ty (s7_f sc) b)))
 
 (emit-cfun '(ms-make-editdata) 0 (lambda () (format %c "
     EditData* ed = new EditData(0);
