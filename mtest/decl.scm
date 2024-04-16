@@ -172,26 +172,24 @@ extern Ms::MTest* g_mtest;
     (raw "uint64_t ty = 0;")
     (c_make_goo sc ty (s7_f sc) b)))
 
-(emit-cfun '(ms-make-editdata) 0 (lambda () (format %c "
-    EditData* ed = new EditData(0);
-    ed->view = 0;
-    uint64_t ty = 0;
-    return c_make_goo(sc, ty, s7_f(sc), ed);
-")))
+(evalc
+ `(defcreg (ms-make-editdata) ()
+    (raw "EditData* ed = new EditData(0);")
+    (raw "ed->view = 0;")
+    (raw "uint64_t ty = 0;")
+    (c_make_goo sc ty (s7_f sc) ed)))
 
-(emit-cfun '(ms-editdata-dropelement) 2 (list
-  '(emit-pop-arg-goo)
-  '(emit-next-arg)
-  (lambda (e)
-   (format %c "
-    s = s7_car(args);
-    if (! c_is_goo(sc, s)) return s7_f(sc);
-    goo_t *g2 = (goo_t *)s7_c_object_value(s);
+(evalc
+ `(defcreg (ms-editdata-dropelement) (1 2)
+    (pop-arg-goo ("_") ())
+    (next-arg () ())
+    (raw "s = s7_car(args);")
+    (if (! (c_is_goo sc s)) (return (s7_f sc)))
+    (raw "goo_t *g2 = (goo_t *)s7_c_object_value(s);")
 
-    EditData* ed = (EditData*) g->cd;
-    ed->dropElement = (Element *) g2->cd;
-    return s7_t(sc);
-"))))
+    (raw "EditData* ed = (EditData*) g->cd;")
+    (raw "ed->dropElement = (Element *) g2->cd;")
+    (s7_t sc)))
 
 (emit-cfun '(ms-element-drop) 2 (list
   '(emit-pop-arg-goo)

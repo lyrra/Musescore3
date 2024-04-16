@@ -169,6 +169,8 @@
        (apply emit-pop-arg-sym (cdr ir)))
       ((pop-arg-goo)
        (apply emit-pop-arg-goo (cdr ir)))
+      ((next-arg)
+       (apply emit-next-arg (cdr ir)))
       ((return-goo)
        (emit-return-goo (cadr ir) (caddr ir)))
       ((raw)
