@@ -94,7 +94,7 @@
       (psyntax-load file)))
 
 (load-source-file "../s7/lib.scm")
-(load-source-file "comp.scm")
+(load-source-file "../scheme-cpp/comp.scm")
 (load-source-file "gen.scm")
 (load-source-file "types.scm")
 (load-source-file "ms-objects.scm")

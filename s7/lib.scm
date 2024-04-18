@@ -1,3 +1,8 @@
+;
+; polyfill library for s7
+; for running guile scheme on s7
+;
+
 (define-macro (match expr case1)
   (let ((lst (car case1))
         (body (cdr case1)))
@@ -36,13 +41,7 @@
 (define (filter proc lst)
   (map (lambda (x) (if (proc x) x (values))) lst))
 
-(define (assis? key lst)
-  (let ((pair (assoc key lst)))
-    (if pair
-        (cdr pair)
-        #f)))
-
-(define (assoc-set lst key val)
+(define (assq-set! lst key val)
   (let ((pair (assq key lst)))
     (cond
      (pair
@@ -50,6 +49,16 @@
       lst)
      (else
       (cons (cons key val) lst)))))
+
+;
+; extras
+;
+
+(define (assis? key lst)
+  (let ((pair (assoc key lst)))
+    (if pair
+        (cdr pair)
+        #f)))
 
 (define (list-nth lst index)
   (if (> (length lst) index)

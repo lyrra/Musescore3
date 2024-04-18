@@ -25,7 +25,7 @@
               methods)
     (format #t "registering object ~a~%" obj-name)
     (set! %objects
-          (assoc-set %objects obj-name
+          (assq-set! %objects obj-name
                      `((c-type . ,c-type)
                        (make-args . ,make-args)
                        (methods . ,methods))))))
@@ -346,7 +346,7 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
 (define (maybe-emit-args-check e)
   (unless (assis? 'argsPairKnow e)
     (format %c "    if (!s7_is_pair(args)) return s7_f(sc);~%")
-    (set! e (assoc-set e 'argsPairKnow #t)))
+    (set! e (assq-set! e 'argsPairKnow #t)))
   e)
 
 (define-syntax def-emit-pop-arg
@@ -383,13 +383,13 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
       (format %c "        if (!s7_is_~a(s)) return s7_f(sc);~%" 'stype)
       (format %c "        ~a = ~a;~%" cargname sconv)
       (format %c "    }~%")
-      (set! e (assoc-set e 's #t)))
+      (set! e (assq-set! e 's #t)))
      (else
       (set! e (maybe-emit-args-check e))
       (format %c "    ~as = s7_car(args);~%" (if (assis? 's e) "" "s7_pointer "))
       (format %c "    if (!s7_is_~a(s)) return s7_f(sc);~%" 'stype)
       (format %c "    ~a ~a = ~a;~%" ctype cargname sconv)
-      (set! e (assoc-set e 's #t))))
+      (set! e (assq-set! e 's #t))))
     e)))))))))
 
 (def-emit-pop-arg sym)
@@ -418,12 +418,12 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
       (format %c "        ~a~a = (goo_t *)s7_c_object_value(s);~%"
               (if (and (not cvarg) (assis? 'g e)) "" "goo_t* ") cvar)
       (unless cvarg
-        (set! e (assoc-set e 'g #t)))
+        (set! e (assq-set! e 'g #t)))
       (if (and type name)
           (format %c "    ~a = (~a) ~a->cd;~%"
                   name type cvar))
       (format %c "    }~%")
-      (set! e (assoc-set e 's #t)))
+      (set! e (assq-set! e 's #t)))
      (else
       (set! e (maybe-emit-args-check e))
       (format %c "
@@ -431,9 +431,9 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
     if (! c_is_goo(sc, s)) return s7_f(sc);
     ~a~a = (goo_t *)s7_c_object_value(s);
 " (if (assis? 's e) "" "s7_pointer ") (if (and (not cvarg) (assis? 'g e)) "" "goo_t* ") cvar)
-      (set! e (assoc-set e 's #t))
+      (set! e (assq-set! e 's #t))
       (unless cvarg
-        (set! e (assoc-set e 'g #t)))
+        (set! e (assq-set! e 'g #t)))
       (if (and type name)
           (format %c "    ~a ~a = (~a) ~a->cd;~%"
                   type name type cvar)))))
@@ -444,7 +444,7 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
     // emit-next-arg
     args = s7_cdr(args);
 ")
-  (assoc-set e 'argsPairKnow #f)) ; resets checked-if-end-of-list flag
+  (assq-set! e 'argsPairKnow #f)) ; resets checked-if-end-of-list flag
 
 (define (emit-maybe-next-arg args e)
   (format %c "
@@ -535,7 +535,7 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
 (define (emit-setenv args e)
   (let ((key (car args))
         (val (cadr args)))
-    (assoc-set e key val)))
+    (assq-set! e key val)))
 
 (define (emit-getenv e key)
   (cdr (assoc key e)))
