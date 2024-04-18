@@ -204,7 +204,7 @@
   (if (pair? expr)
       (let ((f (car expr)))
         (cond
-         ((memq f '(if switch return-goo)) #f)
+         ((memq f '(if cond switch return-goo)) #f)
          (else #t)))
       #t))
 

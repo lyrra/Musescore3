@@ -191,24 +191,22 @@ extern Ms::MTest* g_mtest;
     (raw "ed->dropElement = (Element *) g2->cd;")
     (s7_t sc)))
 
-(emit-cfun '(ms-element-drop) 2 (list
-  '(emit-pop-arg-goo)
-  '(emit-next-arg)
-  (lambda (e)
-   (format %c "
-    s = s7_car(args);
-    if (! c_is_goo(sc, s)) return s7_f(sc);
-    goo_t *g2 = (goo_t *)s7_c_object_value(s);
+(evalc
+ `(defcreg (ms-element-drop) (1 2)
+    (pop-arg-goo () ())
+    (next-arg () ())
+    (raw "s = s7_car(args);")
+    (if (! (c_is_goo sc s)) (return (s7_f sc)))
+    (raw "goo_t *g2 = (goo_t *)s7_c_object_value(s);")
 
-    Element *e = (Element*) g->cd;
-    EditData* ed = (EditData*) g2->cd;
-    if (e->acceptDrop(*ed)) {
-      e->drop(*ed);
-      return s7_t(sc);
-    } else {
-      return s7_f(sc);
-    }
-"))))
+    (raw "Element *e = (Element*) g->cd;")
+    (raw "EditData* ed = (EditData*) g2->cd;")
+    (cond
+     ((e->acceptDrop *ed)
+      (e->drop *ed)
+      (s7_t sc))
+     (else
+      (s7_f sc)))))
 
 ;
 ; hairpin
