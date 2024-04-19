@@ -2,16 +2,40 @@
 ;;;; scheme-pseudo-code to c compiler
 ;;;;
 
-(define (%string-join sep lst cnt acc)
+(define (c-ify-name sname)
+  (let ((str "")
+        (sname (symbol->string sname)))
+    (do ((i 0 (+ 1 i)))
+        ((>= i (string-length sname)))
+      (set! str (format #f "~a~a" str
+                        (let ((s (substring sname i (+ i 1))))
+                          (if (string=? s "-") "_" s)))))
+    str))
+
+(define (%string-interleave inter lst cnt acc)
   (if (null? lst)
       acc
-      (%string-join sep (cdr lst) (+ 1 cnt) (format #f "~a~a~a"
-                                                    acc
-                                                    (if (> cnt 0) sep "")
-                                                    (car lst)))))
+      (%string-interleave inter (cdr lst) (+ 1 cnt) (format #f "~a~a~a"
+                                                            acc
+                                                            (if (> cnt 0) inter "")
+                                                            (car lst)))))
 
-(define (string-join sep lst)
-  (%string-join ", " lst 0 ""))
+(define (string-interleave lst int)
+  (%string-interleave int lst 0 ""))
+
+
+; auxiliary stuff
+(define %comp-export '())
+
+(define (comp-begin)
+  (set! %comp-export '()))
+
+(define %registered-primitives '())
+
+(define (comp-register-primitive name fun)
+  (set! %registered-primitives
+        (cons (cons name fun)
+              %registered-primitives)))
 
 ;;;
 ;;; intermediate-representation
@@ -96,9 +120,9 @@
   (let* ((scname (car ir))
          (args (cadr ir))
          (body (caddr ir)))
-    (set! %export-to-scheme2
+    (set! %comp-export
           (cons (list (car scname) (cadr scname) (length args) 0)
-                %export-to-scheme2))
+                %comp-export))
     (format %h "s7_pointer ~a (s7_scheme *sc, s7_pointer args);~%" (cadr scname))
     (format %c "s7_pointer ~a (s7_scheme *sc, s7_pointer args)~%{~%" (cadr scname))
     (for-each (lambda (line)
@@ -112,10 +136,10 @@
          (rett (caddr ir))
          (body (cadddr ir)))
     (format %h "~a ~a(" rett (cadr scname))
-    (format %h "~a" (string-join ", " args))
+    (format %h "~a" (string-interleave args ", "))
     (format %h ");~%")
     (format %c "~%~a ~a(" rett (cadr scname))
-    (format %c "~a" (string-join ", " args))
+    (format %c "~a" (string-interleave args ", "))
     (format %c ")~%{~%")
     (for-each (lambda (line)
                 (emit-c line))
@@ -165,25 +189,23 @@
       ((==) (emit-infix '== (cdr ir)))
       ((&&) (emit-infix '&& (cdr ir)))
       ((>=) (emit-infix '>= (cdr ir)))
-      ((pop-arg-sym)
-       (apply emit-pop-arg-sym (cdr ir)))
-      ((pop-arg-goo)
-       (apply emit-pop-arg-goo (cdr ir)))
-      ((next-arg)
-       (apply emit-next-arg (cdr ir)))
-      ((return-goo)
-       (emit-return-goo (cadr ir) (caddr ir)))
       ((raw)
        (emit-raw (cdr ir)))
-      (else ; c-call
-       (format %c "~a(" (car ir))
-       (let ((n 0))
-         (for-each (lambda (arg)
-                     (if (> n 0) (format %c ", "))
-                     (emit-c arg)
-                     (set! n (+ n 1)))
-                   (cdr ir)))
-       (format %c ")"))))
+      (else
+       (cond
+        ; registered functions
+        ((assq (car ir) %registered-primitives)
+         (let ((fun (cdr (assq (car ir) %registered-primitives))))
+           (fun (cdr ir) '())))
+        (else ; c-call
+         (format %c "~a(" (car ir))
+         (let ((n 0))
+           (for-each (lambda (arg)
+                       (if (> n 0) (format %c ", "))
+                       (emit-c arg)
+                       (set! n (+ n 1)))
+                     (cdr ir)))
+         (format %c ")"))))))
    (else
     (format %c "~a" ir))))
 
@@ -256,6 +278,7 @@
 ;;;
 
 (define (evalc-comp expr)
+  (comp-begin)
   (cond
    ((pair? expr)
     (case (car expr)

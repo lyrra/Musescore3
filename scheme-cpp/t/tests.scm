@@ -70,58 +70,154 @@
   "s7_pointer c_fun_name (s7_scheme *sc, s7_pointer args);\n"
   "s7_pointer c_fun_name (s7_scheme *sc, s7_pointer args)\n{\n  return some_c_fun(some-arg, 0, s7_f(sc), nullptr);\n}\n\n")
 
-(deftest 'maps3
-  (let* ((typename "Foo")
-         (types '((s-1 CONST_1) (s-2 CONST_2)))
-         (c-type "FooType")
-         (sname (string->symbol (format #f "to-string"))))
-    (evalc
-      `(defcfun (,sname) (,(format #f "Ms::~a x" c-type)) "const char*"
-         ,(append
-          '(switch (x))
-          (append
-           (map (lambda (lst)
-                  (match lst
-                    ((sname cname )
-                     (list 'case cname
-                           (list 'return (format #f "\"~a-~a\"" typename sname))))))
-                types)
-           (list '(default (return "\"\"")))))))
-
-    ;----- 
-    (evalc
-      `(defcfun (,sname) (,(format #f "Ms::~a x" c-type)) "const char*"
-         ,@(append
-           (map (lambda (lst)
-                  (match lst
-                    ((sname cname)
-                     `(if (== x ,cname)
-                          (return ,(format #f "\"~a\"" cname))))))
-                types)
-               (list "\"ERROR-UNKNOWN\""))))
-    ;----- 
-
-    ; emit c-function that takes an string and returns an object of a specific type
-    (let ((sname (string->symbol (format #f "string_to_~a" typename))))
-      (evalc
-       (append
-          `(defcfun (,sname) ("const char *name") ,(format #f "Ms::~a" c-type))
-          (map (lambda (lst)
-                   (match lst
-                     ((sname cname )
-                      `(if ,(format #f "!strcmp(name, \"~a-~a\")" typename sname)
-                           (return ,cname)))))
-                 types)
-           (list (format #f "(Ms::~a)0" c-type))))))
-  "const char* to_string(Ms::FooType x);\nconst char* to_string(Ms::FooType x);\nMs::FooType string_to_Foo(const char *name);\n"
-  "\nconst char* to_string(Ms::FooType x)\n{\nswitch (x) {\n  case CONST_1:\n  return \"Foo-s-1\";\n  case CONST_2:\n  return \"Foo-s-2\";\n  default:\n    return \"\";\n\n}\n}\n\n\nconst char* to_string(Ms::FooType x)\n{\nif (x == CONST_1) {\n  return \"CONST_1\";\n}\nif (x == CONST_2) {\n  return \"CONST_2\";\n}\n  return \"ERROR-UNKNOWN\";\n}\n\n\nMs::FooType string_to_Foo(const char *name)\n{\nif (!strcmp(name, \"Foo-s-1\")) {\n  return CONST_1;\n}\nif (!strcmp(name, \"Foo-s-2\")) {\n  return CONST_2;\n}\n  return (Ms::FooType)0;\n}\n\n")
+(deftest 'switch
+  (evalc
+   `(defcfun (f-switch) (1) "const char*"
+      (switch (x)
+        (case foo "foo")
+        (case bar 1)
+        (default 2))))
+  "const char* f_switch(1);\n"
+  "\nconst char* f_switch(1)\n{\nswitch (x) {\n  case foo:\nfoo  case bar:\n1  default:\n  2\n}\n}\n\n")
 
 (deftest 'enum
   (evalc
     `(defcenum GOO_TYPE "uint64_t"
-               ,(append %goo-types
+               ,(append '()
                         (map (lambda (type)
-                               (symbol->string (car type)))
-                             (cdr (assoc 'ElementType %c-types))))))
-  "enum class GOO_TYPE : uint64_t {\n  NIL = 0,\n  CHORD,\n  NOTE,\n  ElementType-MAXTYPE,\n  ElementType-VOLTA,\n  ElementType-SYMBOL,\n  ElementType-STAFF,\n  ElementType-BRACKET_ITEM,\n  END\n};\n"
+                               (symbol->string type))
+                             '(a b c)))))
+  "enum class GOO_TYPE : uint64_t {\n  NIL = 0,\n  a,\n  b,\n  c,\n  END\n};\n"
   "")
+
+(deftest 'pop-arg-goo
+  (evalc
+   `(defcreg (f-pop-arg-goo) (1)
+      (x)
+      (pop-arg-goo ("Void*" "arg") ())
+      (y)))
+  "s7_pointer f_pop_arg_goo (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_pop_arg_goo (s7_scheme *sc, s7_pointer args)\n{\nx()\n    // emit-pop-arg-goo () ((Void* arg)) => g\n    a();\n    pop_arg();\n    b();\n  return y();\n}\n\n")
+
+(deftest 'pop-arg-goo-env
+  (evalc
+   `(defcreg (f-pop-arg-goo) (1)
+      (x)
+      (pop-arg-goo ("Void*" "arg") ()) ; modifies environment
+      (pop-arg-goo ("Void*" "arg") ()) ; pop_arg() call should be pruned if env is set
+      (y)))
+  "s7_pointer f_pop_arg_goo (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_pop_arg_goo (s7_scheme *sc, s7_pointer args)\n{\nx()\n    // emit-pop-arg-goo () ((Void* arg)) => g\n    a();\n    pop_arg();\n    b();\n\n    // emit-pop-arg-goo () ((Void* arg)) => g\n    a();\n    pop_arg();\n    b();\n  return y();\n}\n\n")
+
+(deftest 'defcreg-raw
+  (evalc
+   `(defcreg (f_raw) (1)
+      (raw "const char *symname = s7_symbol_name(s7_car(args));")
+      (raw "uint64_t ty;")
+      (raw "Element* e = NULL;")
+      ,(append
+        '(cond)
+        (map (lambda (type)
+               (let ((name (car type))
+                     (cname (cadr type)))
+                 (list `(! (strcasecmp symname ,(format #f "\"~a\"" name)))
+                       (list 'raw (format #f "e = Element::create(~a, g_mtest->score);" cname))
+                       (list 'raw (format #f "ty = static_cast<uint64_t>(GOO_TYPE::~a);"
+                                          (symbol->string name))))))
+             '((A "a") (B b)))
+        (list
+         (list 'else
+               '(raw "error(\"ERROR: UNRECOGNIZED ELEMENT TYPE\");")
+               '(return (s7_nil sc)))))))
+  "s7_pointer f_raw (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_raw (s7_scheme *sc, s7_pointer args)\n{\n  const char *symname = s7_symbol_name(s7_car(args));\n  uint64_t ty;\n  Element* e = NULL;\n  if (!(strcasecmp(symname, \"A\"))) {\n    e = Element::create(a, g_mtest->score);\n    ty = static_cast<uint64_t>(GOO_TYPE::A);\n  } else if (!(strcasecmp(symname, \"B\"))) {\n    e = Element::create(b, g_mtest->score);\n    ty = static_cast<uint64_t>(GOO_TYPE::B);\n  } else {\n    error(\"ERROR: UNRECOGNIZED ELEMENT TYPE\");\n    return s7_nil(sc);\n  }\n}\n\n")
+
+(deftest 'defcreg-if-1
+  (evalc
+   `(defcreg (f-if-1) (1)
+      (if (f) (a))
+      (c)))
+  "s7_pointer f_if_1 (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_if_1 (s7_scheme *sc, s7_pointer args)\n{\nif (f()) {\na()}\n  return c();\n}\n\n")
+
+(deftest 'defcreg-if-2
+  (evalc
+   `(defcreg (f-if-2) (1)
+      (if (f) (a) (b))
+      (c)))
+  "s7_pointer f_if_2 (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_if_2 (s7_scheme *sc, s7_pointer args)\n{\nif (f()) {\na()} else {\nb()}\n  return c();\n}\n\n")
+
+(deftest 'defcreg-if-1-tcp
+  (evalc
+   `(defcreg (f-if-1-tcp) (1)
+      (if (f) (a))))
+  "s7_pointer f_if_1_tcp (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_if_1_tcp (s7_scheme *sc, s7_pointer args)\n{\nif (f()) {\na()}\n}\n\n")
+
+(deftest 'defcreg-if-2-tcp
+  (evalc
+   `(defcreg (f-if-2-tcp) (1)
+      (if (f) (a) (b))))
+  "s7_pointer f_if_2_tcp (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_if_2_tcp (s7_scheme *sc, s7_pointer args)\n{\nif (f()) {\na()} else {\nb()}\n}\n\n")
+
+(deftest 'defcreg-when-1
+  (evalc
+   `(defcreg (f-when-1) (1)
+      (when (f) (a))
+      (c)))
+  "s7_pointer f_when_1 (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_when_1 (s7_scheme *sc, s7_pointer args)\n{\nif (f()) {\n    a()}\n  return c();\n}\n\n")
+
+(deftest 'defcreg-when-2
+  (evalc
+   `(defcreg (f-when-2) (1)
+      (when (f) (a) (b))
+      (c)))
+  "s7_pointer f_when_2 (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_when_2 (s7_scheme *sc, s7_pointer args)\n{\nif (f()) {\n    a()    b()}\n  return c();\n}\n\n")
+
+(deftest 'defcreg-when-1-tcp
+  (evalc
+   `(defcreg (f-when-1-tcp) (1)
+      (when (f) (a))))
+  "s7_pointer f_when_1_tcp (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_when_1_tcp (s7_scheme *sc, s7_pointer args)\n{\n  return if (f()) {\n    a()}\n;\n}\n\n")
+
+(deftest 'defcreg-when-2-tcp
+  (evalc
+   `(defcreg (f-when-2-tcp) (1)
+      (when (f) (a) (b))))
+  "s7_pointer f_when_2_tcp (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_when_2_tcp (s7_scheme *sc, s7_pointer args)\n{\n  return if (f()) {\n    a()    b()}\n;\n}\n\n")
+
+(deftest 'defcreg-if-infix-andand
+  (evalc
+   `(defcreg (f_infix_andand) ()
+      (if (&& (c1) (c2)) (a))))
+  "s7_pointer f_infix_andand (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_infix_andand (s7_scheme *sc, s7_pointer args)\n{\nif (c1() && c2()) {\na()}\n}\n\n")
+
+(deftest 'defcreg-nextarg
+  (evalc
+   `(defcreg (f-nextarg) (1 2)
+      (pop-arg-goo ("_") ())
+      (next-arg () ())
+      (s7_t sc)))
+  "s7_pointer f_nextarg (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer f_nextarg (s7_scheme *sc, s7_pointer args)\n{\n\n    // emit-pop-arg-goo () ((_)) => g\n    a();\n    pop_arg();\n    b();\n\n    // emit-next-arg\n    args = s7_cdr(args);\n  return s7_t(sc);\n}\n\n")
+
+; ensure we can return a value from cond in tail-call-position
+; ensure usage of multiple statements in cond
+(deftest 'defcreg-cond-return
+  (evalc
+   `(defcreg (ms-element-drop) ()
+      (cond
+       ((c1)
+        (a)
+        (s7_t sc))
+       (else
+        (s7_f sc)))))
+  "s7_pointer ms_element_drop (s7_scheme *sc, s7_pointer args);\n"
+  "s7_pointer ms_element_drop (s7_scheme *sc, s7_pointer args)\n{\n  if (c1()) {\n  a()  s7_t(sc)  } else {\n  s7_f(sc)  }\n}\n\n")

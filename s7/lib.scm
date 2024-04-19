@@ -50,6 +50,17 @@
      (else
       (cons (cons key val) lst)))))
 
+(define (%string-join sep lst cnt acc)
+  (if (null? lst)
+      acc
+      (%string-join sep (cdr lst) (+ 1 cnt) (format #f "~a~a~a"
+                                                    acc
+                                                    (if (> cnt 0) sep "")
+                                                    (car lst)))))
+
+(define (string-join lst sep)
+  (%string-join sep lst 0 ""))
+
 ;
 ; extras
 ;
