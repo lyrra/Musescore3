@@ -155,18 +155,6 @@
                     (emit-c-stend)))
               ir)))
 
-(define (emit-c-reg ir)
-  (let* ((scname (car ir))
-         (args (cadr ir))
-         (body (caddr ir)))
-    (set! %comp-export
-          (cons (list (car scname) (cadr scname) (length args) 0)
-                %comp-export))
-    (format %h "s7_pointer ~a (s7_scheme *sc, s7_pointer args);~%" (cadr scname))
-    (format %c "s7_pointer ~a (s7_scheme *sc, s7_pointer args)~%{~%" (cadr scname))
-    (emit-c-body body)
-    (format %c "}~%~%")))
-
 (define (emit-c-fun ir)
   (let* ((scname (car ir))
          (args (cadr ir))
@@ -220,8 +208,6 @@
        (emit-c-enum (cdr ir)))
       ((defcfun)
        (emit-c-fun (cdr ir)))
-      ((defcreg)
-       (emit-c-reg (cdr ir)))
       ((return)
        (emit-c-return (cdr ir)))
       ((begin)
@@ -269,27 +255,12 @@
                line)
              body))))
 
-(define (ir-comp-creg names args body)
-  (let* ((sname (car names))
-         (cname (c-ify-name sname)))
-    `(defcreg (,sname ,cname) ,args
-       ,(map (lambda (line)
-               line)
-             body))))
-
 (define (comp-cfun expr)
   (let ((names (car expr))
         (args (cadr expr))
         (rett (caddr expr))
         (body (cdddr expr)))
     (let ((ir (ir-comp-cfun names args rett body)))
-      ir)))
-
-(define (comp-creg expr)
-  (let ((names (car expr))
-        (args (cadr expr))
-        (body (cddr expr)))
-    (let ((ir (ir-comp-creg names args body)))
       ir)))
 
 ;;;
@@ -304,9 +275,7 @@
       ((defcenum)
        (comp-cenum (cdr expr)))
       ((defcfun)
-       (comp-cfun (cdr expr)))
-      ((defcreg)
-       (comp-creg (cdr expr)))))))
+       (comp-cfun (cdr expr)))))))
 
 (define (evalc expr)
   ; compile expression into immediate-representation

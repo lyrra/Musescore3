@@ -10,10 +10,43 @@
 
 (define %objects '())
 
+(define %compile-env '())
+
+(define-syntax defcompile
+  (syntax-rules ()
+    ((_ . body)
+     (begin
+       (set! %compile-env '())
+       (evalc . body)))))
+
+(define (compile-register-cfun sname num-req-args num-opt-args body)
+  (format #t "compile-register-cfun sname=~s  num-req-args=~s  snum-opt-args=~s~%"
+          sname num-req-args num-opt-args)
+  (let ((cname (c-ify-name sname)))
+    (set! %export-to-scheme2
+          (cons (list sname cname num-req-args num-opt-args)
+                %export-to-scheme2))
+    (append `(defcfun (,sname ,cname)
+               ("s7_scheme *sc" "s7_pointer args")
+               "s7_pointer")
+            body)))
+
+(define-syntax defcreg
+  (syntax-rules ()
+    ((_ (sname) (num-req-args num-opt-args) . body)
+     (compile-register-cfun sname num-req-args num-opt-args
+                            (list . body)))
+    ((_ (sname) (num-req-args) . body)
+     (compile-register-cfun sname num-req-args 0
+                            (list . body)))
+    ((_ (sname) () . body)
+     (compile-register-cfun sname 0 0
+                            (list . body)))))
+
 (define-syntax define-object
   (syntax-rules ()
-      ((k objname . args)
-       (register-object 'objname 'args))))
+    ((k objname . args)
+     (register-object 'objname 'args))))
 
 (define (register-object obj-name args);  c-type make-args methods)
   (let ((c-type  (cadr (assq 'c-type args)))
@@ -33,7 +66,7 @@
 (define-syntax emit-stat-fmt
   (syntax-rules ()
     ((_ . args)
-     `(emit-stat ,(format #f . args)))))
+     (format #f . args))))
 
 (define (emit-registered-object pair)
   (let* ((name (car pair))
@@ -83,62 +116,65 @@
           #f
           (car ss))))
     (define (emit-code-get-args required-args optional-args)
+      (append
+       (list 'begin '(raw "// ---- emit-code-get-args ----"))
       (let ((n 0))
         (cond
          ((null? optional-args)
           (map (lambda (arg)
                  (set! n (+ n 1))
                  (let ((type (car arg)))
-                   (list '(emit-next-arg)
+                   (list 'begin
+                    (emit-next-arg)
                     (cond
                      ((string? type) ; goo type
-                      `(emit-pop-arg-goo ,(if (memq 'stack arg) (format #f "~a*" type) type)
-                                         ,(format #f "x~a" n)))
-                     ((eq? 'bool type) `(emit-pop-arg-bool ,(format #f "x~a" n)))
-                     ((eq? 'int  type) `(emit-pop-arg-int  ,(format #f "x~a" n)))
-                     ((eq? 'real type) `(emit-pop-arg-real ,(format #f "x~a" n)))
+                      (emit-pop-arg-goo `(,(if (memq 'stack arg) (format #f "~a*" type) type)
+                                          ,(format #f "x~a" n))))
+                     ((eq? 'bool type) (emit-pop-arg-bool (list (format #f "x~a" n))))
+                     ((eq? 'int  type) (emit-pop-arg-int  (list (format #f "x~a" n))))
+                     ((eq? 'real type) (emit-pop-arg-real (list (format #f "x~a" n))))
                      ((eq? 'sym type)
                       (let ((conv (cadr arg))
                             (stype (typeinfo-meta-get (cadr arg) 'c-type-cons)))
-                        (list
-                         `(emit-pop-arg-sym ,(format #f "t~a" n))
-                         (emit-stat-fmt "Ms::~a x~a = string_to_~a(t~a)" stype n conv n))))
+                        (list 'begin
+                         (emit-pop-arg-sym (list (format #f "t~a" n)))
+                         (list 'raw (format #f "Ms::~a x~a = string_to_~a(t~a)" stype n conv n)))))
                      (else (error "unknown arg-type" type))))))
                required-args))
          (else
-          (list
+           (append
            ; emit all required arguments
            (map (lambda (arg)
                   (set! n (+ n 1))
-                  (list
-                   '(emit-next-arg)
+                  (list 'begin
+                   (emit-next-arg)
                    (case (car arg)
-                     ((int) `(emit-pop-arg-int ,(format #f "x~a" n)))
+                     ((int) (emit-pop-arg-int (list (format #f "x~a" n))))
                      ((sym)
                       (let ((stype (cadr arg)))
-                        (list
-                         `(emit-pop-arg-sym ,(format #f "t~a" n))
-                         (emit-stat-fmt "Ms::~a x~a = string_to_~a(t~a)" stype n stype n))))
-                     (else `(emit-pop-arg-goo ,(car arg) ,(format #f "x~a" n))))))
+                        (list 'begin
+                         (emit-pop-arg-sym (list (format #f "t~a" n)))
+                         (list 'raw (format #f "Ms::~a x~a = string_to_~a(t~a)" stype n stype n)))))
+                     (else (emit-pop-arg-goo (list (car arg) (format #f "x~a" n)))))))
                 required-args)
-           (if (> (length optional-args) 0)
-               (emit-stat-fmt "bool moreArgs = true")
-               `(emit-noop))
-           (emit-stat-fmt "int numArgs = ~a" (length required-args))
+           (list (if (> (length optional-args) 0)
+                     (list 'raw (format #f "bool moreArgs = true"))
+                     (emit-noop)))
+           (list (list 'raw (format #f "int numArgs = ~a" (length required-args))))
            ; emit optional arguments
            (map (lambda (arg)
                   (set! n (+ n 1))
-                  (list
-                   '(emit-maybe-next-arg)
+                  (list 'begin
+                   (emit-maybe-next-arg)
                    (case (car arg)
-                     ((int) `(emit-pop-arg-int ,(format #f "x~a" n) #t))
+                     ((int) (emit-pop-arg-int (list (format #f "x~a" n) #t)))
                      ((sym)
                       (let ((stype (cadr arg)))
-                        (list
-                         `(emit-pop-arg-sym ,(format #f "t~a" n) #t)
-                         (emit-stat-fmt "Ms::~a x~a = string_to_~a(t~a)" stype n stype n))))
-                     (else `(emit-pop-arg-goo ,(car arg) ,(format #f "x~a" n) #f #t)))))
-                optional-args))))))
+                        (list 'begin
+                         (emit-pop-arg-sym (list (format #f "t~a" n) #t))
+                         (list 'raw (format #f "Ms::~a x~a = string_to_~a(t~a)" stype n stype n)))))
+                     (else (emit-pop-arg-goo (list (car arg) (format #f "x~a" n) #f #t))))))
+                optional-args)))))))
     (define (emit-code-funcall info cname cargs required-args optional-args rets)
       (if (null? optional-args)
           (let* ((methtype (cond
@@ -164,11 +200,11 @@
              ((not methtype) ; dont care about return value
               (emit-stat-fmt "~a" methexpr))
              ((memq 'stack rets) ; stack-allocated return
-              (list
-               (emit-stat-fmt "~a tsa = ~a /* stack-alloc */" cmethtype methexpr)
+              (list 'begin
+               (list 'raw (format #f "~a tsa = ~a /* stack-alloc */" cmethtype methexpr))
                ; would be nicer to just do malloc(sizeof(...)), but we might need to run constructors
                ; and also c++ knows how to move an compound object
-               (emit-stat-fmt "~a* r = new ~a(tsa)" cmethtype cmethtype)))
+               (list 'raw (format #f "~a* r = new ~a(tsa)" cmethtype cmethtype))))
              (else
               (emit-stat-fmt "~a r = ~a" cmethtype methexpr))))
           (list ; emit required and optional args
@@ -203,7 +239,7 @@
               ((real) '(emit-stat "return s7_make_real(sc, r)"))
               ((bool) '(emit-stat "return s7_make_boolean(sc, r)"))
               (else
-               `(emit-return-goo "r" ,(format #f "static_cast<uint64_t>(~a)" gootype))))
+               (emit-return-goo "r" (format #f "static_cast<uint64_t>(~a)" gootype))))
             '(emit-stat "return s7_t(sc)"))))
     (define (emit-method-nil methname methargs)
       (let ((sname (string->symbol (format #f "ms-~a-~a" name methname)))
@@ -212,7 +248,7 @@
                         (format #f "o->~a()" methname)
                         (car methargs))))
         (emit-cfun `(,sname) 1 (list
-          `(emit-pop-arg-goo ,(format #f "~a*" c-type) "o")
+          `(emit-pop-arg-goo (,(format #f "~a*" c-type) "o"))
           (lambda (e) (format %c "
     ~a;
     return s7_t(sc);~%" methexpr))))))
@@ -225,22 +261,25 @@
              (info (if (pair? (cdr methargs)) (cddr methargs) #f))
              (cname (if (pair? methpair) (cadr methpair) methpair))
              (sname (get-method-sname-get methpair)))
-       (format #t "emit-method-get ~s~%" methpair)
-       (emit-cfun (if cname `(,sname) `(,sname)) (+ 1 (length cargs)) (list
-         `(emit-pop-arg-goo ,(format #f "~a*" c-type) "o")
-         (emit-code-get-args cargs '())
-         (emit-code-funcall info cname cargs '() '() rets)
-         (emit-code-return rets)))))
+       (format #t "~%emit-method-get ~s [~s ~s] ~s~%" methpair sname cname cargs)
+       (defcompile
+         (defcreg (sname) ((+ 1 (length cargs)))
+           (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+           (emit-code-get-args cargs '())
+           (emit-code-funcall info cname cargs '() '() rets)
+           (emit-code-return rets)))))
     (define (emit-method-set methpair methargs)
+      (format #t "emit-method-set ~s~%" methpair)
       (let* ((cargs (car methargs)) ; arguments to c-function
              (info (if (pair? (cdr methargs)) (cddr methargs) '()))
              (cname (if (pair? methpair) (cadr methpair) methpair))
              (sname (get-method-sname-get methpair)))
-       (emit-cfun (if cname `(,sname) `(,sname)) (+ 1 (length cargs)) (list
-         `(emit-pop-arg-goo ,(format #f "~a*" c-type) "o")
-         (emit-code-get-args cargs '())
-         (emit-code-funcall info cname cargs '() '() #f)
-         '(emit-stat "return s")))))
+        (defcompile
+          (defcreg (sname) ((+ 1 (length cargs)))
+            (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+            (emit-code-get-args cargs '())
+            (emit-code-funcall info cname cargs '() '() #f)
+            's))))
     (define (emit-method-get/set methname methargs)
       (let* ((rets (car methargs))
              (cargs (list rets))
@@ -258,42 +297,52 @@
              (sname-set (string->symbol (format #f "ms-~a-~a" name methname-set)))
              (cname-get (string->symbol (format #f "ms_~a_~a" name methname)))
              (cname-set (string->symbol (format #f "ms_~a_~a" name methname-set))))
+        (format #t "emit-method-get/set x1~%")
         (set! %export-to-scheme-getset2 (cons (list sname-get cname-get sname-set cname-set)
                                               %export-to-scheme-getset2))
         ; emit getter
-        (emit-cfun `(,sname-get) '(1 no-register) (list
-          `(emit-pop-arg-goo ,(format #f "~a*" c-type) "o")
-          (emit-code-funcall info methname '() '() '() rets)
-          (emit-code-return rets)))
+        (defcompile
+          (defcreg (sname-get) ((+ 1 (length cargs)))
+             (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             (emit-code-funcall info methname '() '() '() rets)
+             (emit-code-return rets)))
+        (format #t "emit-method-get/set x2~%")
         ; emit setter
-        (emit-cfun `(,sname-set) '(1 no-register) (list
-          `(emit-pop-arg-goo ,(format #f "~a*" c-type) "o")
-          (emit-code-get-args cargs '())
-          ; by tacking on avoid-ref, we mean that the function should not be referenced
-          (emit-code-funcall (cons 'avoid-ref info) methname-set
-                             ; if the c-function parameter is a reference
-                             ; we need to dereference the arguments (it is a pointer [we only deal in pointers])
-                             (if (memq 'ref info)
-                                 (map (lambda (arg) (cons 'deref arg)) cargs)
-                                 cargs)
-                             '() '() #f)
-          '(emit-stat "return s")))))
+        (defcompile
+          (defcreg (sname-set) ((+ 1 (length cargs)))
+             (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             (emit-code-get-args cargs '())
+             ; by tacking on avoid-ref, we mean that the function should not be referenced
+             (emit-code-funcall (cons 'avoid-ref info) methname-set
+                                 ; if the c-function parameter is a reference
+                                 ; we need to dereference the arguments (it is a pointer [we only deal in pointers])
+                                 (if (memq 'ref info)
+                                     (map (lambda (arg) (cons 'deref arg)) cargs)
+                                     cargs)
+                                 '() '() #f)
+             's))))
     (define (emit-method-apply methpair methargs)
+      (format #t "emit-method-apply ~s~%" methpair)
       (let* ((cargs (car methargs))
              (info (cdr methargs))
              (cname (if (pair? methpair) (cadr methpair) methpair))
              (sname (get-method-sname-get methpair))
              (required-args (make-required-args cargs))
-             (optional-args (make-optional-args cargs)))
-        (emit-cfun `(,sname) `((req-args . ,(+ 1 (length required-args)))
-                               (opt-args . ,(length optional-args)))
-          (list `(emit-pop-arg-goo ,(format #f "~a*" c-type) "o")
-                (emit-code-get-args required-args optional-args)
-                (emit-code-funcall info cname cargs required-args optional-args #f)
-                (emit-code-return #f)))))
+             (optional-args (make-optional-args cargs))
+             (len-required-args (length required-args))
+             (len-optional-args (length optional-args)))
+        (defcompile
+          (defcreg (sname) ((+ 1 len-required-args) len-optional-args)
+             ;`((req-args . ,(+ 1 (length required-args)))
+             ;(opt-args . ,(length optional-args)))
+             (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             (emit-code-get-args required-args optional-args)
+             (emit-code-funcall info cname cargs required-args optional-args #f)
+             (emit-code-return #f)))))
     (for-each (lambda (meth)
                 (match1 meth
                  ((typeof methname . methargs)
+                  (format #t "emit method ~s of type: ~s~%" methname typeof)
                   (case typeof
                    ((nil)     (emit-method-nil methname methargs))
                    ((set)     (emit-method-set methname methargs))
@@ -343,11 +392,12 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
 
 (define (emit-noop args e) e)
 
-(define (maybe-emit-args-check e)
-  (unless (assis? 'argsPairKnow e)
-    (format %c "    if (!s7_is_pair(args)) return s7_f(sc);~%")
-    (set! e (assq-set! e 'argsPairKnow #t)))
-  e)
+(define (maybe-emit-args-check)
+  (cond
+   ((not (assis? 'argsPairKnow %compile-env))
+    (set! %compile-env (assq-set! %compile-env 'argsPairKnow #t))
+    '(if (!(s7_is_pair args)) (return (s7_f sc))))
+   (else '(noop))))
 
 (define-syntax def-emit-pop-arg
   (lambda (x)
@@ -369,100 +419,89 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
                       (ctype (datum->syntax (syntax def-emit-pop-arg) (caddr lst)))
                       (sconv (datum->syntax (syntax def-emit-pop-arg) (cadddr lst))))
           (syntax
-          (define (fname args e)
+          (define (fname args)
   (let ((cargname (car args))
-        (optional (and (pair? (cdr args)) (cadr args))))
-    (format %c "~%    // ~a ~a ~a~%" 'fname cargname (if optional "optional" ""))
+        (optional (and (pair? (cdr args)) (cadr args)))
+        (s (assis? 's %compile-env)))
+    (set! %compile-env (assq-set! %compile-env 's #t))
     (cond
      (optional
-      (format %c "    ~a ~a;~%" ctype cargname)
-      (format %c "    if (moreArgs) {~%")
-      (set! e (maybe-emit-args-check e))
-      (format %c "        numArgs++;~%")
-      (format %c "        ~as = s7_car(args);~%" (if (assis? 's e) "" "s7_pointer "))
-      (format %c "        if (!s7_is_~a(s)) return s7_f(sc);~%" 'stype)
-      (format %c "        ~a = ~a;~%" cargname sconv)
-      (format %c "    }~%")
-      (set! e (assq-set! e 's #t)))
+      `(begin
+         (raw ,(format #f "~a ~a" ctype cargname))
+         (when moreArgs
+           ,(maybe-emit-args-check)
+           (raw "numArgs++")
+           (raw ,(format #f "~as = s7_car(args)" (if s "" "s7_pointer ")))
+           (if (! (,(string->symbol (format #f "s7_is_~a" 'stype)) s)) (return (s7_f sc)))
+           (raw ,(format #f "~a = ~a;~%" cargname sconv)))))
      (else
-      (set! e (maybe-emit-args-check e))
-      (format %c "    ~as = s7_car(args);~%" (if (assis? 's e) "" "s7_pointer "))
-      (format %c "    if (!s7_is_~a(s)) return s7_f(sc);~%" 'stype)
-      (format %c "    ~a ~a = ~a;~%" ctype cargname sconv)
-      (set! e (assq-set! e 's #t))))
-    e)))))))))
+      `(begin
+         ,(maybe-emit-args-check)
+         (raw ,(format #f "~as = s7_car(args)" (if s "" "s7_pointer ")))
+         (if (! (,(string->symbol (format #f "s7_is_~a" 'stype)) s)) (return (s7_f sc)))
+         (raw ,(format #f "~a ~a = ~a;~%" ctype cargname sconv))))))))))))))
 
 (def-emit-pop-arg sym)
 (def-emit-pop-arg int)
 (def-emit-pop-arg bool)
 (def-emit-pop-arg real)
 
-(define (emit-pop-arg-goo args e)
+(define (emit-pop-arg-goo args . rest)
   (let ((type (if (pair? args) (car args) #f))
         (name (if (and (pair? args) (pair? (cdr args))) (cadr args) #f))
         (cvar (if (and (pair? args) (pair? (cdr args)) (pair? (cddr args))) (caddr args) "g"))
         (cvarg (and (pair? args) (pair? (cdr args)) (pair? (cddr args))))
         (optional (list-nth args 3)))
-    (format %c "~%    // emit-pop-arg-goo ~a (~a) => ~a~a~%" name type cvar
-            (if optional " , optional arguments" ""))
-    (cond
-     (optional
-      (format %c "    ~a ~a;~%" (if (and (not cvarg) (assis? 'g e)) "" "goo_t* ") cvar)
-      (if (and type name)
-          (format %c "    ~a ~a;~%" type name))
-      (format %c "    if (moreArgs) {~%")
-      (set! e (maybe-emit-args-check e))
-      (format %c "        numArgs++;~%")
-      (format %c "        ~as = s7_car(args);~%" (if (assis? 's e) "" "s7_pointer "))
-      (format %c "        if (! c_is_goo(sc, s)) return s7_f(sc);~%")
-      (format %c "        ~a~a = (goo_t *)s7_c_object_value(s);~%"
-              (if (and (not cvarg) (assis? 'g e)) "" "goo_t* ") cvar)
+    (let ((cur-g (assis? 'g %compile-env))
+          (cur-s (assis? 's %compile-env)))
+      (set! %compile-env (assq-set! %compile-env 's #t))
       (unless cvarg
-        (set! e (assq-set! e 'g #t)))
-      (if (and type name)
-          (format %c "    ~a = (~a) ~a->cd;~%"
-                  name type cvar))
-      (format %c "    }~%")
-      (set! e (assq-set! e 's #t)))
-     (else
-      (set! e (maybe-emit-args-check e))
-      (format %c "
-    ~as = s7_car(args);
-    if (! c_is_goo(sc, s)) return s7_f(sc);
-    ~a~a = (goo_t *)s7_c_object_value(s);
-" (if (assis? 's e) "" "s7_pointer ") (if (and (not cvarg) (assis? 'g e)) "" "goo_t* ") cvar)
-      (set! e (assq-set! e 's #t))
-      (unless cvarg
-        (set! e (assq-set! e 'g #t)))
-      (if (and type name)
-          (format %c "    ~a ~a = (~a) ~a->cd;~%"
-                  type name type cvar)))))
-  e)
+        (set! %compile-env (assq-set! %compile-env 'g #t)))
+      (cond
+       (optional
+        `(begin
+           (raw "// ---- emit-pop-arg-goo ----")
+           (raw ,(format #f "    ~a ~a" (if (and (not cvarg) cur-g) "" "goo_t* ") cvar))
+           ,(if (and type name)
+               `(raw ,(format #f "  ~a ~a" type name))
+               '(noop))
+           (when moreArgs
+             ,(maybe-emit-args-check)
+             (raw "        numArgs++")
+             (raw ,(format #f "        ~as = s7_car(args);~%" cur-s))
+             (if (!(c_is_goo sc s)) (return (s7_f sc)))
+             (raw ,(format #f "        ~a~a = (goo_t *)s7_c_object_value(s)"
+                           (if (and (not cvarg) cur-g) "" "goo_t* ") cvar))
+             ,(if (and type name)
+                  `(raw ,(format #f "    ~a = (~a) ~a->cd" name type cvar))
+                  '(noop)))))
+       (else
+        `(begin
+           (raw "// ---- emit-pop-arg-goo ----")
+           ,(maybe-emit-args-check)
+           (raw ,(format #f" ~as = s7_car(args)" (if cur-s "" "s7_pointer ")))
+           (if (!(c_is_goo sc s)) (return (s7_f sc)))
+           (raw ,(format #f "~a~a = (goo_t *)s7_c_object_value(s)"
+                         (if (and (not cvarg) cur-g) "" "goo_t* ") cvar))
+           ,(if (and type name)
+               `(raw ,(format #f "    ~a ~a = (~a) ~a->cd"
+                              type name type cvar))
+               '(noop))))))))
 
-(define (emit-next-arg args e)
-  (format %c "
-    // emit-next-arg
-    args = s7_cdr(args);
-")
-  (assq-set! e 'argsPairKnow #f)) ; resets checked-if-end-of-list flag
+(define (emit-next-arg . args)
+  ; resets checked-if-end-of-list flag
+  (set! %compile-env (assq-set! %compile-env 'argsPairKnow #f))
+  '(raw  "args = s7_cdr(args)"))
 
-(define (emit-maybe-next-arg args e)
-  (format %c "
-    // emit-maybe-next-arg
-    if (moreArgs && s7_is_pair(args)) {
-        args = s7_cdr(args);
-    } else {
-        moreArgs = false;
-    }~%")
-  e)
+(define (emit-maybe-next-arg)
+  '(if (&& moreArgs (s7_is_pair args))
+       (raw "args = s7_cdr(args)")
+       (raw "moreArgs = false")))
 
-(define (emit-return-goo args e)
-  (let ((varname (car args))
-        (typename (cadr args)))
-    (format %c "
-    uint64_t ty = (uint64_t) ~a;
-    return c_make_goo(sc, ty, s7_f(sc), (void*) ~a);~%" typename varname)
-  e))
+(define (emit-return-goo varname init)
+  `(begin
+     (raw ,(format #f "uint64_t ty = (uint64_t) ~a" init))
+     (c_make_goo sc ty (s7_f sc) ,(format #f "(void*) ~a" varname))))
 
 (define (emit-stat args e)
   (format %c "    ~a;~%" (car args))
@@ -552,16 +591,18 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
 (define (def-goo-setters-goo objtype objname getname setname operandtype)
   (let ((sname-getname (string->symbol (format #f "ms-~a-~a" objname getname)))
         (sname-setname (string->symbol (format #f "ms-~a-~a" objname setname))))
-    (emit-cfun (list sname-getname) 1 (list
-      `(emit-pop-arg-goo ,objtype "o")
-      (lambda (e) (format %c "    ~a y = o->~a();~%" operandtype getname))
-      `(emit-return-goo "y" 0)))
-    (emit-cfun (list sname-setname) 2 (list
-      `(emit-pop-arg-goo ,objtype "o" "go")
-      '(emit-next-arg)
-      `(emit-pop-arg-goo ,operandtype "x" "gx")
-      (lambda (e) (format %c "    o->~a(x);
-    return s7_t(sc);" setname))))))
+    (defcompile
+      (defcreg (sname-getname) (1)
+         (emit-pop-arg-goo `(,objtype "o"))
+         `(raw ,(format #f "   ~a y = o->~a();~%" operandtype getname))
+         (emit-return-goo "y" 0)))
+    (defcompile
+      (defcreg (sname-setname) (2)
+         (emit-pop-arg-goo `(,objtype "o" "go"))
+         (emit-next-arg)
+         (emit-pop-arg-goo `(,operandtype "x" "gx"))
+         `(raw ,(format #f "    o->~a(x)" setname))
+         '(s7_t sc)))))
 
 (define-syntax def-goo-setters-bool
   (syntax-rules ()
@@ -673,9 +714,9 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
                         (match lst
                           ((sname cname idx props)
                            (list 'case cname
-                                 (list 'return (format #f "\"~a-~a\"" typename sname))))))
+                                 (format #f "\"~a-~a\"" typename sname)))))
                       types)
-                 (list '(default (return "\"\"")))))
+                 (list '(default "\"\""))))
               `,@(append
                (map (lambda (lst)
                       (match lst
