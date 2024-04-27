@@ -275,7 +275,8 @@ extern Ms::MTest* g_mtest;
       ((s7_is_symbol val)
        (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (string_to_ctype (s7_symbol_name val)))))
       (else
-       (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_integer val)))))))
+       (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_integer val)))))
+    '(s7_t sc)))
 
 ;
 ; emit code for ms-objects set/get, and register them to be exported to scheme

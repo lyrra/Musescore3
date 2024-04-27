@@ -66,7 +66,7 @@
 (define-syntax emit-stat-fmt
   (syntax-rules ()
     ((_ . args)
-     (format #f . args))))
+     (list 'raw (format #f . args)))))
 
 (define (emit-registered-object pair)
   (let* ((name (car pair))
@@ -207,17 +207,15 @@
                (list 'raw (format #f "~a* r = new ~a(tsa)" cmethtype cmethtype))))
              (else
               (emit-stat-fmt "~a r = ~a" cmethtype methexpr))))
-          (list ; emit required and optional args
+          (cons 'begin ; emit required and optional args
            (let ((lst '()))
              (do ((i (length required-args) (+ i 1)))
                  ((> i (+ (length required-args) (length optional-args))))
-               (set! lst (cons (list
-                                (emit-stat-fmt "if (numArgs == ~a) {" i)
-                                (emit-stat-fmt "~ao->~a(~a)"
-                                                     (if rets (format #f "~a r = " (car rets)) "")
-                                                     cname
-                                                     (make-callargs-max cargs i))
-                                (emit-stat-fmt "}"))
+               (set! lst (cons `(when (== numArgs ,i)
+                                  (raw ,(format #f "~ao->~a(~a)"
+                                                (if rets (format #f "~a r = " (car rets)) "")
+                                                cname
+                                                (make-callargs-max cargs i))))
                                lst)))
              lst))))
     (define (emit-code-return rets)
@@ -231,27 +229,29 @@
         (if rets
             (case (if rets (list-nth rets 0) #f)
               ((QString)
-               '(emit-stat "return s7_make_string(sc, strdup(qPrintable(r)))"))
+               '(return (s7_make_string sc (strdup (qPrintable r)))))
               ((sym)
-               (list (emit-stat-fmt "const char* t = ~a_to_string(r)" methtype)
-                     '(emit-stat "return s7_make_symbol(sc, t)")))
-              ((int)  '(emit-stat "return s7_make_integer(sc, r)"))
-              ((real) '(emit-stat "return s7_make_real(sc, r)"))
-              ((bool) '(emit-stat "return s7_make_boolean(sc, r)"))
+               (list 'begin
+                     (emit-stat-fmt "const char* t = ~a_to_string(r)" methtype)
+                     '(return (s7_make_symbol sc t))))
+              ((int)  '(return (s7_make_integer sc r)))
+              ((real) '(return (s7_make_real sc r)))
+              ((bool) '(return (s7_make_boolean sc r)))
               (else
                (emit-return-goo "r" (format #f "static_cast<uint64_t>(~a)" gootype))))
-            '(emit-stat "return s7_t(sc)"))))
+            '(return (s7_t sc)))))
     (define (emit-method-nil methname methargs)
       (let ((sname (string->symbol (format #f "ms-~a-~a" name methname)))
             (gootype 0)
             (methexpr (if (null? methargs)
                         (format #f "o->~a()" methname)
                         (car methargs))))
-        (emit-cfun `(,sname) 1 (list
-          `(emit-pop-arg-goo (,(format #f "~a*" c-type) "o"))
-          (lambda (e) (format %c "
-    ~a;
-    return s7_t(sc);~%" methexpr))))))
+        (defcompile
+         (defcreg (sname) (1)
+          '(raw "// ---- emit-method-get")
+          (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+          `(raw ,(format #f "~a" methexpr))
+          '(return (s7_t sc))))))
     (define (get-method-sname-get methpair)
       (let ((methname (if (pair? methpair) (car methpair) methpair)))
         (string->symbol (format #f "ms-~a-~a" name methname))))
@@ -265,6 +265,7 @@
        (defcompile
          (defcreg (sname) ((+ 1 (length cargs)))
            (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             '(raw "// ---- emit-method-get")
            (emit-code-get-args cargs '())
            (emit-code-funcall info cname cargs '() '() rets)
            (emit-code-return rets)))))
@@ -277,6 +278,7 @@
         (defcompile
           (defcreg (sname) ((+ 1 (length cargs)))
             (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             '(raw "// ---- emit-method-set")
             (emit-code-get-args cargs '())
             (emit-code-funcall info cname cargs '() '() #f)
             's))))
@@ -304,6 +306,7 @@
         (defcompile
           (defcreg (sname-get) ((+ 1 (length cargs)))
              (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             '(raw "// ---- emit-method-get/set getter")
              (emit-code-funcall info methname '() '() '() rets)
              (emit-code-return rets)))
         (format #t "emit-method-get/set x2~%")
@@ -311,6 +314,7 @@
         (defcompile
           (defcreg (sname-set) ((+ 1 (length cargs)))
              (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             '(raw "// ---- emit-method-get/set setter")
              (emit-code-get-args cargs '())
              ; by tacking on avoid-ref, we mean that the function should not be referenced
              (emit-code-funcall (cons 'avoid-ref info) methname-set
@@ -333,9 +337,8 @@
              (len-optional-args (length optional-args)))
         (defcompile
           (defcreg (sname) ((+ 1 len-required-args) len-optional-args)
-             ;`((req-args . ,(+ 1 (length required-args)))
-             ;(opt-args . ,(length optional-args)))
              (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
+             '(raw "// ---- emit-method-apply")
              (emit-code-get-args required-args optional-args)
              (emit-code-funcall info cname cargs required-args optional-args #f)
              (emit-code-return #f)))))
@@ -502,10 +505,6 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
   `(begin
      (raw ,(format #f "uint64_t ty = (uint64_t) ~a" init))
      (c_make_goo sc ty (s7_f sc) ,(format #f "(void*) ~a" varname))))
-
-(define (emit-stat args e)
-  (format %c "    ~a;~%" (car args))
-  e)
 
 (define (c-ify-name sname)
   (let ((str "")
