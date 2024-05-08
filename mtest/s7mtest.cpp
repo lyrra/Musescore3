@@ -150,18 +150,53 @@ void mtest_s7_define_functions(s7_scheme *sc) {
     s7_define_function(sc, "ms-mtest-readCreatedScore", ms_mtest_readCreatedScore, 1, 0, false, "(ms-mtest-readCreatedScore <score-filename>)");
 }
 
+int load_scheme_script(s7_scheme *s7, const char *dir, const char* filename)
+{
+    char expr[1024];
+    snprintf(expr, sizeof(expr), "%s/mtest/%s", dir, filename);
+    expr[1023] = 0;
+    if (!s7_load(s7, expr)) {
+        fprintf(stderr, "Failed to load %s\n", expr);
+        return -1;
+    }
+    return 0;
+}
+
 int run_scheme_script(const char *filename, int rargc, char **rargv)
 {
-    s7_scheme *s7;
-    s7 = s7_init();
+    int i;
+
+    const char *sourcedir = NULL;
+    {
+        const char *srcdir_flag = "--srcdir=";
+        // Search for the --sourcedir flag
+        for (i = 0; i < rargc; i++) {
+            if (strncmp(rargv[i], srcdir_flag, strlen(srcdir_flag)) == 0) {
+                sourcedir = rargv[i] + strlen(srcdir_flag);
+                break;
+            }
+        }
+    }
+
+    s7_scheme *s7 = s7_init();
     args_s7_list(s7, rargc, rargv);
     mtest_s7_define_functions(s7);
     // load test framework
-    s7_eval_c_string(s7, "(load \"mtest.scm\")");
-    if (!s7_load(s7, filename)) {
-        fprintf(stderr, "Failed to load and evaluate S7-Scheme script: %s\n", filename);
+    if (! sourcedir) {
+        if (!s7_load(s7, "mtest.scm")) {
+            fprintf(stderr, "Failed to load mtest.scm\n");
+            return -1;
+        }
+    } else {
+        if (load_scheme_script(s7, sourcedir, "mtest.scm")) {
+            return -1;
+        }
+    }
+
+    if (load_scheme_script(s7, sourcedir, filename)) {
         return -1;
     }
+
     printf("Test script %s has finished, %i/%i passed/failed tests.\n", filename,
            g_test_check_pass, g_test_check_fail);
     free(s7);

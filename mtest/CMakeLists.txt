@@ -222,16 +222,6 @@ set(GEN_SOURCES
     ms.scm mtest.scm types.scm ../s7/lib.scm ../lib/extras.scm
     )
 
-add_custom_command(TARGET mtest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_element.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_readwriteundoreset.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_breath.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_copypaste.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_note.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_hairpin.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
-
-    DEPENDS ${GEN_SOURCES})
-
 subdirs (
         libmscore/compat114
         libmscore/compat206
