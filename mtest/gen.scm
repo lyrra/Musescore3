@@ -63,7 +63,7 @@
                        (make-args . ,make-args)
                        (methods . ,methods))))))
 
-(define-syntax emit-stat-fmt
+(define-syntax emit-raw
   (syntax-rules ()
     ((_ . args)
      (list 'raw (format #f . args)))))
@@ -198,7 +198,7 @@
                                  (format #f "o->~a(~a)" cname cargsstr))))))
             (cond
              ((not methtype) ; dont care about return value
-              (emit-stat-fmt "~a" methexpr))
+              (emit-raw "~a" methexpr))
              ((memq 'stack rets) ; stack-allocated return
               (list 'begin
                (list 'raw (format #f "~a tsa = ~a /* stack-alloc */" cmethtype methexpr))
@@ -206,7 +206,7 @@
                ; and also c++ knows how to move an compound object
                (list 'raw (format #f "~a* r = new ~a(tsa)" cmethtype cmethtype))))
              (else
-              (emit-stat-fmt "~a r = ~a" cmethtype methexpr))))
+              (emit-raw "~a r = ~a" cmethtype methexpr))))
           (cons 'begin ; emit required and optional args
            (let ((lst '()))
              (do ((i (length required-args) (+ i 1)))
@@ -232,7 +232,7 @@
                '(return (s7_make_string sc (strdup (qPrintable r)))))
               ((sym)
                (list 'begin
-                     (emit-stat-fmt "const char* t = ~a_to_string(r)" methtype)
+                     (emit-raw "const char* t = ~a_to_string(r)" methtype)
                      '(return (s7_make_symbol sc t))))
               ((int)  '(return (s7_make_integer sc r)))
               ((real) '(return (s7_make_real sc r)))
@@ -515,60 +515,6 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
                         (let ((s (substring sname i (+ i 1))))
                           (if (string=? s "-") "_" s)))))
     str))
-
-(define (emit-inst-eval-form form e)
-  (cond
-   ((null? form))
-   ((pair? form)
-    (let ((fun-name (car form)))
-      ((symbol->value fun-name) (cdr form) e)
-      ))
-   (else (form e))))
-
-(define (emit-inst-eval forms e)
-  (when (pair? forms)
-    (let ((form (car forms)))
-      (emit-inst-eval (cdr forms)
-                      (emit-inst-eval-form form e)))))
-
-(define (emit-cfun-eval sname cname arity body)
-  (define (flatten-inst lst)
-    (let ((new '()))
-      (define (iter form)
-        (cond
-         ((and (pair? form) (symbol? (car form)))
-          (set! new (cons form new)))
-         ((pair? form)
-          (for-each iter form))
-         (else
-          (set! new (cons form new)))))
-      (iter lst)
-      (reverse new)))
-  (let ((body (flatten-inst body)))
-    (emit-inst-eval (append (list '(emit-prolog)) body)
-                    `((sname . ,sname) (cname . ,cname) (arity . ,arity)
-                      (s . #f) (g . #f)))))
-
-(define (emit-cfun names args body)
-  (let* ((req-args (if (and (pair? args) (pair? (car args)))
-                       (assq-ref args 'req-args) #f))
-         (opt-args (if (and (pair? args) (pair? (car args)))
-                       (assq-ref args 'opt-args) #f))
-         (arity (if (pair? args) (car args) args))
-         (register (not (and (pair? args) (eq? 'no-register (cadr args)))))
-         (sname (car names))
-         (cname (if (null? (cdr names)) #f (cadr names)))
-         (cname (or cname (c-ify-name sname))))
-    (if register
-      (set! %export-to-scheme2
-            (cons (list sname cname (or req-args arity) (or opt-args 0))
-                  %export-to-scheme2)))
-    (format %h "s7_pointer ~a (s7_scheme *sc, s7_pointer args);~%" cname)
-    (format %c "s7_pointer ~a (s7_scheme *sc, s7_pointer args)~%{~%" cname)
-    (if (pair? body)
-      (emit-cfun-eval sname cname arity body)
-      (body))
-    (format %c "}~%~%")))
 
 (define (emit-setenv args e)
   (let ((key (car args))
