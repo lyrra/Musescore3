@@ -212,20 +212,17 @@ add_custom_command (OUTPUT s7gen.h s7gen.cpp types-code-gen.scm
                             ${CMAKE_CURRENT_SOURCE_DIR}/ms-objects.scm
                             ${CMAKE_CURRENT_SOURCE_DIR}/decl.scm
                             ${PROJECT_SOURCE_DIR}/s7/lib.scm
+                            ${PROJECT_SOURCE_DIR}/lib/extras.scm
+                            ${PROJECT_SOURCE_DIR}/scheme-cpp/compiler.scm
                             ${generate_sources}
                     VERBATIM
                     )
 
 set(GEN_SOURCES
-    ms.scm mtest.scm types.scm ../s7/lib.scm
+    ms.scm mtest.scm types.scm ../s7/lib.scm ../lib/extras.scm
     )
 
 add_custom_command(TARGET mtest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/ms.scm ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mtest.scm ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/types.scm ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/s7/lib.scm ${CMAKE_CURRENT_BINARY_DIR}
-
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_element.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_readwriteundoreset.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/mtest/libmscore/tst_breath.scm ${CMAKE_CURRENT_BINARY_DIR}/libmscore

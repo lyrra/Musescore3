@@ -388,8 +388,8 @@
   (for-each emit-registered-object %objects))
 
 ; generate a .h and .c file, write to these files
-(define %h (open-output-file "s7gen.h" "w"))
-(define %c (open-output-file "s7gen.cpp" "w"))
+(define %h (p-open-output-file "s7gen.h" "w"))
+(define %c (p-open-output-file "s7gen.cpp" "w"))
 
 (define (emit-string-to-ctype)
   (format %h "int string_to_ctype (const char *sname);~%")

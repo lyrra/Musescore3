@@ -16,8 +16,6 @@
 ;;;; corresponding enum are listed in mtest/ms.scm in %style-id 
 ;;;; (in this example Sid-Sid-createMultiMeasureRests)
 
-(load "./mtest.scm")
-
 ; testReadWriteResetPositions
 (let ((DIR "libmscore/readwriteundoreset/"))
   (for-each (lambda (file)

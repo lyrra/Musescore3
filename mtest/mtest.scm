@@ -7,8 +7,8 @@
       (if n
         (set! %source-dir (substring arg (+ 9 n)))))))
 
-(load "lib.scm")
-(load "ms.scm")
+(load (format #f "~a/s7/lib.scm" %source-dir))
+(load (format #f "~a/mtest/ms.scm" %source-dir))
 (load "types-code-gen.scm")
 
 (define (check-write-read-elm elm fun val)
