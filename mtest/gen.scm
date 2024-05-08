@@ -19,18 +19,6 @@
        (set! %compile-env '())
        (evalc . body)))))
 
-(define (compile-register-cfun sname num-req-args num-opt-args body)
-  (format #t "compile-register-cfun sname=~s  num-req-args=~s  snum-opt-args=~s~%"
-          sname num-req-args num-opt-args)
-  (let ((cname (c-ify-name sname)))
-    (set! %export-to-scheme2
-          (cons (list sname cname num-req-args num-opt-args)
-                %export-to-scheme2))
-    (append `(defcfun (,sname ,cname)
-               ("s7_scheme *sc" "s7_pointer args")
-               "s7_pointer")
-            body)))
-
 (define-syntax defcreg
   (syntax-rules ()
     ((_ (sname) (num-req-args num-opt-args) . body)
@@ -41,7 +29,12 @@
                             (list . body)))
     ((_ (sname) () . body)
      (compile-register-cfun sname 0 0
-                            (list . body)))))
+                            (list . body)))
+    ((_ sname (req-args ...) (opt-args ...) body ...)
+     (compreg-cfun sname
+                   '(req-args ...)
+                   '(opt-args ...)
+                   (list body ...)))))
 
 (define-syntax define-object
   (syntax-rules ()
@@ -67,6 +60,43 @@
   (syntax-rules ()
     ((_ . args)
      (list 'raw (format #f . args)))))
+
+(define (compile-register-cfun sname num-req-args num-opt-args body)
+  (let ((cname (c-ify-name sname)))
+    (set! %export-to-scheme2
+          (cons (list sname cname num-req-args num-opt-args)
+                %export-to-scheme2))
+    (append `(defcfun (,sname ,cname)
+               ("s7_scheme *sc" "s7_pointer args")
+               "s7_pointer")
+            body)))
+
+(define (compreg-cfun sname req-args opt-args body)
+  (define (comp-args args)
+    (let ((n 0))
+      (apply append
+       (map (lambda (arg)
+              (set! n (+ 1 n))
+              (append (if (> n 1)
+                          (list (emit-next-arg))
+                          '())
+                      (let ((argname (car arg))
+                            (argtype (cadr arg)))
+                        (list
+                         (case argtype
+                           ((sym) (emit-pop-arg-sym `(,argname)))
+                           ((int) (emit-pop-arg-int `(,argname)))
+                           ((bool) (emit-pop-arg-bool `(,argname)))
+                           ((goo) (emit-pop-arg-goo `(,(caddr arg) ,argname)))
+                           (else (error "unknown arg type")))))))
+            args))))
+  (set! %compile-env '())
+  (compile-register-cfun sname
+                         (length req-args)
+                         (length opt-args)
+                         (append (comp-args req-args)
+                                 (comp-args opt-args)
+                                 body)))
 
 (define (emit-registered-object pair)
   (let* ((name (car pair))

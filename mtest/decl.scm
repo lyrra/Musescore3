@@ -61,7 +61,7 @@ extern Ms::MTest* g_mtest;
                            (cdr (assoc 'ElementType %c-types))))))
 
 (evalc
-  (defcreg ('ms-make-nullgoo) ()
+  (defcreg 'ms-make-nullgoo () ()
     '(c_make_goo sc 0 (s7_f sc) nullptr)))
 
 ;
@@ -82,29 +82,28 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps3 'NoteType)
 
 (defcompile
- (defcreg ('ms-make-tduration) (1)
-   (emit-pop-arg-sym '("dur"))
+ (defcreg 'ms-make-tduration ((dur sym)) ()
    '(c_make_goo sc
                 "static_cast<uint64_t>(GOO_TYPE::CHORD)"
                 (s7_nil sc)
                 "(void*) new TDuration(string_to_DurationType(dur))")))
 
 (defcompile
- (defcreg ('ms-make-score) ()
+ (defcreg 'ms-make-score () ()
    '(c_make_goo sc
                 "static_cast<uint64_t>(0 /*GOO_TYPE::CHORD*/)"
                 (s7_nil sc)
                 "new Ms::Score()")))
 
 (defcompile
- (defcreg ('ms-make-chord) ()
+ (defcreg 'ms-make-chord () ()
    '(c_make_goo sc
                 "static_cast<uint64_t>(GOO_TYPE::CHORD)"
                 (s7_nil sc)
                 "new Ms::Chord(g_mtest->score)")))
 
 (defcompile
- (defcreg ('ms-make-note) ()
+ (defcreg 'ms-make-note () ()
    '(c_make_goo sc
                 "static_cast<uint64_t>(GOO_TYPE::NOTE)"
                 (s7_nil sc)
@@ -136,30 +135,25 @@ extern Ms::MTest* g_mtest;
             '(return (s7_nil sc)))))
    '(c_make_goo sc ty (s7_f sc) e)))
 
-
 (defcompile
- (defcreg ('ms-element-type) (1)
-   (emit-pop-arg-goo '("Element*" "e"))
+ (defcreg 'ms-element-type ((e goo Element*)) ()
    '(s7_make_integer sc "static_cast<uint64_t>(e->type())")))
 
 (def-goo-setters-goo "Ms::Element*" "element" "parent" "setParent" "Element*")
 
 (defcompile
-  (defcreg ('ms-score-selection-elements) (1)
-    (emit-pop-arg-goo '("MasterScore*" "score"))
+  (defcreg 'ms-score-selection-elements ((score goo MasterScore*)) ()
     '(raw "const void *elms = &(score->selection().elements())")
     (emit-return-goo "elms" 0)))
 
-
 (defcompile
-  (defcreg ('ms-elements-getnext) (1)
-    (emit-pop-arg-goo '("QList<Element*>*" "elms"))
+  (defcreg 'ms-elements-getnext ((elms goo QList<Element*>*)) ()
     '(raw "int cnt = 0")
     '(when (&& g->data (s7_is_integer g->data))
-      (raw "cnt = s7_integer(g->data)")
-      (raw "cnt++"))
+       (raw "cnt = s7_integer(g->data)")
+       (raw "cnt++"))
     '(if (>= cnt (elms->size)) ; no more elements
-      (return (s7_f sc)))
+       (return (s7_f sc)))
     '(raw "g->data = s7_make_integer(sc, cnt)")
     '(raw "Element* elm = elms->at(cnt)")
     (emit-return-goo "elm" 0)))
@@ -168,40 +162,26 @@ extern Ms::MTest* g_mtest;
 ; breath
 ;
 (defcompile
-  (defcreg ('ms-make-breath) (1)
-    (emit-pop-arg-goo '("MasterScore*" "score"))
+  (defcreg 'ms-make-breath ((score goo MasterScore*)) ()
     '(if (! score) (return (s7_f sc)))
     '(raw "Breath* b = new Breath(score);")
     '(raw "uint64_t ty = 0;")
     '(c_make_goo sc ty (s7_f sc) b)))
 
 (defcompile
-  (defcreg ('ms-make-editdata) ()
+  (defcreg 'ms-make-editdata () ()
     '(raw "EditData* ed = new EditData(0);")
     '(raw "ed->view = 0;")
     '(raw "uint64_t ty = 0;")
     '(c_make_goo sc ty (s7_f sc) ed)))
 
 (defcompile
-  (defcreg ('ms-editdata-dropelement) (2)
-    (emit-pop-arg-goo '("_"))
-    (emit-next-arg)
-    '(raw "s = s7_car(args);")
-    '(if (! (c_is_goo sc s)) (return (s7_f sc)))
-    '(raw "goo_t *g2 = (goo_t *)s7_c_object_value(s);")
-    '(raw "EditData* ed = (EditData*) g->cd;")
-    '(raw "ed->dropElement = (Element *) g2->cd;")
+  (defcreg 'ms-editdata-dropelement ((ed goo EditData*) (elm goo Element*)) ()
+    '(raw "ed->dropElement = elm;")
     '(s7_t sc)))
 
 (defcompile
-  (defcreg ('ms-element-drop) (2)
-    (emit-pop-arg-goo '())
-    (emit-next-arg)
-    '(raw "s = s7_car(args);")
-    '(if (! (c_is_goo sc s)) (return (s7_f sc)))
-    '(raw "goo_t *g2 = (goo_t *)s7_c_object_value(s);")
-    '(raw "Element *e = (Element*) g->cd;")
-    '(raw "EditData* ed = (EditData*) g2->cd;")
+  (defcreg 'ms-element-drop ((e goo Element*) (ed goo EditData*)) ()
     '(cond
      ((e->acceptDrop *ed)
       (e->drop *ed)
@@ -217,7 +197,7 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps3 'hairpin)
 
 (defcompile
-  (defcreg ('ms-make-hairpin) ()
+  (defcreg 'ms-make-hairpin () ()
     '(raw "Hairpin* hp = new Hairpin(g_mtest->score);")
     (emit-return-goo "hp" "static_cast<uint64_t>(GOO_TYPE::ElementType__HAIRPIN)")))
 
@@ -227,8 +207,7 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps3 'TremoloType)
 
 (defcompile
-  (defcreg ('ms-make-tremolo) (1)
-    (emit-pop-arg-goo '("MasterScore*" "score"))
+  (defcreg 'ms-make-tremolo ((score goo MasterScore*)) ()
     '(raw "Tremolo* tr = new Tremolo(score)")
     (emit-return-goo "tr" "static_cast<uint64_t>(GOO_TYPE::ElementType__TREMOLO)")))
 
@@ -237,10 +216,7 @@ extern Ms::MTest* g_mtest;
 ; articulation
 
 (defcompile
-  (defcreg ('ms-make-articulation) (2)
-    (emit-pop-arg-goo '("MasterScore*" "score"))
-    (emit-next-arg)
-    (emit-pop-arg-sym '("sym"))
+  (defcreg 'ms-make-articulation ((score goo MasterScore*) (sym sym)) ()
     '(raw "Ms::SymId syid = string_to_SymId(sym)")
     '(raw "Articulation* ar = new Articulation(syid, score)")
     (emit-return-goo "ar" "static_cast<uint64_t>(0)")))
@@ -250,15 +226,11 @@ extern Ms::MTest* g_mtest;
 ;
 
 (defcompile
-  (defcreg ('ms-note-usermirror) (1)
-    (emit-pop-arg-goo '("Ms::Note*" "note"))
+  (defcreg 'ms-note-usermirror ((note goo "Ms::Note*")) ()
     '(s7_make_symbol sc (DirectionH_to_string (note->userMirror)))))
 
 (defcompile
-  (defcreg ('ms-set-note-usermirror) (2)
-    (emit-pop-arg-goo '("Ms::Note*" "note"))
-    (emit-next-arg)
-    (emit-pop-arg-sym '("symname"))
+  (defcreg 'ms-set-note-usermirror ((note goo "Ms::Note*") (symname sym)) ()
     '(note->setUserMirror (string_to_DirectionH symname))
     's))
 
@@ -324,32 +296,24 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps3 'AccidentalType)
 
 (defcompile
-  (defcreg ('ms-make-fraction) (2)
-    (emit-pop-arg-int '("numerator"))
-    (emit-next-arg)
-    (emit-pop-arg-int '("denominator"))
+  (defcreg 'ms-make-fraction
+           ((numerator int) (denominator int)) ()
     '(raw "Fraction* f = new Fraction(numerator, denominator)")
     '(raw "uint64_t ty = static_cast<uint64_t>(0); // GOO_TYPE::ElementType__FRACTION")
     '(c_make_goo sc ty (s7_f sc) f)))
 
 (defcompile
-  (defcreg ('ms-division) ()
+  (defcreg 'ms-division () ()
     '(s7_make_integer sc "MScore::division")))
 
 (defcompile
-  (defcreg ('ms-tpc2degree) (2)
-    (emit-pop-arg-sym '("tpc"))
-    (emit-next-arg)
-    (emit-pop-arg-sym '("key"))
+  (defcreg 'ms-tpc2degree
+           ((tpc sym) (key sym)) ()
     '(s7_make_integer sc (tpc2degree (string_to_Tpc tpc) (string_to_Key key)))))
 
 (defcompile
-  (defcreg ('ms-make-ChangeStyleVal) (3)
-    (emit-pop-arg-goo '("Score*" "score"))
-    (emit-next-arg)
-    (emit-pop-arg-sym '("sym"))
-    (emit-next-arg)
-    (emit-pop-arg-bool '("variant"))
+  (defcreg 'ms-make-ChangeStyleVal
+           ((score goo Score*) (sym sym) (variant bool)) ()
     '(raw "Ms::Sid sid = string_to_Sid(sym)")
     '(raw "ChangeStyleVal* x = new ChangeStyleVal(score, sid, variant)")
     (emit-return-goo "x" "static_cast<uint64_t>(0)")))
@@ -375,15 +339,11 @@ extern Ms::MTest* g_mtest;
 ; emit simple iterators
 
 (defcompile
-  (defcreg ('ms-notes-size) (1 0)
-    (emit-pop-arg-goo '("std::vector<Note*>*" "notes"))
+  (defcreg 'ms-notes-size ((notes goo "std::vector<Note*>*")) ()
     '(s7_make_integer sc (notes->size))))
 
 (defcompile
-  (defcreg ('ms-notes-ref) (2 0)
-    (emit-pop-arg-goo '("std::vector<Note*>*" "notes"))
-    (emit-next-arg)
-    (emit-pop-arg-int '("i"))
+  (defcreg 'ms-notes-ref ((notes goo "std::vector<Note*>*") (i int)) ()
     '(if (>= i (notes->size))
          (return (s7_f sc)))
     '(raw "Note* note = notes->at(i)")
