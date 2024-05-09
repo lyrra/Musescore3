@@ -85,6 +85,12 @@
               (cdr ir))
     (format %c "  }~%")))
 
+(define (emit-c-set! ir args)
+  (let ((dst (car ir))
+        (src (cadr ir)))
+    (format %c "  ~a = " dst)
+    (emit-c src args)))
+
 (define (emit-c-if ir args)
   (let ((c (car ir))
         (t (cadr ir))
@@ -242,6 +248,8 @@
        (emit-c-begin (cdr ir) args))
       ((let)
        (emit-c-let (cdr ir) args))
+      ((set!)
+       (emit-c-set! (cdr ir) args))
       ((if)
        (emit-c-if (cdr ir) args))
       ((when)

@@ -125,13 +125,13 @@ extern Ms::MTest* g_mtest;
                (let ((name (car type))
                      (cname (cadr type)))
                  (list `(! (strcasecmp symname ,(format #f "\"~a\"" name)))
-                      (list 'raw (format #f "e = Element::create(~a, g_mtest->score)" cname))
-                      (list 'raw (format #f "ty = static_cast<uint64_t>(GOO_TYPE::~a)"
-                                         (string-lisp->c (symbol->string name)))))))
+                   `(set! e ,(format #f "Element::create(~a, g_mtest->score)" cname))
+                   `(set! ty ,(format #f "static_cast<uint64_t>(GOO_TYPE::~a)"
+                                      (string-lisp->c (symbol->string name)))))))
              (cdr (assoc 'ElementType %c-types)))
         (list
         (list 'else
-              (list 'raw (format #f "fprintf(stderr, \"ERROR: UNRECOGNIZED ELEMENT TYPE: %s\\n\", symname)"))
+              '(fprintf stderr "\"ERROR: UNRECOGNIZED ELEMENT TYPE: %s\\n\"" symname)
               '(return (s7_nil sc)))))
       (c_make_goo sc ty (s7_f sc) e))))
 
@@ -150,7 +150,7 @@ extern Ms::MTest* g_mtest;
   (defcreg 'ms-elements-getnext ((elms goo QList<Element*>*)) ()
     `(let ((cnt int 0))
        (when (&& g->data (s7_is_integer g->data))
-         (raw "cnt = s7_integer(g->data)")
+         (set! cnt (s7_integer g->data))
          (raw "cnt++"))
        (if (>= cnt (elms->size)) ; no more elements
          (return (s7_f sc)))
@@ -172,12 +172,12 @@ extern Ms::MTest* g_mtest;
   (defcreg 'ms-make-editdata () ()
     `(let ((ed EditData* "new EditData(0)")
            (ty uint64_t 0))
-       (raw "ed->view = 0;")
+       (set! ed->view 0)
        (c_make_goo sc ty (s7_f sc) ed))))
 
 (defcompile
   (defcreg 'ms-editdata-dropelement ((ed goo EditData*) (elm goo Element*)) ()
-    '(raw "ed->dropElement = elm;")
+    '(set! ed->dropElement elm)
     '(s7_t sc)))
 
 (defcompile
