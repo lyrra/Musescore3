@@ -57,6 +57,34 @@
                 (emit-c-stend))
               ir)))
 
+(define (emit-c-let ir args)
+  (let ((n 1)
+        (num-stmt (length ir)))
+    (format %c "  {~%")
+    (for-each (lambda (line)
+                (let ((name (car line))
+                      (type (if (pair? (cdr line)) (cadr line) #f))
+                      (init (if (and (pair? (cdr line)) (pair? (cddr line))) (caddr line) #f)))
+                  (format %c "    ~a ~a" (or type "auto") name)
+                  (cond
+                   (init
+                    (format %c " = ")
+                    (emit-c init)
+                    (format %c ";~%"))
+                   (else
+                    (format %c ";~%")))))
+              (car ir))
+    (for-each (lambda (line)
+                (format %c "    ")
+                (set! n (+ 1 n))
+                (emit-c line
+                        (if (and (= num-stmt n) (memq 'tcp args))
+                            args
+                            '()))
+                (emit-c-stend))
+              (cdr ir))
+    (format %c "  }~%")))
+
 (define (emit-c-if ir args)
   (let ((c (car ir))
         (t (cadr ir))
@@ -212,6 +240,8 @@
        (emit-c-return (cdr ir)))
       ((begin)
        (emit-c-begin (cdr ir) args))
+      ((let)
+       (emit-c-let (cdr ir) args))
       ((if)
        (emit-c-if (cdr ir) args))
       ((when)
