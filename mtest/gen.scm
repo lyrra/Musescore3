@@ -114,17 +114,28 @@
                                         n)))
                    args)
           str))
-    (define (make-callargs-max args numargs)
-      (let ((n 0) (str ""))
+    (define (form-callargs args)
+      (let ((n 0))
+        (map (lambda (arg)
+               (set! n (+ 1 n))
+               (format #f "~ax~a"
+                       ; c-ref(&), need to ref pointer
+                       (if (memq 'deref arg) "*" "")
+                       n))
+             args)))
+    (define (form-callargs-max args numargs)
+      (let ((n 0) (lst '()))
         (for-each (lambda (arg)
                     (set! n (+ 1 n))
                     (if (<= n numargs)
-                          (set! str (format #f "~a~a~ax~a"
-                                            str (if (= n 1) "" ", ")
-                                            (if (memq 'deref arg) "*" "") ; c-ref(&), need to ref pointer
-                                            n))))
-                  args)
-        str))
+                        (set! lst
+                              (cons (format #f "~ax~a"
+                                            ; c-ref(&), need to ref pointer
+                                            (if (memq 'deref arg) "*" "")
+                                            n)
+                                    lst))))
+             args)
+        (reverse lst)))
     (define (make-optional-args args)
       (filter (lambda (arg)
                 (and (pair? arg) (pair? (cdr arg)) (pair? (cddr arg))
@@ -205,6 +216,30 @@
                          (list 'raw (format #f "Ms::~a x~a = string_to_~a(t~a)" stype n stype n)))))
                      (else (emit-pop-arg-goo (list (car arg) (format #f "x~a" n) #f #t))))))
                 optional-args)))))))
+    (define (emit-code-funcall2 info cname cargs rets)
+      (let* ((methtype (cond
+                            ((not rets) #f)
+                            ((string? (car rets)) (car rets))
+                            ((= (length rets) 2)
+                             (typeinfo-meta-get (cadr rets) 'c-type-cons))
+                            (else (car rets))))
+             (cmethtype (case methtype
+                          ((real) 'double)
+                          (else methtype)))
+             (cargsstr (make-callargs cargs))
+             (cargslst (form-callargs cargs))
+             (methexpr (cond
+                        ((get-string info) (get-string info))
+                        ; this avoids constructing an ref (since it hits first)
+                        ((get-symbol info 'avoid-ref)
+                         (append (list (format #f "o->~a" cname)) cargslst))
+                        ((get-symbol info 'ref)
+                         `(& ,(append (list (format #f "o->~a" cname)) cargslst)))
+                        (else
+                         (if (memq 'infix info)
+                             (format #f "*o ~a *~a" cname cargsstr)
+                             (append (list (format #f "o->~a" cname)) cargslst))))))
+        (list cmethtype methexpr)))
     (define (emit-code-funcall info cname cargs required-args optional-args rets)
       (if (null? optional-args)
           (let* ((methtype (cond
@@ -226,28 +261,14 @@
                              (if (memq 'infix info)
                                  (format #f "*o ~a *~a" cname cargsstr)
                                  (format #f "o->~a(~a)" cname cargsstr))))))
-            (cond
-             ((not methtype) ; dont care about return value
-              (emit-raw "~a" methexpr))
-             ((memq 'stack rets) ; stack-allocated return
-              (list 'begin
-               (list 'raw (format #f "~a tsa = ~a /* stack-alloc */" cmethtype methexpr))
-               ; would be nicer to just do malloc(sizeof(...)), but we might need to run constructors
-               ; and also c++ knows how to move an compound object
-               (list 'raw (format #f "~a* r = new ~a(tsa)" cmethtype cmethtype))))
-             (else
-              (emit-raw "~a r = ~a" cmethtype methexpr))))
-          (cons 'begin ; emit required and optional args
-           (let ((lst '()))
-             (do ((i (length required-args) (+ i 1)))
-                 ((> i (+ (length required-args) (length optional-args))))
-               (set! lst (cons `(when (== numArgs ,i)
-                                  (raw ,(format #f "~ao->~a(~a)"
-                                                (if rets (format #f "~a r = " (car rets)) "")
-                                                cname
-                                                (make-callargs-max cargs i))))
-                               lst)))
-             lst))))
+            (if (not methtype) ; dont care about return value
+              methexpr))
+          (cons 'cond ; emit required and optional args
+                (map (lambda (i)
+                       `((== numArgs ,(+ (length required-args) i))
+                         ,(append (list (format #f "o->~a" cname))
+                                   (form-callargs-max cargs (+ (length required-args) i)))))
+                     (iota (+ 1 (length optional-args)))))))
     (define (emit-code-return rets)
       (let* ((methtype (if rets (car rets) #f))
              (gootype (if (and rets (list-nth rets 2)) (list-nth rets 2) #f))
@@ -261,9 +282,8 @@
               ((QString)
                '(return (s7_make_string sc (strdup (qPrintable r)))))
               ((sym)
-               (list 'begin
-                     (emit-raw "const char* t = ~a_to_string(r)" methtype)
-                     '(return (s7_make_symbol sc t))))
+               `(let ((t "const char*" ,(format #f "~a_to_string(r)" methtype)))
+                  (return (s7_make_symbol sc t))))
               ((int)  '(return (s7_make_integer sc r)))
               ((real) '(return (s7_make_real sc r)))
               ((bool) '(return (s7_make_boolean sc r)))
@@ -291,14 +311,21 @@
              (info (if (pair? (cdr methargs)) (cddr methargs) #f))
              (cname (if (pair? methpair) (cadr methpair) methpair))
              (sname (get-method-sname-get methpair)))
-       (format #t "~%emit-method-get ~s [~s ~s] ~s~%" methpair sname cname cargs)
+       (format #t "~%emit-method-get ~s [~s ~s] ~s => ~s~%" methpair sname cname cargs rets)
        (defcompile
          (defcreg (sname) ((+ 1 (length cargs)))
            (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
-             '(raw "// ---- emit-method-get")
+           '(raw "// ---- emit-method-get")
            (emit-code-get-args cargs '())
-           (emit-code-funcall info cname cargs '() '() rets)
-           (emit-code-return rets)))))
+           (let* ((callinfo (emit-code-funcall2 info cname cargs rets))
+                  (cmethtype (car callinfo))
+                  (methexpr (cadr callinfo)))
+             (if (memq 'stack rets) ; stack-allocated return
+               `(let ((tsa ,cmethtype ,methexpr)
+                      (r ,(format #f "~a*" cmethtype) ,(format #f "new ~a(tsa)" cmethtype)))
+                  ,(emit-code-return rets))
+               `(let ((r ,cmethtype ,methexpr))
+                  ,(emit-code-return rets))))))))
     (define (emit-method-set methpair methargs)
       (format #t "emit-method-set ~s~%" methpair)
       (let* ((cargs (car methargs)) ; arguments to c-function
@@ -337,8 +364,13 @@
           (defcreg (sname-get) ((+ 1 (length cargs)))
              (emit-pop-arg-goo `(,(format #f "~a*" c-type) "o"))
              '(raw "// ---- emit-method-get/set getter")
-             (emit-code-funcall info methname '() '() '() rets)
-             (emit-code-return rets)))
+             (if (memq 'stack rets) ; stack-allocated return
+                 (error "interim stack alloc not supported")
+                 (let* ((callinfo (emit-code-funcall2 info methname '() rets))
+                        (cmethtype (car callinfo))
+                        (methexpr (cadr callinfo)))
+                   `(let ((r ,cmethtype ,methexpr))
+                      ,(emit-code-return rets))))))
         (format #t "emit-method-get/set x2~%")
         ; emit setter
         (defcompile
@@ -466,7 +498,7 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
            (raw "numArgs++")
            (raw ,(format #f "~as = s7_car(args)" (if s "" "s7_pointer ")))
            (if (! (,(string->symbol (format #f "s7_is_~a" 'stype)) s)) (return (s7_f sc)))
-           (raw ,(format #f "~a = ~a;~%" cargname sconv)))))
+           (set! ,cargname ,sconv))))
      (else
       `(begin
          ,(maybe-emit-args-check)
@@ -524,12 +556,12 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
 (define (emit-next-arg . args)
   ; resets checked-if-end-of-list flag
   (set! %compile-env (assq-set! %compile-env 'argsPairKnow #f))
-  '(raw  "args = s7_cdr(args)"))
+  '(set! args (s7_cdr args)))
 
 (define (emit-maybe-next-arg)
   '(if (&& moreArgs (s7_is_pair args))
-       (raw "args = s7_cdr(args)")
-       (raw "moreArgs = false")))
+       (set! args (s7_cdr args))
+       (set! moreArgs false)))
 
 (define (emit-return-goo varname init)
   `(begin
@@ -576,7 +608,7 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
          (emit-pop-arg-goo `(,objtype "o" "go"))
          (emit-next-arg)
          (emit-pop-arg-goo `(,operandtype "x" "gx"))
-         `(raw ,(format #f "    o->~a(x)" setname))
+         `(,(format #f "o->~a" setname) x)
          '(s7_t sc)))))
 
 (define-syntax def-goo-setters-bool

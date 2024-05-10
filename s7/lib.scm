@@ -48,5 +48,10 @@
      (else
       (cons (cons key val) lst)))))
 
+(define (iota num)
+  (if (= 0 num)
+      '()
+      (cons (- num 1) (iota (- num 1)))))
+
 (define (p-open-output-file file mode)
   (open-output-file file mode))
