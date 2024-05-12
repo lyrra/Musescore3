@@ -4,7 +4,7 @@
 
 (define (c-ify-name sname)
   (let ((str "")
-        (sname (symbol->string sname)))
+        (sname (if (string? sname) sname (symbol->string sname))))
     (do ((i 0 (+ 1 i)))
         ((>= i (string-length sname)))
       (set! str (format #f "~a~a" str

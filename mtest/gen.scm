@@ -570,7 +570,7 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
 
 (define (c-ify-name sname)
   (let ((str "")
-        (sname (symbol->string sname)))
+        (sname (if (string? sname) sname (symbol->string sname))))
     (do ((i 0 (+ 1 i)))
         ((>= i (string-length sname)))
       (set! str (format #f "~a~a" str
@@ -617,19 +617,23 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
      (begin
        (set! %export-to-scheme-getset (cons (list objname memname memnameset)
                                             %export-to-scheme-getset))
-       (emit-header-getset objname memname)
-       (emit-func-prolog #f objname memname objtype)
-       (format %c "
-    return s7_make_boolean(sc, o->~a());
-}
-" memnameget)
-       (emit-func-prolog #t objname memname objtype)
-       (format %c "
-  s7_pointer x = s7_cadr(args);
-  o->~a(s7_boolean(sc, x));
-  return x;
-}
-" memnameset)))))
+       (defcompile
+         `(defcfun (,(format #f "ms_~a_~a" objname memname))
+                   ("s7_scheme *sc" "s7_pointer args")
+                   "s7_pointer"
+            (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
+              (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
+                (s7_make_boolean sc (,(format #f "o->~a" memnameget)))))))
+
+       (defcompile
+         `(defcfun (,(format #f "ms_set_~a_~a" objname memname))
+                   ("s7_scheme *sc" "s7_pointer args")
+                   "s7_pointer"
+            (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
+              (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
+                (let ((x "s7_pointer" (s7_cadr args)))
+                  (,(format #f "o->~a" memnameset) (s7_boolean sc x))
+                  x)))))))))
 
 ; FIX: the transname should be a symbol that references into %c-types-info
 (define-syntax def-goo-setters-sym
@@ -653,56 +657,27 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
 }
 " memnameset transname))))))
 
-(define (emit-c-type-string-maps name typelst basetypename)
-  (let ()
-    (format %h "const char* ~a_to_string (~a x);~%" name basetypename)
-    (format %c "const char* ~a_to_string (~a x)~%" name basetypename)
-    (format %c "{~%    switch (x) {~%")
-    (map (lambda (lst)
-                (match lst
-                  ((symname c-type)
-                   (format %c "        case ~a:~%" c-type)
-                   (format %c "        return \"~s-~s\";~%" basetypename symname))))
-         typelst)
-    (format %c "    fprintf(stderr, \"WARNING: Unknown ctype-int %i\\n\", (int) c-type);~%")
-    (format %c "    }~%}~%")
-
-    (format %h "~a string_to_~a (const char *name);~%" basetypename name)
-    (format %c "~a string_to_~a (const char *name)~%" basetypename name)
-    (format %c "{~%~%")
-    (map (lambda (lst)
-                (match lst
-                  ((symname c-type)
-                   (format %c "    if (!strcmp(name, \"~s\")) {~%" symname)
-                   (format %c "        return ~a;~%" c-type)
-                   (format %c "    }~%"))))
-         typelst)
-    (format %c "    fprintf(stderr, \"WARNING: Unknown ctype-str %s\\n\", name);~%")
-    (format %c "    return (~a)0;~%" basetypename)
-    (format %c "}~%")))
-
 (define (emit-c-type-string-maps-simple name typelst basetypename)
-  (let ()
-    ; emit c-function that takes a object of a specific type and returns a string
-    (format %h "const char* ~a_to_string (~a x);~%" name basetypename)
-    (format %c "const char* ~a_to_string (~a x)~%" name basetypename)
-    (format %c "{~%    switch (x) {~%")
-    (for-each (lambda (tri)
-      (format %c "        case Ms::~a:~%" (cadr tri))
-      (format %c "        return \"~a-~a\";~%" basetypename (cadr tri)))
-      typelst)
-    (format %c "    }~%}~%")
-    ; emit c-function that takes an string and returns an object of a specific type
-    (format %h "~a string_to_~a (const char *name);~%" basetypename name)
-    (format %c "~a string_to_~a (const char *name)~%" basetypename name)
-    (format %c "{~%~%")
-    (for-each (lambda (tri)
-      (format %c "    if (!strcmp(name, \"~a\")) {~%" (cadr tri))
-      (format %c "        return Ms::~a;~%" (cadr tri))
-      (format %c "    }~%"))
-      typelst)
-    (format %c "    return (~a)0;~%" basetypename)
-    (format %c "}~%")))
+  ; emit c-function that takes a object of a specific type and returns a string
+  (defcompile
+    `(defcfun (,(format #f "~a_to_string" name))
+              (,(format #f "~a x" basetypename))
+              "const char*"
+       ,(append '(switch (x))
+                (map (lambda (tri)
+                       (list 'case (format #f "Ms::~a" (cadr tri))
+                             (format #f "\"~a-~a\"" basetypename (cadr tri))))
+                     typelst))))
+  ; emit c-function that takes an string and returns an object of a specific type
+  (defcompile
+   `(defcfun (,(format #f "string_to_~a" name))
+             ("const char *name")
+             ,basetypename
+      ,@(map (lambda (tri)
+               `(if (!(strcmp name ,(format #f "\"~a\"" (cadr tri))))
+                    (return ,(format #f "Ms::~a" (cadr tri)))))
+             typelst)
+      ,(format #f "(~a)0" basetypename))))
 
 (define (emit-c-type-string-maps3 typename)
   (let* ((types (assq-ref %c-types typename))
@@ -740,7 +715,7 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
           (map (lambda (lst)
                    (match lst
                      ((sname cname idx props)
-                      `(if ,(format #f "!strcmp(name, \"~a-~a\")" typename sname)
+                      `(if (!(strcmp name ,(format #f "\"~a-~a\"" typename sname)))
                            (return ,cname)))))
                  types)
            (list (format #f "(Ms::~a)0" c-type)))))))
