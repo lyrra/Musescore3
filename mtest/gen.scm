@@ -200,7 +200,7 @@
                 required-args)
            (list (if (> (length optional-args) 0)
                      (list 'raw (format #f "bool moreArgs = true"))
-                     (emit-noop)))
+                     '(noop)))
            (list (list 'raw (format #f "int numArgs = ~a" (length required-args))))
            ; emit optional arguments
            (map (lambda (arg)
@@ -442,21 +442,6 @@ int string_to_ctype (const char *sname)
        %c-types)
   (format %c "    return -999999;    ~%}~%"))
 
-(define (emit-header-getset objname memname)
-  (format %h "s7_pointer ms_~a_~a (s7_scheme *sc, s7_pointer args);~%" objname memname)
-  (format %h "s7_pointer ms_set_~a_~a (s7_scheme *sc, s7_pointer args);~%" objname memname))
-
-; write the beginning of a c-function. FIX: (with-c-fun (args) body) would be better
-(define (emit-func-prolog setter objname memname objtype)
-  (format %c "
-s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
-{
-    goo_t *g = (goo_t *)s7_c_object_value(s7_car(args));
-    ~a* o = (~a*) g->cd;
-" (if setter "set_" "") objname memname objtype objtype))
-
-(define (emit-noop args e) e)
-
 (define (maybe-emit-args-check)
   (cond
    ((not (assis? 'argsPairKnow %compile-env))
@@ -642,20 +627,23 @@ s7_pointer ms_~a~a_~a (s7_scheme *sc, s7_pointer args)
      (begin
        (set! %export-to-scheme-getset (cons (list objname memname memnameset)
                                             %export-to-scheme-getset))
-       (emit-header-getset objname memname)
-       (emit-func-prolog #f objname memname objtype)
-       (format %c "
-    return s7_make_symbol(sc, ~a_to_string(o->~a()));
-}
-" transname memname)
-       (when memnameset
-         (emit-func-prolog #t objname memname objtype)
-         (format %c "
-  s7_pointer x = s7_cadr(args);
-  o->~a(string_to_~a(s7_symbol_name(x)));
-  return x;
-}
-" memnameset transname))))))
+       (defcompile
+         `(defcfun (,(format #f "ms_~a_~a" objname memname))
+                   ("s7_scheme *sc" "s7_pointer args")
+                   "s7_pointer"
+            (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
+              (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
+                (s7_make_symbol sc (,(format #f "~a_to_string" transname) (,(format #f "o->~a"memname))))))))
+       (if memnameset
+          (defcompile
+           `(defcfun (,(format #f "ms_set_~a_~a" objname memname))
+                     ("s7_scheme *sc" "s7_pointer args")
+                     "s7_pointer"
+              (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
+                (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
+                  (let ((x "s7_pointer" "s7_cadr(args)"))
+                    (,(format #f "o->~a" memnameset) (,(format #f "string_to_~a" transname) (s7_symbol_name x)))
+                    x))))))))))
 
 (define (emit-c-type-string-maps-simple name typelst basetypename)
   ; emit c-function that takes a object of a specific type and returns a string
