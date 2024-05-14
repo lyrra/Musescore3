@@ -280,16 +280,16 @@
         (if rets
             (case (if rets (list-nth rets 0) #f)
               ((QString)
-               '(return (s7_make_string sc (strdup (qPrintable r)))))
+               '(s7_make_string sc (strdup (qPrintable r))))
               ((sym)
                `(let ((t "const char*" ,(format #f "~a_to_string(r)" methtype)))
-                  (return (s7_make_symbol sc t))))
-              ((int)  '(return (s7_make_integer sc r)))
-              ((real) '(return (s7_make_real sc r)))
-              ((bool) '(return (s7_make_boolean sc r)))
+                  (s7_make_symbol sc t)))
+              ((int)  '(s7_make_integer sc r))
+              ((real) '(s7_make_real sc r))
+              ((bool) '(s7_make_boolean sc r))
               (else
                (emit-return-goo "r" (format #f "static_cast<uint64_t>(~a)" gootype))))
-            '(return (s7_t sc)))))
+            '(s7_t sc))))
     (define (emit-method-nil methname methargs)
       (let ((sname (string->symbol (format #f "ms-~a-~a" name methname)))
             (gootype 0)
@@ -424,23 +424,19 @@
 (define %c (p-open-output-file "s7gen.cpp" "w"))
 
 (define (emit-string-to-ctype)
-  (format %h "int string_to_ctype (const char *sname);~%")
-  (format %c "
-int string_to_ctype (const char *sname)
-{
-")
-  (map (lambda (lst)
-         (let ((typename (car lst))
-               (types (cdr lst)))
-           (map (lambda (lst)
-                  (match lst
-                    ((sname cname idx props)
-                     (format %c "    if (!strcmp(sname, \"~s-~s\")) {~%" typename sname)
-                     (format %c "        return (int)~a;~%" cname)
-                     (format %c "    }~%"))))
-                types)))
-       %c-types)
-  (format %c "    return -999999;    ~%}~%"))
+  (defcompile
+    `(defcfun ("string_to_ctype") ("const char *sname") "int"
+       ,@(apply append (map (lambda (lst)
+                         (let ((typename (car lst))
+                               (types (cdr lst)))
+                           (map (lambda (type)
+                                  (match type
+                                    ((sname cname idx props)
+                                     `(if (! (strcmp sname ,(format #f "\"~s-~s\"" typename sname)))
+                                           (return ,(format #f "(int)~a" cname))))))
+                                types)))
+                       %c-types))
+       -999999)))
 
 (define (maybe-emit-args-check)
   (cond
@@ -550,8 +546,8 @@ int string_to_ctype (const char *sname)
 
 (define (emit-return-goo varname init)
   `(begin
-     (raw ,(format #f "uint64_t ty = (uint64_t) ~a" init))
-     (c_make_goo sc ty (s7_f sc) ,(format #f "(void*) ~a" varname))))
+     (let ((ty uint64_t ,(format #f "(uint64_t) ~a" init)))
+       (c_make_goo sc ty (s7_f sc) ,(format #f "(void*) ~a" varname)))))
 
 (define (c-ify-name sname)
   (let ((str "")
