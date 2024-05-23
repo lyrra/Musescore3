@@ -236,26 +236,25 @@ extern Ms::MTest* g_mtest;
 
 (defcompile
   (defcreg ('ms-note-set-property) (3)
-    (emit-pop-arg-goo '("Ms::Note*" "note"))
-    '(raw "s7_pointer sym = s7_car(s7_cdr(args))")
-    '(raw "s7_pointer val = s7_car(s7_cddr(args))")
-    '(cond
-      ((s7_is_boolean val)
-       (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_boolean sc val))))
-      ((s7_is_real val)
-       (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_real val))))
-      ((s7_is_symbol val)
-       (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (string_to_ctype (s7_symbol_name val)))))
-      (else
-       (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_integer val)))))
-    '(s7_t sc)))
+    (emit-pop-arg-goo2 #t #f #f #f '("Ms::Note*" "note") "g"
+      '(let ((sym "s7_pointer" (s7_car (s7_cdr args)))
+             (val "s7_pointer" (s7_car (s7_cddr args))))
+         (cond
+          ((s7_is_boolean val)
+           (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_boolean sc val))))
+          ((s7_is_real val)
+           (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_real val))))
+          ((s7_is_symbol val)
+           (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (string_to_ctype (s7_symbol_name val)))))
+          (else
+           (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_integer val)))))
+         (s7_t sc)))))
 
 ;
 ; emit code for ms-objects set/get, and register them to be exported to scheme
 ;
 
 (def-goo-setters-sym "Ms::Breath" "breath" "symId" "setSymId" "SymId")
-
 (def-goo-setters-bool "Ms::Note" "note" "small" "isSmall" "setSmall")
 (def-goo-setters-bool "Ms::Note" "note" "ghost" "ghost" "setGhost")
 (def-goo-setters-sym "Ms::Note" "note" "userDotPosition" "setUserDotPosition" "Direction")
@@ -266,17 +265,17 @@ extern Ms::MTest* g_mtest;
 
 (defcompile
   (defcreg ('ms-score-undoStack-undo) (2)
-    (emit-pop-arg-goo '("MasterScore*" "score"))
-    (emit-next-arg)
-    '(raw "s = s7_car(args)")
-    '(cond
-      ((c_is_goo sc s)
-       (raw "g = (goo_t *)s7_c_object_value(s)")
-       (let ((ed EditData* "(EditData*) g->cd"))
-         (raw "score->undoStack()->undo(ed)")))
-      (else
-       (raw "score->undoStack()->undo(0)")))
-    '(s7_t sc)))
+    (emit-pop-arg-goo2 #t #f #f #f '("MasterScore*" "score") "g"
+      (emit-next-arg)
+      '(set! s (s7_car args))
+      `(cond
+        ((c_is_goo sc s)
+         (set! g ,(format #f "(goo_t *)s7_c_object_value(s)"))
+         (let ((ed EditData* "(EditData*) g->cd"))
+           (raw "score->undoStack()->undo(ed)")))
+        (else
+         (raw "score->undoStack()->undo(0)")))
+      '(s7_t sc))))
 
 ; register type enumerations
 (for-each (lambda (lst)
@@ -284,8 +283,7 @@ extern Ms::MTest* g_mtest;
                   (scheme-type-name (cadr lst)))
               (register-c-type global-list)
               (emit-c-type-string-maps3 scheme-type-name)))
-  `(
-    (,%duration-type DurationType)
+  `((,%duration-type DurationType)
     (,%select-type   SelectType)
     (,%updown-mode UpDownMode)
     (,%key-type Key)
@@ -330,9 +328,9 @@ extern Ms::MTest* g_mtest;
          ((sname cvartype cvarname meth crestype cresvarname gootype)
           (defcompile
             (defcreg (sname) (1)
-               (emit-pop-arg-goo `(,cvartype ,cvarname))
-               `(let ((,cresvarname ,crestype ,meth))
-                  ,(emit-return-goo cresvarname (format #f "static_cast<uint64_t>(~a)" gootype))))))))
+               (emit-pop-arg-goo2 #t #f #f #f `(,cvartype ,cvarname) "g"
+                `(let ((,cresvarname ,crestype ,meth))
+                   ,(emit-return-goo cresvarname (format #f "static_cast<uint64_t>(~a)" gootype)))))))))
      '((ms-chords-first "QVector<Ms::Chord*>*" "chords" "chords->first()" "Ms::Chord*" "chord" "GOO_TYPE::CHORD")
        (ms-notes-front "std::vector<Note*>*" "notes" "notes->front()" "Note*" "note" "GOO_TYPE::NOTE")))
 
@@ -346,7 +344,7 @@ extern Ms::MTest* g_mtest;
   (defcreg 'ms-notes-ref ((notes goo "std::vector<Note*>*") (i int)) ()
     '(if (>= i (notes->size))
          (return (s7_f sc)))
-    `(let ((note Note* "notes->at(i)"))
+    `(let ((note Note* (notes->at i)))
        ,(emit-return-goo "note" "GOO_TYPE::ElementType__NOTE"))))
 
 (emit-string-to-ctype)
