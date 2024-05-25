@@ -317,7 +317,7 @@ extern Ms::MTest* g_mtest;
        ,(emit-return-goo "x" "static_cast<uint64_t>(0)"))))
 
 ;;;
-;;; emit all declaratively stated c++object functions
+;;; emit all declaratively stated c++object methods
 ;;;
 
 (emit-registered-objects)
