@@ -104,7 +104,7 @@
   (methods
     (get toString () (QString))
     (get (equal ==) (("Ms::Fraction*")) (bool) infix)
-    (apply (add   +=) (("Ms::Fraction*")) #f infix) ; FIX: return void
+    (apply (add +=) (("Ms::Fraction*")) #f infix) ; FIX: return void
     ))
 
 (define-object tduration

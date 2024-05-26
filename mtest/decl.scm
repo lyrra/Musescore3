@@ -149,12 +149,12 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg 'ms-elements-getnext ((elms goo QList<Element*>*)) ()
     `(let ((cnt int 0))
-       (when (&& g->data (s7_is_integer g->data))
-         (set! cnt (s7_integer g->data))
+       (when (&& g1->data (s7_is_integer g1->data))
+         (set! cnt (s7_integer g1->data))
          (raw "cnt++"))
        (if (>= cnt (elms->size)) ; no more elements
          (return (s7_f sc)))
-       (raw "g->data = s7_make_integer(sc, cnt)")
+       (raw "g1->data = s7_make_integer(sc, cnt)")
        (let ((elm Element* (elms->at cnt)))
          ,(emit-return-goo "elm" 0)))))
 
