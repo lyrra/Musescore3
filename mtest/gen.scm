@@ -274,34 +274,13 @@
          (c-type (assq-ref args 'c-type))
          (make-args (assq-ref args 'make-args))
          (methods (assq-ref args 'methods)))
-    (define (make-callargs2 args)
-        (let ((n 0) (str ""))
-          (for-each (lambda (arg)
-                      (set! n (+ 1 n))
-                      (set! str (format #f "~a~a~ax~a"
-                                        str (if (= n 1) "" ", ")
-                                        (if (assq-ref arg 'deref) "*" "") ; c-ref(&), need to ref pointer
-                                        n)))
-                   args)
-          str))
-    (define (make-callargs args)
-        (let ((n 0) (str ""))
-          (for-each (lambda (arg)
-                      (set! n (+ 1 n))
-                      (set! str (format #f "~a~a~ax~a"
-                                        str (if (= n 1) "" ", ")
-                                        (if (memq 'deref arg) "*" "") ; c-ref(&), need to ref pointer
-                                        n)))
-                   args)
-          str))
     (define (form-callargs2 args)
       (let ((n 0))
         (map (lambda (arg)
                (set! n (+ 1 n))
-               (format #f "~ax~a"
-                       ; c-ref(&), need to ref pointer
-                       (if (assq-ref arg 'deref) "*" "")
-                       n))
+               (if (assq-ref arg 'deref)
+                   `(deref ,(format #f "x~a" n))
+                   (format #f "x~a" n)))
              args)))
     (define (form-callargs-max args numargs)
       (let ((n 0) (lst '()))
@@ -309,10 +288,9 @@
                     (set! n (+ 1 n))
                     (if (<= n numargs)
                         (set! lst
-                              (cons (format #f "~ax~a"
-                                            ; c-ref(&), need to ref pointer
-                                            (if (memq 'deref arg) "*" "")
-                                            n)
+                              (cons (if (memq 'deref arg)
+                                        `(deref ,(format #f "x~a" n))
+                                        (format #f "x~a" n))
                                     lst))))
              args)
         (reverse lst)))
@@ -347,7 +325,6 @@
              (cmethtype (case methtype
                           ((real) 'double)
                           (else methtype)))
-             (cargsstr (make-callargs2 cargs))
              (cargslst (form-callargs2
                         (if (and setter? (memq 'ref info))
                             (cons (cons (cons 'deref #t) (car cargs)) (cdr cargs))
@@ -356,21 +333,20 @@
                         ((get-string info) (get-string info))
                         ; this avoids constructing an ref (since it hits first)
                         ((get-symbol info 'avoid-ref)
-                         (append (list (format #f "o->~a" cname)) cargslst))
+                         `(-> o ,cname ,@cargslst))
                         ((and (not setter?) (get-symbol info 'ref))
-                         `(& ,(append (list (format #f "o->~a" cname)) cargslst)))
+                         `(ref (-> o ,cname ,@cargslst)))
                         (else
                          (if (memq 'infix info)
-                             (format #f "*o ~a *~a" cname cargsstr)
-                             (append (list (format #f "o->~a" cname)) cargslst))))))
+                             `(infix ,cname (deref o) (deref ,@cargslst))
+                             `(-> o ,cname ,@cargslst))))))
         (if (null? opt-args)
             (list cmethtype methexpr)
             (list cmethtype
                   (cons 'cond ; emit required and optional args
                         (map (lambda (i)
                                `((== numArgs ,(+ (length req-args) i))
-                                 ,(append (list (format #f "o->~a" cname))
-                                          (form-callargs-max cargs (+ (length req-args) i)))))
+                                 (-> o ,cname ,@(form-callargs-max cargs (+ (length req-args) i)))))
                              (iota (+ 1 (length opt-args)))))))))
     (define (emit-code-return2 rets)
       (let* ((methtype (if rets (assq-ref rets 'type) #f))
@@ -396,12 +372,12 @@
     (define (emit-method-nil methname)
       (let ((sname (string->symbol (format #f "ms-~a-~a" name methname)))
             (gootype 0)
-            (methexpr (format #f "o->~a()" methname)))
+            (methexpr `(-> o ,methname)))
         (defcompile
          (defcreg (sname) (1)
           '(raw "// ---- emit-method-get")
           (emit-pop-arg-goo2 #t #f #f #f `(,(format #f "~a*" c-type) "o") "g"
-            `(raw ,(format #f "~a" methexpr))
+            methexpr
             '(return (s7_t sc)))))))
     (define (get-method-sname-get methpair)
       (let ((methname (if (pair? methpair) (car methpair) methpair)))
@@ -442,16 +418,17 @@
               (if (> (length cargs) 0) '(set! args (s7_cdr args)) '(begin))
               (emit-code-get-argso #f 'i #f 1 cargs ()
                (list
-                (let* ((cargsstr (make-callargs cargs))
+                (let* ((cargsstr (form-callargs2 cargs))
                        (methexpr (cond
                                   ((get-string info) (get-string info))
                                   ; this avoids constructing an ref (since it hits first)
-                                  ((get-symbol info 'avoid-ref) (format #f "o->~a(~a)" cname cargsstr))
-                                  ((get-symbol info 'ref) (format #f "&(o->~a(~a))" cname cargsstr))
+                                  ((get-symbol info 'avoid-ref) `(-> o ,cname ,@cargsstr))
+                                  ((get-symbol info 'ref)
+                                   `(ref (-> o ,cname ,@cargsstr)))
                                   (else
                                    (if (memq 'infix info)
-                                       (format #f "*o ~a *~a" cname cargsstr)
-                                       (format #f "o->~a(~a)" cname cargsstr))))))
+                                       `(infix ,cname (deref o) (deref ,@cargsstr))
+                                       `(-> o ,cname ,@cargsstr))))))
                   methexpr)
                 's)))))))
     (define (emit-method-get/set methname cargs methargs)
@@ -588,10 +565,11 @@
               `(begin (set! ,(format #f "~a" cvar) "(goo_t *)s7_c_object_value(s)"))
               `(let ((,(format #f "~a" cvar) "goo_t*" ,(format #f "(goo_t *)s7_c_object_value(s)")))))
           (if (and type name)
-              `((raw ,(format #f "    ~a ~a = (~a) ~a->cd"
-                              type name type cvar)))
-              '())
-          body)))))))
+              (list
+               (append
+                `(let ((,name ,type ,(format #f "(~a) ~a->cd" type cvar))))
+                body))
+              body))))))))
 
 (define (emit-maybe-next-arg)
   '(if (&& moreArgs (s7_is_pair args))
@@ -626,13 +604,13 @@
     (defcompile
       (defcreg (sname-getname) (1)
         (emit-pop-arg-goo2 #t #f #f #f `(,objtype "o") "g"
-          `(let ((y ,operandtype (,(format #f "o->~a" getname))))
+          `(let ((y ,operandtype (-> o ,getname)))
              ,(emit-return-goo "y" 0)))))
     (defcompile
       (defcreg (sname-setname) (2)
         (emit-pop-arg-goo2 #t #f #f #f `(,objtype "o") "go"
           (emit-pop-arg-goo2 #t #t #f #t `(,operandtype "x") "gx"
-            `(,(format #f "o->~a" setname) x)
+            `(-> o ,setname x)
             '(s7_t sc)))))))
 
 (define-syntax def-goo-setters-bool
@@ -647,7 +625,7 @@
                    "s7_pointer"
             (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
               (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
-                (s7_make_boolean sc (,(format #f "o->~a" memnameget)))))))
+                (s7_make_boolean sc (-> o ,memnameget))))))
 
        (defcompile
          `(defcfun (,(format #f "ms_set_~a_~a" objname memname))
@@ -656,7 +634,7 @@
             (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
               (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
                 (let ((x "s7_pointer" (s7_cadr args)))
-                  (,(format #f "o->~a" memnameset) (s7_boolean sc x))
+                  (-> o ,memnameset (s7_boolean sc x))
                   x)))))))))
 
 ; FIX: the transname should be a symbol that references into %c-types-info
@@ -672,7 +650,7 @@
                    "s7_pointer"
             (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
               (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
-                (s7_make_symbol sc (,(format #f "~a_to_string" transname) (,(format #f "o->~a"memname))))))))
+                (s7_make_symbol sc (,(format #f "~a_to_string" transname) (-> o ,memname)))))))
        (if memnameset
           (defcompile
            `(defcfun (,(format #f "ms_set_~a_~a" objname memname))
@@ -681,7 +659,7 @@
               (let ((g "goo_t*" "(goo_t *)s7_c_object_value(s7_car(args))"))
                 (let ((o ,(format #f "~a*" objtype) ,(format #f "(~a*) g->cd" objtype)))
                   (let ((x "s7_pointer" "s7_cadr(args)"))
-                    (,(format #f "o->~a" memnameset) (,(format #f "string_to_~a" transname) (s7_symbol_name x)))
+                    (-> o ,memnameset (,(format #f "string_to_~a" transname) (s7_symbol_name x)))
                     x))))))))))
 
 (define (emit-c-type-string-maps-simple name typelst basetypename)
