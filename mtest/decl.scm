@@ -86,28 +86,28 @@ extern Ms::MTest* g_mtest;
    '(c_make_goo sc
                 "static_cast<uint64_t>(GOO_TYPE::CHORD)"
                 (s7_nil sc)
-                "(void*) new TDuration(string_to_DurationType(dur))")))
+                (cast void* (c++new (TDuration (string_to_DurationType dur)))))))
 
 (defcompile
  (defcreg 'ms-make-score () ()
    '(c_make_goo sc
                 "static_cast<uint64_t>(0 /*GOO_TYPE::CHORD*/)"
                 (s7_nil sc)
-                "new Ms::Score()")))
+                (c++new (Ms::Score)))))
 
 (defcompile
  (defcreg 'ms-make-chord () ()
    '(c_make_goo sc
                 "static_cast<uint64_t>(GOO_TYPE::CHORD)"
                 (s7_nil sc)
-                "new Ms::Chord(g_mtest->score)")))
+                (c++new (Ms::Chord (-> g_mtest score))))))
 
 (defcompile
  (defcreg 'ms-make-note () ()
    '(c_make_goo sc
                 "static_cast<uint64_t>(GOO_TYPE::NOTE)"
                 (s7_nil sc)
-                "new Ms::Note(g_mtest->score)")))
+                (c++new (Ms::Note (-> g_mtest score))))))
 
 ;
 ; (ms-make-element <element-name>) => element-object
@@ -125,7 +125,7 @@ extern Ms::MTest* g_mtest;
                (let ((name (car type))
                      (cname (cadr type)))
                  (list `(! (strcasecmp symname ,(format #f "\"~a\"" name)))
-                   `(set! e ,(format #f "Element::create(~a, g_mtest->score)" cname))
+                   `(set! e (Element::create ,cname (-> g_mtest score)))
                    `(set! ty ,(format #f "static_cast<uint64_t>(GOO_TYPE::~a)"
                                       (string-lisp->c (symbol->string name)))))))
              (cdr (assoc 'ElementType %c-types)))
@@ -137,13 +137,13 @@ extern Ms::MTest* g_mtest;
 
 (defcompile
  (defcreg 'ms-element-type ((e goo Element*)) ()
-   '(s7_make_integer sc "static_cast<uint64_t>(e->type())")))
+   '(s7_make_integer sc (cast uint64_t ((-> e type))))))
 
 (def-goo-setters-goo "Ms::Element*" "element" "parent" "setParent" "Element*")
 
 (defcompile
   (defcreg 'ms-score-selection-elements ((score goo MasterScore*)) ()
-    `(let ((elms "const void*" "&(score->selection().elements())"))
+    `(let ((elms "const void*" (ref ((.> ((-> score selection)) elements)))))
        ,(emit-return-goo "elms" 0))))
 
 (defcompile
@@ -154,7 +154,7 @@ extern Ms::MTest* g_mtest;
          (raw "cnt++"))
        (if (>= cnt (elms->size)) ; no more elements
          (return (s7_f sc)))
-       (raw "g1->data = s7_make_integer(sc, cnt)")
+       (set! (-> g1 data) (s7_make_integer sc cnt))
        (let ((elm Element* (elms->at cnt)))
          ,(emit-return-goo "elm" 0)))))
 
@@ -164,13 +164,13 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg 'ms-make-breath ((score goo MasterScore*)) ()
     '(if (! score) (return (s7_f sc)))
-    '(let ((b Breath* "new Breath(score)")
-          (ty uint64_t 0))
+    '(let ((b Breath* (c++new (Breath score)))
+           (ty uint64_t 0))
        (c_make_goo sc ty (s7_f sc) b))))
 
 (defcompile
   (defcreg 'ms-make-editdata () ()
-    `(let ((ed EditData* "new EditData(0)")
+    `(let ((ed EditData* (c++new (EditData 0)))
            (ty uint64_t 0))
        (set! ed->view 0)
        (c_make_goo sc ty (s7_f sc) ed))))
@@ -198,8 +198,8 @@ extern Ms::MTest* g_mtest;
 
 (defcompile
   (defcreg 'ms-make-hairpin () ()
-    `(let ((hp Hairpin* "new Hairpin(g_mtest->score)"))
-       ,(emit-return-goo "hp" "static_cast<uint64_t>(GOO_TYPE::ElementType__HAIRPIN)"))))
+    `(let ((hp Hairpin* (c++new (Hairpin (-> g_mtest score)))))
+       ,(emit-return-goo "hp" "GOO_TYPE::ElementType__HAIRPIN"))))
 
 (def-goo-setters-sym "Ms::Hairpin" "hairpin" "hairpinType" "setHairpinType" "hairpin")
 
@@ -208,8 +208,8 @@ extern Ms::MTest* g_mtest;
 
 (defcompile
   (defcreg 'ms-make-tremolo ((score goo MasterScore*)) ()
-    `(let ((tr Tremolo* "new Tremolo(score)"))
-       ,(emit-return-goo "tr" "static_cast<uint64_t>(GOO_TYPE::ElementType__TREMOLO)"))))
+    `(let ((tr Tremolo* (c++new (Tremolo score))))
+       ,(emit-return-goo "tr" "GOO_TYPE::ElementType__TREMOLO"))))
 
 (def-goo-setters-sym "Ms::Tremolo" "tremolo" "tremoloType" "setTremoloType" "TremoloType")
 
@@ -218,8 +218,8 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg 'ms-make-articulation ((score goo MasterScore*) (sym sym)) ()
     `(let ((syid Ms::SymId (string_to_SymId sym))
-           (ar Articulation* "new Articulation(syid, score)"))
-       ,(emit-return-goo "ar" "static_cast<uint64_t>(0)"))))
+           (ar Articulation* (c++new (Articulation syid score))))
+       ,(emit-return-goo "ar" 0))))
 
 ;
 ; note
@@ -270,11 +270,11 @@ extern Ms::MTest* g_mtest;
       '(set! s (s7_car args))
       `(cond
         ((c_is_goo sc s)
-         (set! g ,(format #f "(goo_t *)s7_c_object_value(s)"))
-         (let ((ed EditData* "(EditData*) g->cd"))
-           (raw "score->undoStack()->undo(ed)")))
+         (set! g (cast "goo_t *" (s7_c_object_value s)))
+         (let ((ed EditData* (cast "EditData*" (-> g cd))))
+           ((-> ((-> score undoStack)) undo) ed)))
         (else
-         (raw "score->undoStack()->undo(0)")))
+         ((-> ((-> score undoStack)) undo) 0)))
       '(s7_t sc))))
 
 ; register type enumerations
@@ -296,8 +296,8 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg 'ms-make-fraction
            ((numerator int) (denominator int)) ()
-    '(let ((f Fraction* "new Fraction(numerator, denominator)")
-           (ty uint64_t "static_cast<uint64_t>(0); // GOO_TYPE::ElementType__FRACTION"))
+    '(let ((f Fraction* (c++new (Fraction numerator denominator)))
+           (ty uint64_t (cast uint64_t 0))) ; // GOO_TYPE::ElementType__FRACTION
        (c_make_goo sc ty (s7_f sc) f))))
 
 (defcompile
@@ -313,8 +313,8 @@ extern Ms::MTest* g_mtest;
   (defcreg 'ms-make-ChangeStyleVal
            ((score goo Score*) (sym sym) (variant bool)) ()
     `(let ((sid "Ms::Sid" (string_to_Sid sym))
-           (x ChangeStyleVal* "new ChangeStyleVal(score, sid, variant)"))
-       ,(emit-return-goo "x" "static_cast<uint64_t>(0)"))))
+           (x ChangeStyleVal* (c++new (ChangeStyleVal score sid variant))))
+       ,(emit-return-goo "x" '(cast uint64_t 0)))))
 
 ;;;
 ;;; emit all declaratively stated c++object methods
@@ -324,15 +324,15 @@ extern Ms::MTest* g_mtest;
 
 ; emit c-functions for simple object-methods
 (map (lambda (lst)
-       (match lst
-         ((sname cvartype cvarname meth crestype cresvarname gootype)
+       (apply (lambda (sname cvartype cvarname meth crestype cresvarname gootype)
           (defcompile
             (defcreg (sname) (1)
                (emit-pop-arg-goo2 #t #f #f #f `(,cvartype ,cvarname) "g"
                 `(let ((,cresvarname ,crestype ,meth))
-                   ,(emit-return-goo cresvarname (format #f "static_cast<uint64_t>(~a)" gootype)))))))))
-     '((ms-chords-first "QVector<Ms::Chord*>*" "chords" "chords->first()" "Ms::Chord*" "chord" "GOO_TYPE::CHORD")
-       (ms-notes-front "std::vector<Note*>*" "notes" "notes->front()" "Note*" "note" "GOO_TYPE::NOTE")))
+                   ,(emit-return-goo cresvarname `(cast uint64_t ,gootype)))))))
+              lst))
+     '((ms-chords-first "QVector<Ms::Chord*>*" "chords" ((-> chords first)) "Ms::Chord*" "chord" "GOO_TYPE::CHORD")
+       (ms-notes-front "std::vector<Note*>*" "notes" ((-> notes front)) "Note*" "note" "GOO_TYPE::NOTE")))
 
 ; emit simple iterators
 
