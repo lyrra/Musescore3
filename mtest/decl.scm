@@ -77,7 +77,7 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps3 'note_ValueType)
 (emit-c-type-string-maps3 'NoteHead_Type)
 (emit-c-type-string-maps3 'NoteHead_Group)
-(emit-c-type-string-maps-simple "element_pid" (cdr (assoc 'Pid %c-types)) "Ms::Pid")
+(emit-c-type-string-maps-simple "element_pid" (cdr (assoc 'Pid %c-types)) 'Ms::Pid)
 
 (emit-c-type-string-maps3 'NoteType)
 
@@ -139,7 +139,7 @@ extern Ms::MTest* g_mtest;
  (defcreg 'ms-element-type ((e goo Element*)) ()
    '(s7_make_integer sc (cast uint64_t ((-> e type))))))
 
-(def-goo-setters-goo "Ms::Element*" "element" "parent" "setParent" "Element*")
+(def-goo-setters-goo 'Ms::Element* "element" "parent" "setParent" "Element*")
 
 (defcompile
   (defcreg 'ms-score-selection-elements ((score goo MasterScore*)) ()
@@ -201,7 +201,7 @@ extern Ms::MTest* g_mtest;
     `(let ((hp Hairpin* (c++new (Hairpin (-> g_mtest score)))))
        ,(emit-return-goo "hp" "GOO_TYPE::ElementType__HAIRPIN"))))
 
-(def-goo-setters-sym "Ms::Hairpin" "hairpin" "hairpinType" "setHairpinType" "hairpin")
+(def-goo-setters-sym 'Ms::Hairpin "hairpin" "hairpinType" "setHairpinType" "hairpin")
 
 ; tremolo
 (emit-c-type-string-maps3 'TremoloType)
@@ -211,7 +211,7 @@ extern Ms::MTest* g_mtest;
     `(let ((tr Tremolo* (c++new (Tremolo score))))
        ,(emit-return-goo "tr" "GOO_TYPE::ElementType__TREMOLO"))))
 
-(def-goo-setters-sym "Ms::Tremolo" "tremolo" "tremoloType" "setTremoloType" "TremoloType")
+(def-goo-setters-sym 'Ms::Tremolo "tremolo" "tremoloType" "setTremoloType" "TremoloType")
 
 ; articulation
 
@@ -226,17 +226,17 @@ extern Ms::MTest* g_mtest;
 ;
 
 (defcompile
-  (defcreg 'ms-note-usermirror ((note goo "Ms::Note*")) ()
+  (defcreg 'ms-note-usermirror ((note goo Ms::Note*)) ()
     '(s7_make_symbol sc (DirectionH_to_string (note->userMirror)))))
 
 (defcompile
-  (defcreg 'ms-set-note-usermirror ((note goo "Ms::Note*") (symname sym)) ()
+  (defcreg 'ms-set-note-usermirror ((note goo Ms::Note*) (symname sym)) ()
     '(note->setUserMirror (string_to_DirectionH symname))
     's))
 
 (defcompile
   (defcreg ('ms-note-set-property) (3)
-    (emit-pop-arg-goo2 #t #f #f #f '("Ms::Note*" "note") "g"
+    (emit-pop-arg-goo2 #t #f #f #f '(Ms::Note* note) 'g
       '(let ((sym "s7_pointer" (s7_car (s7_cdr args)))
              (val "s7_pointer" (s7_car (s7_cddr args))))
          (cond
@@ -254,14 +254,14 @@ extern Ms::MTest* g_mtest;
 ; emit code for ms-objects set/get, and register them to be exported to scheme
 ;
 
-(def-goo-setters-sym "Ms::Breath" "breath" "symId" "setSymId" "SymId")
-(def-goo-setters-bool "Ms::Note" "note" "small" "isSmall" "setSmall")
-(def-goo-setters-bool "Ms::Note" "note" "ghost" "ghost" "setGhost")
-(def-goo-setters-sym "Ms::Note" "note" "userDotPosition" "setUserDotPosition" "Direction")
-(def-goo-setters-sym "Ms::Note" "note" "headGroup" "setHeadGroup" "NoteHead_Group")
-(def-goo-setters-sym "Ms::Note" "note" "headType" "setHeadType" "NoteHead_Type")
-(def-goo-setters-sym "Ms::Note" "note" "veloType" "setVeloType" "note_ValueType") ; velotype uses Note::Valuetype
-(def-goo-setters-sym "Ms::Note" "note" "noteType" #f "NoteType")
+(def-goo-setters-sym 'Ms::Breath "breath" "symId" "setSymId" "SymId")
+(def-goo-setters-bool 'Ms::Note "note" "small" "isSmall" "setSmall")
+(def-goo-setters-bool 'Ms::Note "note" "ghost" "ghost" "setGhost")
+(def-goo-setters-sym 'Ms::Note "note" "userDotPosition" "setUserDotPosition" "Direction")
+(def-goo-setters-sym 'Ms::Note "note" "headGroup" "setHeadGroup" "NoteHead_Group")
+(def-goo-setters-sym 'Ms::Note "note" "headType" "setHeadType" "NoteHead_Type")
+(def-goo-setters-sym 'Ms::Note "note" "veloType" "setVeloType" "note_ValueType") ; velotype uses Note::Valuetype
+(def-goo-setters-sym 'Ms::Note "note" "noteType" #f "NoteType")
 
 (defcompile
   (defcreg ('ms-score-undoStack-undo) (2)
@@ -302,7 +302,7 @@ extern Ms::MTest* g_mtest;
 
 (defcompile
   (defcreg 'ms-division () ()
-    '(s7_make_integer sc "MScore::division")))
+    '(s7_make_integer sc MScore::division)))
 
 (defcompile
   (defcreg 'ms-tpc2degree
@@ -312,7 +312,7 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg 'ms-make-ChangeStyleVal
            ((score goo Score*) (sym sym) (variant bool)) ()
-    `(let ((sid "Ms::Sid" (string_to_Sid sym))
+    `(let ((sid Ms::Sid (string_to_Sid sym))
            (x ChangeStyleVal* (c++new (ChangeStyleVal score sid variant))))
        ,(emit-return-goo "x" '(cast uint64_t 0)))))
 
@@ -321,7 +321,8 @@ extern Ms::MTest* g_mtest;
 ;;;
 
 (emit-registered-objects)
-
+;(gen-done)(exit)
+;;;;;;;
 ; emit c-functions for simple object-methods
 (map (lambda (lst)
        (apply (lambda (sname cvartype cvarname meth crestype cresvarname gootype)
@@ -331,21 +332,21 @@ extern Ms::MTest* g_mtest;
                 `(let ((,cresvarname ,crestype ,meth))
                    ,(emit-return-goo cresvarname `(cast uint64_t ,gootype)))))))
               lst))
-     '((ms-chords-first "QVector<Ms::Chord*>*" "chords" ((-> chords first)) "Ms::Chord*" "chord" "GOO_TYPE::CHORD")
-       (ms-notes-front "std::vector<Note*>*" "notes" ((-> notes front)) "Note*" "note" "GOO_TYPE::NOTE")))
+     '((ms-chords-first QVector<Ms::Chord*>* chords ((-> chords first)) Ms::Chord* chord GOO_TYPE::CHORD)
+       (ms-notes-front std::vector<Note*>* notes ((-> notes front)) Note* note GOO_TYPE::NOTE)))
 
 ; emit simple iterators
 
 (defcompile
-  (defcreg 'ms-notes-size ((notes goo "std::vector<Note*>*")) ()
+  (defcreg 'ms-notes-size ((notes goo std::vector<Note*>*)) ()
     '(s7_make_integer sc (notes->size))))
 
 (defcompile
-  (defcreg 'ms-notes-ref ((notes goo "std::vector<Note*>*") (i int)) ()
+  (defcreg 'ms-notes-ref ((notes goo std::vector<Note*>*) (i int)) ()
     '(if (>= i (notes->size))
          (return (s7_f sc)))
     `(let ((note Note* (notes->at i)))
-       ,(emit-return-goo "note" "GOO_TYPE::ElementType__NOTE"))))
+       ,(emit-return-goo "note" 'GOO_TYPE::ElementType__NOTE))))
 
 (emit-string-to-ctype)
 
