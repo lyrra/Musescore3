@@ -12,6 +12,12 @@
 
 (define %compile-env '())
 
+(define (fmt . args)
+  (apply format #f args))
+
+(define (fmtsym . args)
+  (string->symbol (apply format #f args)))
+
 (define-syntax defcompile
   (syntax-rules ()
     ((_ . body)
@@ -56,11 +62,6 @@
                        (make-args . ,make-args)
                        (methods . ,methods))))))
 
-(define-syntax emit-raw
-  (syntax-rules ()
-    ((_ . args)
-     (list 'raw (format #f . args)))))
-
 (define (compile-register-cfun sname num-req-args num-opt-args body)
   (let ((cname (c-ify-name sname)))
     (set! %export-to-scheme2
@@ -68,7 +69,7 @@
                 %export-to-scheme2))
     (append `(defcfun (,sname ,cname)
                ("s7_scheme *sc" "s7_pointer args")
-               "s7_pointer")
+               s7_pointer)
             body)))
 
 (define (compile-args at args)
@@ -163,14 +164,14 @@
 
 (define (emit-code-get-argso an? at na? n req-args opt-args body)
       (append
-       `(begin (raw ,(format #f "// ---- emit-code-get-argso ~a ----" n)))
+       `(begin (raw ,(fmt "// ---- emit-code-get-argso ~a ----" n)))
        (cond
         ((and (null? req-args) (null? opt-args))
          body)
         ((not (null? req-args))
          (append
           (let* ((arg (car req-args))
-                 (varname (if an? (assq-ref arg 'name) (format #f "x~a" n))))
+                 (varname (if an? (assq-ref arg 'name) (fmtsym "x~a" n))))
             ;(set! %compile-env (assq-set! %compile-env 'argsPairKnow #f))
             (list (list 'begin
                         (if (> n 1) '(set! args (s7_cdr args)) '(begin)))
@@ -208,8 +209,8 @@
                             (list (maybe-emit-args-check))
                             `((let ((s s7_pointer (s7_car args)))
                                 (if (! (s7_is_symbol s)) (return (s7_f sc)))
-                                (let ((,(format #f "t~a" n) "const char*" (s7_symbol_name s)))
-                                  (let ((,varname ,(format #f "Ms::~a" stype) (,(format #f "string_to_~a" conv) ,(format #f "t~a" n))))
+                                (let ((,(fmtsym "t~a" n) "const char*" (s7_symbol_name s)))
+                                  (let ((,varname ,(fmtsym "Ms::~a" stype) (,(fmtsym "string_to_~a" conv) ,(fmtsym "t~a" n))))
                                     ,(emit-code-get-argso an? at na? (+ 1 n) (cdr req-args) opt-args body))))))
                            (append
                             `(begin)
@@ -221,7 +222,7 @@
                     (else
                      (emit-pop-arg-goo2 (= n 1) #f #f #f
                       (list (assq-ref arg 'ctype) varname)
-                      (format #f "g~a" n)
+                      (fmtsym "g~a" n)
                       (emit-code-get-argso an? at na? (+ 1 n) (cdr req-args) opt-args body))))))))
         ((and (null? req-args) (not na?))
          (list
@@ -235,7 +236,7 @@
                     (emit-code-get-argso an? at #t n req-args opt-args body)))))))
         ((null? req-args)
          (let* ((arg (car opt-args))
-                (varname (if an? (assq-ref arg 'name) (format #f "x~a" n))))
+                (varname (if an? (assq-ref arg 'name) (fmtsym "x~a" n))))
            (list
            (list 'begin
                  (emit-maybe-next-arg)
@@ -251,20 +252,20 @@
                    ((sym)
                     (let ((conv (assq-ref arg 'ctype))
                           (stype (typeinfo-meta-get (assq-ref arg 'ctype) 'c-type-cons))
-                          (cargname (format #f "t~a" n)))
+                          (cargname (fmtsym "t~a" n)))
                       (append
                        `(begin)
                        (list (maybe-emit-args-check))
                        `((let ((s s7_pointer (s7_car args)))
                            (if (! (s7_is_symbol s)) (return (s7_f sc)))
                            (let ((,cargname "const char*" (s7_symbol_name s)))
-                             (let ((,varname ,(format #f "Ms::~a" stype) (,(format #f "string_to_~a" conv) ,cargname)))
+                             (let ((,varname ,(fmtsym "Ms::~a" stype) (,(fmtsym "string_to_~a" conv) ,cargname)))
                                ,(emit-code-get-argso an? at na? (+ 1 n) req-args (cdr opt-args) body))))))))
                    (else
                     (emit-pop-arg-goo2 (= n 1) #t #t #t
                                        (raw "// ---- emit goo arg")
                                        (list (assq-ref arg 'ctype) varname)
-                                       (format #f "g~a" n)
+                                       (fmtsym "g~a" n)
                      (raw "// ---- emit sym arg")
                      (emit-code-get-argso an? at na? (+ 1 n) req-args (cdr opt-args) body)))))))))))
 
@@ -279,8 +280,8 @@
         (map (lambda (arg)
                (set! n (+ 1 n))
                (if (assq-ref arg 'deref)
-                   `(deref ,(format #f "x~a" n))
-                   (format #f "x~a" n)))
+                   `(deref ,(fmtsym "x~a" n))
+                   (fmtsym "x~a" n)))
              args)))
     (define (form-callargs-max args numargs)
       (let ((n 0) (lst '()))
@@ -289,8 +290,8 @@
                     (if (<= n numargs)
                         (set! lst
                               (cons (if (memq 'deref arg)
-                                        `(deref ,(format #f "x~a" n))
-                                        (format #f "x~a" n))
+                                        `(deref ,(fmtsym "x~a" n))
+                                        (fmtsym "x~a" n))
                                     lst))))
              args)
         (reverse lst)))
@@ -354,34 +355,34 @@
              (gootype (cond
                        ((not gootype) 0)
                        ((string? gootype) gootype)
-                       (else (format #f "GOO_TYPE::~a" gootype)))))
+                       (else (fmtsym "GOO_TYPE::~a" gootype)))))
         (if (eq? 'sym methtype) (set! methtype (assq-ref rets 'ctype))) ; FIX, destructure rets properly
         (if rets
             (case (if rets (assq-ref rets 'type) #f)
               ((QString)
                '(s7_make_string sc (strdup (qPrintable r))))
               ((sym)
-               `(let ((t "const char*" ,(format #f "~a_to_string(r)" methtype)))
+               `(let ((t "const char*" (,(fmt "~a_to_string" methtype) r)))
                   (s7_make_symbol sc t)))
               ((int)  '(s7_make_integer sc r))
               ((real) '(s7_make_real sc r))
               ((bool) '(s7_make_boolean sc r))
               (else
-               (emit-return-goo "r" (format #f "static_cast<uint64_t>(~a)" gootype))))
+               (emit-return-goo "r" gootype)))
             '(s7_t sc))))
     (define (emit-method-nil methname)
-      (let ((sname (string->symbol (format #f "ms-~a-~a" name methname)))
+      (let ((sname (fmtsym "ms-~a-~a" name methname))
             (gootype 0)
             (methexpr `((-> o ,methname))))
         (defcompile
          (defcreg (sname) (1)
           '(raw "// ---- emit-method-get")
-          (emit-pop-arg-goo2 #t #f #f #f `(,(format #f "~a*" c-type) "o") "g"
+          (emit-pop-arg-goo2 #t #f #f #f `(,(fmtsym "~a*" c-type) o) 'g
             methexpr
             '(return (s7_t sc)))))))
     (define (get-method-sname-get methpair)
       (let ((methname (if (pair? methpair) (car methpair) methpair)))
-        (string->symbol (format #f "ms-~a-~a" name methname))))
+        (fmtsym "ms-~a-~a" name methname)))
     (define (emit-method-get methpair args methargs)
       (let* ((cargs args) ; arguments to c-function
              (rets (if (pair? methargs) (car methargs) #f)) ; return-type of c-function
@@ -391,7 +392,7 @@
        (format #t "~%emit-method-get ~s [~s ~s] ~s => ~s~%" methpair sname cname cargs rets)
        (defcompile
          (defcreg (sname) ((+ 1 (length cargs)))
-           (emit-pop-arg-goo2 #t #f #f #f `(,(format #f "~a*" c-type) "o") "g"
+           (emit-pop-arg-goo2 #t #f #f #f `(,(fmtsym "~a*" c-type) o) 'g
              '(raw "// ---- emit-method-get")
              (if (> (length cargs) 0) '(set! args (s7_cdr args)) '(begin))
              (emit-code-get-argso #f 'i #f 1 cargs ()
@@ -402,7 +403,7 @@
                       (methexpr (cadr callinfo)))
                  (if (assq-ref (car rets) 'stack) ; stack-allocated return
                    `(let ((tsa ,cmethtype ,methexpr)
-                          (r ,(format #f "~a*" cmethtype) ,(format #f "new ~a(tsa)" cmethtype)))
+                          (r ,(fmtsym "~a*" cmethtype) (c++new (,cmethtype tsa))))
                       ,(emit-code-return2 (car rets)))
                    `(let ((r ,cmethtype ,methexpr))
                       ,(emit-code-return2 (car rets))))))))))))
@@ -413,7 +414,7 @@
         (format #t "~%emit-method-set ~s [~s ~s] ~s~%" methpair sname cname cargs)
         (defcompile
           (defcreg (sname) ((+ 1 (length cargs)))
-            (emit-pop-arg-goo2 #t #f #f #f `(,(format #f "~a*" c-type) "o") "g"
+            (emit-pop-arg-goo2 #t #f #f #f `(,(fmtsym "~a*" c-type) o) 'g
               '(raw "// ---- emit-method-set")
               (if (> (length cargs) 0) '(set! args (s7_cdr args)) '(begin))
               (emit-code-get-argso #f 'i #f 1 cargs ()
@@ -437,20 +438,20 @@
       (let* ((rets (car cargs)) ; get return type
              (info (if (pair? (cdr methargs)) (cdr methargs) '()))
              (methname-set (let ((s (symbol->string methname)))
-                             (format #f "set~a~a"
-                                     (string-upcase (substring s 0 1))
-                                     (substring s 1))))
+                             (fmt "set~a~a"
+                                  (string-upcase (substring s 0 1))
+                                  (substring s 1))))
              (sname-get (get-method-sname-get methname))
-             (sname-set (string->symbol (format #f "ms-~a-~a" name methname-set)))
-             (cname-get (string->symbol (format #f "ms_~a_~a" name methname)))
-             (cname-set (string->symbol (format #f "ms_~a_~a" name methname-set))))
+             (sname-set (string->symbol (fmt "ms-~a-~a" name methname-set)))
+             (cname-get (string->symbol (fmt "ms_~a_~a" name methname)))
+             (cname-set (string->symbol (fmt "ms_~a_~a" name methname-set))))
         (format #t "info: ~s~%" info)
         (set! %export-to-scheme-getset2 (cons (list sname-get cname-get sname-set cname-set)
                                               %export-to-scheme-getset2))
         ; emit getter
         (defcompile
           (defcreg (sname-get) ((+ 1 (length cargs)))
-             (emit-pop-arg-goo2 #t #f #f #f `(,(format #f "~a*" c-type) "o") "g"
+             (emit-pop-arg-goo2 #t #f #f #f `(,(fmtsym "~a*" c-type) o) 'g
               (if (assq-ref rets 'stack) ; stack-allocated return
                   (error "interim stack alloc not supported")
                   (let* ((callinfo (emit-code-funcall4 #f info methname '() '() rets))
@@ -461,7 +462,7 @@
         ; emit setter
         (defcompile
           (defcreg (sname-set) ((+ 1 (length cargs)))
-             (emit-pop-arg-goo2 #t #f #f #f `(,(format #f "~a*" c-type) "o") "g"
+             (emit-pop-arg-goo2 #t #f #f #f `(,(fmtsym "~a*" c-type) o) 'g
               (if (> (length cargs) 0) '(set! args (s7_cdr args)) '(begin))
               (emit-code-get-argso #f 'i #f 1 cargs ()
                (list
@@ -481,7 +482,7 @@
              (len-optional-args (length optional-args)))
         (defcompile
           (defcreg (sname) ((+ 1 len-required-args) len-optional-args)
-             (emit-pop-arg-goo2 #t #f #f #f `(,(format #f "~a*" c-type) "o") "g"
+             (emit-pop-arg-goo2 #t #f #f #f `(,(fmtsym "~a*" c-type) o) 'g
               (if (> (+ len-required-args len-optional-args) 0)
                   '(set! args (s7_cdr args)) '())
               (emit-code-get-argso #f 'i #f 1 required-args optional-args
@@ -530,7 +531,7 @@
                            (map (lambda (type)
                                   (match type
                                     ((sname cname idx props)
-                                     `(if (! (strcmp sname ,(format #f "\"~s-~s\"" typename sname)))
+                                     `(if (! (strcmp sname ,(fmt "\"~s-~s\"" typename sname)))
                                            (return (cast int ,cname))))))
                                 types)))
                        %c-types))
@@ -562,8 +563,8 @@
         (list
          (append
           (if g?
-              `(begin (set! ,(format #f "~a" cvar) (cast "goo_t *" (s7_c_object_value s))))
-              `(let ((,(format #f "~a" cvar) "goo_t*" (cast "goo_t *" (s7_c_object_value s))))))
+              `(begin (set! ,(fmtsym "~a" cvar) (cast "goo_t *" (s7_c_object_value s))))
+              `(let ((,(fmtsym "~a" cvar) "goo_t*" (cast "goo_t *" (s7_c_object_value s))))))
           (if (and type name)
               (list
                (append
@@ -599,17 +600,17 @@
   (cdr (assoc key e)))
 
 (define (def-goo-setters-goo objtype objname getname setname operandtype)
-  (let ((sname-getname (string->symbol (format #f "ms-~a-~a" objname getname)))
-        (sname-setname (string->symbol (format #f "ms-~a-~a" objname setname))))
+  (let ((sname-getname (string->symbol (fmt "ms-~a-~a" objname getname)))
+        (sname-setname (string->symbol (fmt "ms-~a-~a" objname setname))))
     (defcompile
       (defcreg (sname-getname) (1)
-        (emit-pop-arg-goo2 #t #f #f #f `(,objtype "o") "g"
+        (emit-pop-arg-goo2 #t #f #f #f `(,objtype o) 'g
           `(let ((y ,operandtype ((-> o ,getname))))
-             ,(emit-return-goo "y" 0)))))
+             ,(emit-return-goo 'y 0)))))
     (defcompile
       (defcreg (sname-setname) (2)
-        (emit-pop-arg-goo2 #t #f #f #f `(,objtype "o") "go"
-          (emit-pop-arg-goo2 #t #t #f #t `(,operandtype "x") "gx"
+        (emit-pop-arg-goo2 #t #f #f #f `(,objtype o) 'go
+          (emit-pop-arg-goo2 #t #t #f #t `(,operandtype x) 'gx
             `((-> o ,setname) x)
             '(s7_t sc)))))))
 
@@ -620,19 +621,19 @@
        (set! %export-to-scheme-getset (cons (list objname memname memnameset)
                                             %export-to-scheme-getset))
        (defcompile
-         `(defcfun (,(format #f "ms_~a_~a" objname memname))
+         `(defcfun (,(fmtsym "ms_~a_~a" objname memname))
                    ("s7_scheme *sc" "s7_pointer args")
-                   "s7_pointer"
+                   s7_pointer
             (let ((g "goo_t*" (cast "goo_t *" (s7_c_object_value (s7_car args)))))
-              (let ((o ,(format #f "~a*" objtype) (cast ,(format #f "~a*" objtype) (-> g cd))))
+              (let ((o ,(fmtsym "~a*" objtype) (cast ,(fmtsym "~a*" objtype) (-> g cd))))
                 (s7_make_boolean sc ((-> o ,memnameget)))))))
        (defcompile
-         `(defcfun (,(format #f "ms_set_~a_~a" objname memname))
+         `(defcfun (,(fmtsym "ms_set_~a_~a" objname memname))
                    ("s7_scheme *sc" "s7_pointer args")
-                   "s7_pointer"
+                   s7_pointer
             (let ((g "goo_t*" (cast "goo_t *" (s7_c_object_value (s7_car args)))))
-              (let ((o ,(format #f "~a*" objtype) (cast ,(format #f "~a*" objtype) (-> g cd))))
-                (let ((x "s7_pointer" (s7_cadr args)))
+              (let ((o ,(fmtsym "~a*" objtype) (cast ,(fmtsym "~a*" objtype) (-> g cd))))
+                (let ((x s7_pointer (s7_cadr args)))
                   ((-> o ,memnameset) (s7_boolean sc x))
                   x)))))))))
 
@@ -644,42 +645,42 @@
        (set! %export-to-scheme-getset (cons (list objname memname memnameset)
                                             %export-to-scheme-getset))
        (defcompile
-         `(defcfun (,(format #f "ms_~a_~a" objname memname))
+         `(defcfun (,(fmtsym "ms_~a_~a" objname memname))
                    ("s7_scheme *sc" "s7_pointer args")
-                   "s7_pointer"
+                   s7_pointer
             (let ((g "goo_t*" (cast "goo_t *" (s7_c_object_value (s7_car args)))))
-              (let ((o ,(format #f "~a*" objtype) (cast ,(format #f "~a*" objtype) (-> g cd))))
-                (s7_make_symbol sc (,(format #f "~a_to_string" transname) ((-> o ,memname))))))))
+              (let ((o ,(fmtsym "~a*" objtype) (cast ,(fmtsym "~a*" objtype) (-> g cd))))
+                (s7_make_symbol sc (,(fmtsym "~a_to_string" transname) ((-> o ,memname))))))))
        (if memnameset
           (defcompile
-           `(defcfun (,(format #f "ms_set_~a_~a" objname memname))
+           `(defcfun (,(fmtsym "ms_set_~a_~a" objname memname))
                      ("s7_scheme *sc" "s7_pointer args")
-                     "s7_pointer"
+                     s7_pointer
               (let ((g "goo_t*" (cast "goo_t *" (s7_c_object_value (s7_car args)))))
-                (let ((o ,(format #f "~a*" objtype) (cast ,(format #f "~a*" objtype) (-> g cd))))
-                  (let ((x "s7_pointer" "s7_cadr(args)"))
-                    ((-> o ,memnameset) (,(format #f "string_to_~a" transname) (s7_symbol_name x)))
+                (let ((o ,(fmtsym "~a*" objtype) (cast ,(fmtsym "~a*" objtype) (-> g cd))))
+                  (let ((x s7_pointer (s7_cadr args)))
+                    ((-> o ,memnameset) (,(fmtsym "string_to_~a" transname) (s7_symbol_name x)))
                     x))))))))))
 
 (define (emit-c-type-string-maps-simple name typelst basetypename)
   ; emit c-function that takes a object of a specific type and returns a string
   (defcompile
-    `(defcfun (,(format #f "~a_to_string" name))
-              (,(format #f "~a x" basetypename))
+    `(defcfun (,(fmt "~a_to_string" name))
+              (,(fmt "~a x" basetypename))
               "const char*"
        ,(append '(switch (x))
                 (map (lambda (tri)
-                       (list 'case (format #f "Ms::~a" (cadr tri))
-                             (format #f "\"~a-~a\"" basetypename (cadr tri))))
+                       (list 'case (fmtsym "Ms::~a" (cadr tri))
+                             (fmt "\"~a-~a\"" basetypename (cadr tri))))
                      typelst))))
   ; emit c-function that takes an string and returns an object of a specific type
   (defcompile
-   `(defcfun (,(format #f "string_to_~a" name))
+   `(defcfun (,(fmt "string_to_~a" name))
              ("const char *name")
              ,basetypename
       ,@(map (lambda (tri)
-               `(if (!(strcmp name ,(format #f "\"~a\"" (cadr tri))))
-                    (return ,(format #f "Ms::~a" (cadr tri)))))
+               `(if (!(strcmp name ,(fmt "\"~a\"" (cadr tri))))
+                    (return ,(fmtsym "Ms::~a" (cadr tri)))))
              typelst)
       (cast ,basetypename 0))))
 
@@ -687,11 +688,11 @@
   (let* ((types (assq-ref %c-types typename))
          (typeinfo (assq-ref %c-types-info typename))
          (c-type (typeinfo-meta-get typename 'c-type-cons))
-         (sname (string->symbol (format #f "~a-to-string" typename))))
+         (sname (fmtsym "~a-to-string" typename)))
     ;(set! c-type (substring c-type 0 (string-position ":" c-type)))
     ; emit c-function that takes a object of a specific type and returns a string
     (evalc
-      `(defcfun (,sname) (,(format #f "Ms::~a x" c-type)) "const char*"
+      `(defcfun (,sname) (,(fmt "Ms::~a x" c-type)) "const char*"
          ,(if (eq? c-type (typeinfo-meta-get typename 'c-type)) ; not an special-enum-class
               (append
                 '(switch (x))
@@ -700,7 +701,7 @@
                         (match lst
                           ((sname cname idx props)
                            (list 'case cname
-                                 (format #f "\"~a-~a\"" typename sname)))))
+                                 (fmt "\"~a-~a\"" typename sname)))))
                       types)
                  (list '(default "\"\""))))
               `,@(append
@@ -708,21 +709,21 @@
                       (match lst
                         ((sname cname idx props)
                          `(if (== x ,cname)
-                              (return ,(format #f "\"~a\"" cname))))))
+                              (return ,(fmt "\"~a\"" cname))))))
                     types)
                (list "\"ERROR-UNKNOWN\"")))))
     ; emit c-function that takes an string and returns an object of a specific type
-    (let ((sname (string->symbol (format #f "string_to_~a" typename))))
+    (let ((sname (fmtsym "string_to_~a" typename)))
       (evalc
        (append
-          `(defcfun (,sname) ("const char *name") ,(format #f "Ms::~a" c-type))
+          `(defcfun (,sname) ("const char *name") ,(fmtsym "Ms::~a" c-type))
           (map (lambda (lst)
                    (match lst
                      ((sname cname idx props)
-                      `(if (!(strcmp name ,(format #f "\"~a-~a\"" typename sname)))
+                      `(if (!(strcmp name ,(fmt "\"~a-~a\"" typename sname)))
                            (return ,cname)))))
                  types)
-           `((cast ,(format #f "Ms::~a" c-type) 0)))))))
+           `((cast ,(fmtsym "Ms::~a" c-type) 0)))))))
 
 (define (emit-exports-getset)
   (for-each (lambda (lst)

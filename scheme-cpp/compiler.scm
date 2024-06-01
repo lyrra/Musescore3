@@ -90,7 +90,7 @@
         (src (cadr ir)))
     (format %c "  ")
     (emit-c dst)
-    (format %c "= ")
+    (format %c " = ")
     (emit-c src args)))
 
 (define (emit-c-if ir args)
@@ -306,6 +306,7 @@
       ((switch)
        (emit-c-switch (cdr ir) args))
       ; reserved functions
+      ((+) (emit-infix '+ (cdr ir) args))
       ((==) (emit-infix '== (cdr ir) args))
       ((&&) (emit-infix '&& (cdr ir) args))
       ((>=) (emit-infix '>= (cdr ir) args))

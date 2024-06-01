@@ -53,7 +53,7 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps3 'Sid)
 
 (evalc
-  `(defcenum GOO_TYPE "uint64_t"
+  `(defcenum GOO_TYPE uint64_t
              ,(append %goo-types
                       (map (lambda (type)
                              (let ((name (car type)))
@@ -77,35 +77,35 @@ extern Ms::MTest* g_mtest;
 (emit-c-type-string-maps3 'note_ValueType)
 (emit-c-type-string-maps3 'NoteHead_Type)
 (emit-c-type-string-maps3 'NoteHead_Group)
-(emit-c-type-string-maps-simple "element_pid" (cdr (assoc 'Pid %c-types)) 'Ms::Pid)
+(emit-c-type-string-maps-simple 'element_pid (cdr (assoc 'Pid %c-types)) 'Ms::Pid)
 
 (emit-c-type-string-maps3 'NoteType)
 
 (defcompile
  (defcreg 'ms-make-tduration ((dur sym)) ()
    '(c_make_goo sc
-                "static_cast<uint64_t>(GOO_TYPE::CHORD)"
+                (cast uint64_t GOO_TYPE::CHORD)
                 (s7_nil sc)
                 (cast void* (c++new (TDuration (string_to_DurationType dur)))))))
 
 (defcompile
  (defcreg 'ms-make-score () ()
    '(c_make_goo sc
-                "static_cast<uint64_t>(0 /*GOO_TYPE::CHORD*/)"
+                (cast uint64_t 0) ; GOO_TYPE::CHORD
                 (s7_nil sc)
                 (c++new (Ms::Score)))))
 
 (defcompile
  (defcreg 'ms-make-chord () ()
    '(c_make_goo sc
-                "static_cast<uint64_t>(GOO_TYPE::CHORD)"
+                (cast uint64_t GOO_TYPE::CHORD)
                 (s7_nil sc)
                 (c++new (Ms::Chord (-> g_mtest score))))))
 
 (defcompile
  (defcreg 'ms-make-note () ()
    '(c_make_goo sc
-                "static_cast<uint64_t>(GOO_TYPE::NOTE)"
+                (cast uint64_t GOO_TYPE::NOTE)
                 (s7_nil sc)
                 (c++new (Ms::Note (-> g_mtest score))))))
 
@@ -126,8 +126,8 @@ extern Ms::MTest* g_mtest;
                      (cname (cadr type)))
                  (list `(! (strcasecmp symname ,(format #f "\"~a\"" name)))
                    `(set! e (Element::create ,cname (-> g_mtest score)))
-                   `(set! ty ,(format #f "static_cast<uint64_t>(GOO_TYPE::~a)"
-                                      (string-lisp->c (symbol->string name)))))))
+                   `(set! ty (cast uint64_t ,(fmtsym "GOO_TYPE::~a"
+                                              (string-lisp->c (symbol->string name))))))))
              (cdr (assoc 'ElementType %c-types)))
         (list
         (list 'else
@@ -139,24 +139,24 @@ extern Ms::MTest* g_mtest;
  (defcreg 'ms-element-type ((e goo Element*)) ()
    '(s7_make_integer sc (cast uint64_t ((-> e type))))))
 
-(def-goo-setters-goo 'Ms::Element* "element" "parent" "setParent" "Element*")
+(def-goo-setters-goo 'Ms::Element* 'element 'parent 'setParent 'Element*)
 
 (defcompile
   (defcreg 'ms-score-selection-elements ((score goo MasterScore*)) ()
     `(let ((elms "const void*" (ref ((.> ((-> score selection)) elements)))))
-       ,(emit-return-goo "elms" 0))))
+       ,(emit-return-goo 'elms 0))))
 
 (defcompile
   (defcreg 'ms-elements-getnext ((elms goo QList<Element*>*)) ()
     `(let ((cnt int 0))
        (when (&& g1->data (s7_is_integer g1->data))
          (set! cnt (s7_integer g1->data))
-         (raw "cnt++"))
+         (set! cnt (+ cnt 1)))
        (if (>= cnt (elms->size)) ; no more elements
          (return (s7_f sc)))
        (set! (-> g1 data) (s7_make_integer sc cnt))
        (let ((elm Element* (elms->at cnt)))
-         ,(emit-return-goo "elm" 0)))))
+         ,(emit-return-goo 'elm 0)))))
 
 ;
 ; breath
@@ -199,9 +199,9 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg 'ms-make-hairpin () ()
     `(let ((hp Hairpin* (c++new (Hairpin (-> g_mtest score)))))
-       ,(emit-return-goo "hp" "GOO_TYPE::ElementType__HAIRPIN"))))
+       ,(emit-return-goo 'hp 'GOO_TYPE::ElementType__HAIRPIN))))
 
-(def-goo-setters-sym 'Ms::Hairpin "hairpin" "hairpinType" "setHairpinType" "hairpin")
+(def-goo-setters-sym 'Ms::Hairpin 'hairpin 'hairpinType 'setHairpinType 'hairpin)
 
 ; tremolo
 (emit-c-type-string-maps3 'TremoloType)
@@ -209,9 +209,9 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg 'ms-make-tremolo ((score goo MasterScore*)) ()
     `(let ((tr Tremolo* (c++new (Tremolo score))))
-       ,(emit-return-goo "tr" "GOO_TYPE::ElementType__TREMOLO"))))
+       ,(emit-return-goo 'tr 'GOO_TYPE::ElementType__TREMOLO))))
 
-(def-goo-setters-sym 'Ms::Tremolo "tremolo" "tremoloType" "setTremoloType" "TremoloType")
+(def-goo-setters-sym 'Ms::Tremolo 'tremolo 'tremoloType 'setTremoloType 'TremoloType)
 
 ; articulation
 
@@ -219,7 +219,7 @@ extern Ms::MTest* g_mtest;
   (defcreg 'ms-make-articulation ((score goo MasterScore*) (sym sym)) ()
     `(let ((syid Ms::SymId (string_to_SymId sym))
            (ar Articulation* (c++new (Articulation syid score))))
-       ,(emit-return-goo "ar" 0))))
+       ,(emit-return-goo 'ar 0))))
 
 ;
 ; note
@@ -237,8 +237,8 @@ extern Ms::MTest* g_mtest;
 (defcompile
   (defcreg ('ms-note-set-property) (3)
     (emit-pop-arg-goo2 #t #f #f #f '(Ms::Note* note) 'g
-      '(let ((sym "s7_pointer" (s7_car (s7_cdr args)))
-             (val "s7_pointer" (s7_car (s7_cddr args))))
+      '(let ((sym s7_pointer (s7_car (s7_cdr args)))
+             (val s7_pointer (s7_car (s7_cddr args))))
          (cond
           ((s7_is_boolean val)
            (note->setProperty (string_to_element_pid (s7_symbol_name sym)) (QVariant::fromValue (s7_boolean sc val))))
@@ -254,24 +254,24 @@ extern Ms::MTest* g_mtest;
 ; emit code for ms-objects set/get, and register them to be exported to scheme
 ;
 
-(def-goo-setters-sym 'Ms::Breath "breath" "symId" "setSymId" "SymId")
-(def-goo-setters-bool 'Ms::Note "note" "small" "isSmall" "setSmall")
-(def-goo-setters-bool 'Ms::Note "note" "ghost" "ghost" "setGhost")
-(def-goo-setters-sym 'Ms::Note "note" "userDotPosition" "setUserDotPosition" "Direction")
-(def-goo-setters-sym 'Ms::Note "note" "headGroup" "setHeadGroup" "NoteHead_Group")
-(def-goo-setters-sym 'Ms::Note "note" "headType" "setHeadType" "NoteHead_Type")
-(def-goo-setters-sym 'Ms::Note "note" "veloType" "setVeloType" "note_ValueType") ; velotype uses Note::Valuetype
-(def-goo-setters-sym 'Ms::Note "note" "noteType" #f "NoteType")
+(def-goo-setters-sym 'Ms::Breath 'breath 'symId 'setSymId 'SymId)
+(def-goo-setters-bool 'Ms::Note 'note 'small 'isSmall 'setSmall)
+(def-goo-setters-bool 'Ms::Note 'note 'ghost 'ghost 'setGhost)
+(def-goo-setters-sym 'Ms::Note 'note 'userDotPosition 'setUserDotPosition 'Direction)
+(def-goo-setters-sym 'Ms::Note 'note 'headGroup 'setHeadGroup 'NoteHead_Group)
+(def-goo-setters-sym 'Ms::Note 'note 'headType 'setHeadType 'NoteHead_Type)
+(def-goo-setters-sym 'Ms::Note 'note 'veloType 'setVeloType 'note_ValueType) ; velotype uses Note::Valuetype
+(def-goo-setters-sym 'Ms::Note 'note 'noteType #f 'NoteType)
 
 (defcompile
   (defcreg ('ms-score-undoStack-undo) (2)
-    (emit-pop-arg-goo2 #t #f #f #f '("MasterScore*" "score") "g"
+    (emit-pop-arg-goo2 #t #f #f #f '(MasterScore* score) 'g
       (emit-next-arg)
       '(set! s (s7_car args))
       `(cond
         ((c_is_goo sc s)
          (set! g (cast "goo_t *" (s7_c_object_value s)))
-         (let ((ed EditData* (cast "EditData*" (-> g cd))))
+         (let ((ed EditData* (cast EditData* (-> g cd))))
            ((-> ((-> score undoStack)) undo) ed)))
         (else
          ((-> ((-> score undoStack)) undo) 0)))
@@ -314,7 +314,7 @@ extern Ms::MTest* g_mtest;
            ((score goo Score*) (sym sym) (variant bool)) ()
     `(let ((sid Ms::Sid (string_to_Sid sym))
            (x ChangeStyleVal* (c++new (ChangeStyleVal score sid variant))))
-       ,(emit-return-goo "x" '(cast uint64_t 0)))))
+       ,(emit-return-goo 'x '(cast uint64_t 0)))))
 
 ;;;
 ;;; emit all declaratively stated c++object methods
@@ -328,7 +328,7 @@ extern Ms::MTest* g_mtest;
        (apply (lambda (sname cvartype cvarname meth crestype cresvarname gootype)
           (defcompile
             (defcreg (sname) (1)
-               (emit-pop-arg-goo2 #t #f #f #f `(,cvartype ,cvarname) "g"
+               (emit-pop-arg-goo2 #t #f #f #f `(,cvartype ,cvarname) 'g
                 `(let ((,cresvarname ,crestype ,meth))
                    ,(emit-return-goo cresvarname `(cast uint64_t ,gootype)))))))
               lst))
