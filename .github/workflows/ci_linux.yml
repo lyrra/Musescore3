@@ -19,7 +19,7 @@ jobs:
       with:
         access_token: ${{ github.token }}
     - name: Clone repo main
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: main
         path: m
@@ -37,11 +37,12 @@ jobs:
       run: |
         cd m
         ./build/ci/linux/package.sh
+        mv musescore3.tar.xz musescore3-${{matrix.runs-on}}.tar.xz
     - name: Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linux-musescore3
-        path: m/musescore3.tar.xz
+        path: m/musescore3.${{matrix.runs-on}}.tar.xz
     - name: version
       run: echo "::set-output name=version::$(date +%Y%m%d)"
       id: version
@@ -62,8 +63,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: ./m/musescore3.tar.xz
-        asset_name: musescore3.tar.xz
+        asset_path: ./m/musescore3-{{matrix.runs-on}}.tar.xz
+        asset_name: musescore3-{{matrix.runs-on}}.tar.xz
         asset_content_type: application/zip
   upload-weekly:
     permissions:
@@ -73,9 +74,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
-          name: linux-musescore3
+          pattern: linux-musescore3*
+          merge-multiple: true
       - name: Upload musescore release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
