@@ -55,7 +55,7 @@ jobs:
           mingw-w64-x86_64-lame
           mingw-w64-x86_64-jack2
     - name: Clone repo master
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: main
         path: m
@@ -77,12 +77,12 @@ jobs:
         cd m
         ./build/ci/mingw/package.sh
     - name: Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mingw-w64-musescore3
         path: m/musescore3-mingw64.zip
     - name: version
-      run: echo "::set-output name=version::$(date +%Y%m%d)"
+      run: echo "version=$(date +%Y%m%d)" >> $GITHUB_OUTPUT
       id: version
     - name: Create Release
       id: create_release
@@ -112,9 +112,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
-          name: mingw-w64-musescore3
+          pattern: mingw-w64-musescore3*
+          merge-multiple: true
       - name: Upload musescore release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
