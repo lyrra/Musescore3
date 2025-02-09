@@ -66,6 +66,7 @@ apt_packages_standard=(
   libqt5opengl5-dev
   libqt5help5
   qtquickcontrols2-5-dev
+  qt5-qmake
   qtbase5-dev
   qtdeclarative5-dev
   qttools5-dev
@@ -88,7 +89,7 @@ apt_packages_runtime=(
   libcups2
   libdbus-1-3
   libegl1-mesa-dev
-  libodbc1
+  libodbc2
   libpq-dev
   libssl-dev
   libxcomposite-dev
