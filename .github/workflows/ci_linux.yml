@@ -2,7 +2,7 @@ name: build_Linux
 
 on:
   schedule:
-    - cron: '0 4 */7 * *'
+    - cron: '0 4 1 * *'
   workflow_dispatch:
     inputs:
       build_mode:
